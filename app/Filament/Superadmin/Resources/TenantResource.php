@@ -174,7 +174,7 @@ class TenantResource extends Resource
                 TextColumn::make('verification_status')
                     ->label('Verification')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn ($state): string => match ((string) $state) {
                         'verified' => 'success',
                         'pending'  => 'warning',
                         'rejected' => 'danger',
@@ -185,7 +185,7 @@ class TenantResource extends Resource
                 TextColumn::make('status')
                     ->label('Status')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn ($state): string => match ((string) $state) {
                         'active'    => 'success',
                         'trial'     => 'info',
                         'suspended' => 'danger',

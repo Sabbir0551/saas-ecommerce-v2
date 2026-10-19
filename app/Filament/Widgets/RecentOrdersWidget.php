@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Enums\OrderStatus;
 use App\Models\Order;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -43,13 +44,16 @@ class RecentOrdersWidget extends BaseWidget
                 TextColumn::make('status')
                     ->label('Status')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn ($state): string => match ($state instanceof OrderStatus ? $state->value : (string) ($state?->value ?? $state ?? '')) {
                         'delivered', 'completed' => 'success',
                         'processing', 'shipped' => 'info',
                         'cancelled' => 'danger',
                         default => 'warning',
                     })
-                    ->formatStateUsing(fn (string $state): string => ucfirst($state)),
+                    ->formatStateUsing(function ($state): string {
+                        $val = $state instanceof OrderStatus ? $state->value : (string) ($state?->value ?? $state ?? '');
+                        return ucfirst($val);
+                    }),
 
                 TextColumn::make('created_at')
                     ->label('Date')

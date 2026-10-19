@@ -115,7 +115,7 @@ class DisputeResource extends Resource
                 TextColumn::make('status')
                     ->label('Status')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn ($state): string => match ((string) $state) {
                         'resolved'    => 'success',
                         'in_progress' => 'warning',
                         'escalated'   => 'danger',
@@ -134,9 +134,9 @@ class DisputeResource extends Resource
                         }
                         return "{$record->hours_remaining} hours left";
                     })
-                    ->color(fn (string $state): string => match (true) {
+                    ->color(fn ($state): string => match (true) {
                         $state === 'Resolved' => 'success',
-                        str_contains($state, 'Breached') => 'danger',
+                        str_contains((string) $state, 'Breached') => 'danger',
                         default => 'warning',
                     })
                     ->sortable(),

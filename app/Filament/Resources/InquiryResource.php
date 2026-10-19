@@ -91,14 +91,14 @@ class InquiryResource extends Resource
                 TextColumn::make('status')
                     ->label('Status')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn ($state): string => match ((string) $state) {
                         'new'        => 'info',
                         'contacted'  => 'warning',
                         'qualified'  => 'primary',
                         'closed_won' => 'success',
                         default      => 'danger',
                     })
-                    ->formatStateUsing(fn (string $state): string => ucfirst(str_replace('_', ' ', $state))),
+                    ->formatStateUsing(fn ($state): string => ucfirst(str_replace('_', ' ', (string) $state))),
                 TextColumn::make('created_at')->label('Received Date')->dateTime('M d, Y h:i A')->sortable(),
             ])
             ->filters([

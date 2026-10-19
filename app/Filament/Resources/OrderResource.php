@@ -225,10 +225,10 @@ class OrderResource extends Resource
                 }
                 return 'N/A';
             })
-            ->color(fn (string $state) => match (true) {
+            ->color(fn ($state) => match (true) {
                 $state === 'Handed Over' => 'success',
-                str_contains($state, 'Breached') => 'danger',
-                str_contains($state, 'left') => 'warning',
+                str_contains((string) $state, 'Breached') => 'danger',
+                str_contains((string) $state, 'left') => 'warning',
                 default => 'gray',
             });
 
@@ -236,7 +236,7 @@ class OrderResource extends Resource
             ->label('Dispute')
             ->badge()
             ->state(fn (Order $record) => $record->dispute_status ?? 'Clear')
-            ->color(fn (string $state) => $state === 'open_dispute' ? 'danger' : 'gray');
+            ->color(fn ($state) => $state === 'open_dispute' ? 'danger' : 'gray');
 
         $columns[] = SelectColumn::make('status')
             ->label('Status')

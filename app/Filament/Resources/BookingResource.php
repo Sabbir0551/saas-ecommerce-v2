@@ -118,13 +118,13 @@ class BookingResource extends Resource
                 TextColumn::make('status')
                     ->label('Status')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn ($state): string => match ((string) $state) {
                         'confirmed' => 'success',
                         'completed' => 'primary',
                         'cancelled' => 'danger',
                         default     => 'warning',
                     })
-                    ->formatStateUsing(fn (string $state): string => ucfirst($state)),
+                    ->formatStateUsing(fn ($state): string => ucfirst((string) $state)),
                 TextColumn::make('created_at')->label('Booked At')->dateTime('M d, h:i A')->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
