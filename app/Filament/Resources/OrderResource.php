@@ -199,6 +199,45 @@ class OrderResource extends Resource
             ->formatStateUsing(fn ($state) => '৳' . number_format($state / 100, 0))
             ->sortable();
 
+        $columns[] = TextColumn::make('payment_status')
+            ->label('Payment')
+            ->badge()
+            ->color(fn ($state) => match ($state?->value ?? $state) {
+                'paid'      => 'success',
+                'partial'   => 'info',
+                'refunded'  => 'gray',
+                default     => 'warning',
+            });
+
+        $columns[] = TextColumn::make('handover_status')
+            ->label('48h Handover')
+            ->badge()
+            ->state(function (Order $record) {
+                if (!empty($record->courier_handed_over_at)) {
+                    return 'Handed Over';
+                }
+                if ($record->isHandoverBreached()) {
+                    return '⚠️ 48h Breached';
+                }
+                if (!empty($record->handover_deadline_at)) {
+                    $hoursLeft = max(0, now()->diffInHours($record->handover_deadline_at, false));
+                    return "{$hoursLeft}h left";
+                }
+                return 'N/A';
+            })
+            ->color(fn (string $state) => match (true) {
+                $state === 'Handed Over' => 'success',
+                str_contains($state, 'Breached') => 'danger',
+                str_contains($state, 'left') => 'warning',
+                default => 'gray',
+            });
+
+        $columns[] = TextColumn::make('dispute_status')
+            ->label('Dispute')
+            ->badge()
+            ->state(fn (Order $record) => $record->dispute_status ?? 'Clear')
+            ->color(fn (string $state) => $state === 'open_dispute' ? 'danger' : 'gray');
+
         $columns[] = SelectColumn::make('status')
             ->label('Status')
             ->options($archetype === 'service' ? $serviceStatusOptions : OrderStatus::class);
@@ -212,6 +251,46 @@ class OrderResource extends Resource
                     ->options($archetype === 'service' ? $serviceStatusOptions : OrderStatus::class),
             ])
             ->actions([
+                Action::make('mark_paid')
+                    ->label('Verify Paid')
+                    ->icon('heroicon-o-check-badge')
+                    ->color('success')
+                    ->visible(fn (Order $record) => $record->payment_status?->value === 'pending' || $record->payment_status?->value === 'unpaid')
+                    ->requiresConfirmation()
+                    ->action(function (Order $record) {
+                        $record->forceFill([
+                            'payment_status'       => \App\Enums\PaymentStatus::Paid,
+                            'paid_at'              => now(),
+                            'handover_deadline_at' => now()->addHours(48),
+                        ])->save();
+
+                        \Filament\Notifications\Notification::make()
+                            ->title('Payment Verified & Marked Paid')
+                            ->body('48h courier handover countdown started.')
+                            ->success()
+                            ->send();
+                    }),
+
+                Action::make('cannot_supply')
+                    ->label('Cannot Supply')
+                    ->icon('heroicon-o-x-circle')
+                    ->color('danger')
+                    ->visible(fn (Order $record) => !in_array($record->status, [\App\Enums\OrderStatus::Delivered, \App\Enums\OrderStatus::Cancelled, \App\Enums\OrderStatus::Returned]))
+                    ->form([
+                        TextInput::make('reason')
+                            ->label('Reason for unable to supply goods (ডিজিটাল কমার্স নির্দেশিকা)')
+                            ->required()
+                            ->placeholder('e.g., Stock unavailable / damaged in transit'),
+                    ])
+                    ->action(function (Order $record, array $data, \App\Services\OrderService $orderService) {
+                        $orderService->markCannotSupply($record, $data['reason'], auth()->id());
+                        \Filament\Notifications\Notification::make()
+                            ->title('Order Marked as Unfulfillable')
+                            ->body('Customer informed via SMS. 72-hour refund protocol initiated.')
+                            ->warning()
+                            ->send();
+                    }),
+
                 Action::make('send_to_courier')
                     ->label('Dispatch Courier')
                     ->icon('heroicon-o-truck')
@@ -236,12 +315,14 @@ class OrderResource extends Resource
 
                             if ($result->success) {
                                 $record->tracking_id = $result->trackingCode;
-                                $record->status = OrderStatus::PROCESSING;
+                                $record->courier = 'Steadfast';
+                                $record->courier_handed_over_at = now();
+                                $record->status = OrderStatus::Processing;
                                 $record->save();
 
                                 \Filament\Notifications\Notification::make()
                                     ->title('Parcel Dispatched Successfully')
-                                    ->body("Steadfast Tracking Code: {$result->trackingCode}")
+                                    ->body("Steadfast Tracking Code: {$result->trackingCode}. Courier handover logged.")
                                     ->success()
                                     ->send();
                             } else {

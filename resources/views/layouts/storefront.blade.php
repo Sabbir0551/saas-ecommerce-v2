@@ -213,11 +213,11 @@
                 <div class="space-y-3">
                     <h3 class="text-white font-bold text-sm tracking-wider uppercase border-b border-zinc-800 pb-2">Policies & Support</h3>
                     <ul class="space-y-2 text-xs">
-                        <li><a href="{{ route('storefront.terms') }}" class="hover:text-white transition">Terms & Conditions</a></li>
+                        <li><a href="{{ route('storefront.terms') }}" class="hover:text-white transition">Terms & Conditions (শর্তাবলী)</a></li>
                         <li><a href="{{ route('storefront.refund') }}" class="hover:text-white transition">Return, Replacement & Refund Policy</a></li>
-                        <li><a href="{{ route('storefront.privacy') }}" class="hover:text-white transition">Privacy Policy (GDPR Compliant)</a></li>
-                        <li><a href="#warranty" class="hover:text-white transition">Warranty & Claim Guidelines</a></li>
-                        <li><a href="tel:{{ $hotline }}" class="hover:text-white transition">Customer Care & Support</a></li>
+                        <li><a href="{{ route('storefront.privacy') }}" class="hover:text-white transition">Privacy Policy (তথ্য সুরক্ষা নীতি)</a></li>
+                        <li><a href="{{ route('storefront.disputes') }}" class="text-amber-400 font-bold hover:underline transition">🛡️ গ্রাহক অভিযোগ ও বিরোধ সেল (৭২ ঘণ্টা)</a></li>
+                        <li><a href="tel:{{ $hotline }}" class="hover:text-white transition">Customer Care & Support: {{ $hotline }}</a></li>
                     </ul>
                 </div>
 
@@ -268,19 +268,48 @@
                     </ul>
                 </div>
 
-                <!-- Column 4: Payment & Logistics -->
+                <!-- Column 4: Payment, Logistics & Business Identity -->
                 <div class="space-y-4">
-                    <h3 class="text-white font-bold text-sm tracking-wider uppercase border-b border-zinc-800 pb-2">Payment & Delivery</h3>
-                    <p class="text-xs text-zinc-400">
-                        Pay with complete peace of mind. Inspect your parcel on delivery before making Cash on Delivery (COD) payment.
-                    </p>
+                    <h3 class="text-white font-bold text-sm tracking-wider uppercase border-b border-zinc-800 pb-2">Business Identity & Payment</h3>
+                    
+                    <!-- Digital Commerce Directive: Business Legal Identity Block -->
+                    <div class="bg-zinc-900/90 border border-zinc-800 p-3 rounded-xl text-[11px] space-y-1.5">
+                        <div class="flex items-center justify-between text-zinc-300 font-bold border-b border-zinc-800/80 pb-1">
+                            <span>📜 ব্যবসার পরিচয় (Legal Info)</span>
+                            @if(tenant('verification_status') === 'verified')
+                                <span class="bg-emerald-950 text-emerald-400 border border-emerald-800/80 px-1.5 py-0.5 rounded text-[10px]">✓ প্ল্যাটফর্ম যাচাইকৃত</span>
+                            @endif
+                        </div>
+                        @if(tenant('trade_license_no'))
+                            <p class="text-zinc-400">ট্রেড লাইসেন্স নং: <strong class="text-zinc-200">{{ tenant('trade_license_no') }}</strong></p>
+                        @endif
+                        @if(tenant('drug_license_no'))
+                            <p class="text-zinc-400">ড্রাগ লাইসেন্স নং: <strong class="text-emerald-300">{{ tenant('drug_license_no') }}</strong></p>
+                        @endif
+                        @if(tenant('bmdc_reg_no'))
+                            <p class="text-zinc-400">BMDC রেজিস্ট্রেশন নং: <strong class="text-blue-300">{{ tenant('bmdc_reg_no') }}</strong></p>
+                        @endif
+                        @if(tenant('tin_no'))
+                            <p class="text-zinc-400">TIN নং: <strong class="text-zinc-200">{{ tenant('tin_no') }}</strong></p>
+                        @endif
+                        @if(tenant('bin_no'))
+                            <p class="text-zinc-400">VAT / BIN নং: <strong class="text-zinc-200">{{ tenant('bin_no') }}</strong></p>
+                        @endif
+                        @if(tenant('pra_no'))
+                            <p class="text-zinc-400">bKash PRA মার্চেন্ট: <strong class="text-pink-300">{{ tenant('pra_no') }}</strong></p>
+                        @endif
+                        @if(!tenant('trade_license_no') && !tenant('drug_license_no') && !tenant('bmdc_reg_no') && !tenant('pra_no'))
+                            <p class="text-zinc-500 italic">ব্যক্তিগত রিটেইল মার্চেন্ট একাউন্ট</p>
+                        @endif
+                    </div>
+
                     <div class="flex flex-wrap gap-2 text-xs font-bold">
                         <span class="px-2.5 py-1 bg-zinc-900 border border-zinc-800 rounded-lg text-emerald-400">💵 Cash on Delivery</span>
                         <span class="px-2.5 py-1 bg-pink-950/60 border border-pink-800/60 rounded-lg text-pink-300">bKash</span>
                         <span class="px-2.5 py-1 bg-orange-950/60 border border-orange-800/60 rounded-lg text-orange-300">Nagad</span>
                         <span class="px-2.5 py-1 bg-blue-950/60 border border-blue-800/60 rounded-lg text-blue-300">Visa / Master</span>
                     </div>
-                    <div class="pt-2 text-xs text-zinc-500">
+                    <div class="pt-1 text-xs text-zinc-500">
                         Official Logistics: <strong>Steadfast Courier</strong> & <strong>Pathao Express</strong>
                     </div>
                 </div>
@@ -289,7 +318,7 @@
             <!-- Bottom Copyright Line -->
             <div class="mt-12 pt-6 border-t border-zinc-900 flex flex-col sm:flex-row items-center justify-between text-xs text-zinc-500 gap-4">
                 <p>© {{ date('Y') }} <strong>{{ $storeName }}</strong>. All rights reserved. Operating under Digital Commerce Directive 2021.</p>
-                <p class="text-[11px] text-zinc-600">Enterprise SaaS Storefront Platform</p>
+                <p class="text-[11px] text-zinc-600">Enterprise Multi-Business SaaS Platform</p>
             </div>
         </div>
     </footer>

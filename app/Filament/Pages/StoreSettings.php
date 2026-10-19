@@ -110,8 +110,13 @@ class StoreSettings extends Page implements HasForms
             'pathao_client_id'        => $creds['pathao_client_id'] ?? '',
             'pathao_client_secret'    => $this->maskSecret($creds['pathao_client_secret'] ?? ''),
 
-            // Pharmacy Compliance
-            'drug_license_no'         => $tenant->drug_license_no ?? '',
+            // Legal Identification & Compliance
+            'trade_license_no'         => $tenant->trade_license_no ?? '',
+            'tin_no'                   => $tenant->tin_no ?? '',
+            'bin_no'                   => $tenant->bin_no ?? '',
+            'pra_no'                   => $tenant->pra_no ?? '',
+            'bmdc_reg_no'              => $tenant->bmdc_reg_no ?? '',
+            'drug_license_no'          => $tenant->drug_license_no ?? '',
 
             // Modules
             'module_physical_store'    => in_array('physical_store', $enabledModules),
@@ -357,9 +362,36 @@ class StoreSettings extends Page implements HasForms
                     ]),
 
                 // Tab 7: Legal Compliance & Licenses
+                // Tab 7: Legal Compliance & Licenses
                 Tabs\Tab::make('Legal & Policies')
                     ->icon('heroicon-o-shield-check')
                     ->schema([
+                        Section::make('Business Identity & Compliance (ব্যবসার পরিচয় ও সনদ)')
+                            ->description('বাংলাদেশ ডিজিটাল কমার্স নির্দেশিকা ২০২১ অনুযায়ী ওয়েবসাইটের ফুটারে ক্রেতাদের আস্থার জন্য প্রদর্শিত হবে')
+                            ->schema([
+                                TextInput::make('trade_license_no')
+                                    ->label('Trade License Number (ট্রেড লাইসেন্স নং)')
+                                    ->placeholder('e.g., TRAD/DNCC/12345/2026'),
+
+                                TextInput::make('tin_no')
+                                    ->label('TIN Certificate Number (TIN নং)')
+                                    ->placeholder('e.g., 123456789012'),
+
+                                TextInput::make('bin_no')
+                                    ->label('VAT / BIN Number (ভ্যাট / বিআইএন নং)')
+                                    ->placeholder('e.g., 001234567-0101'),
+
+                                TextInput::make('pra_no')
+                                    ->label('bKash Personal Retail Account (PRA No)')
+                                    ->placeholder('e.g., PRA-017XXXXXXXX')
+                                    ->helperText('ট্রেড লাইসেন্স না থাকলে bKash ব্যক্তিগত খুচরা বিক্রেতা (PRA) নম্বর দিতে পারেন'),
+
+                                TextInput::make('bmdc_reg_no')
+                                    ->label('BMDC Doctor Registration No (বিএমডিসি নম্বর)')
+                                    ->placeholder('e.g., A-12345')
+                                    ->visible($tenant->business_category === 'doctor' || $tenant->archetype === 'service_booking'),
+                            ])->columns(2),
+
                         Section::make('Pharmacy Drug License Verification')
                             ->description('Required under Digital Commerce Directive for pharmaceutical sales')
                             ->schema([
@@ -384,6 +416,7 @@ class StoreSettings extends Page implements HasForms
                                         <li><strong>Terms & Conditions:</strong> Governs customer rights, orders, and delivery obligations.</li>
                                         <li><strong>Return & Refund Policy:</strong> 3-7 day return and warranty claim conditions.</li>
                                         <li><strong>Privacy Policy:</strong> Compliant with Personal Data Protection Act.</li>
+                                        <li><strong>Customer Dispute:</strong> 72-hour dispute and resolution ticketing system.</li>
                                     </ul>
                                 ")),
                         ]),
@@ -453,6 +486,21 @@ class StoreSettings extends Page implements HasForms
         $tenant->branding = $brandingData;
         if (isset($state['store_name'])) {
             $tenant->name = $state['store_name'];
+        }
+        if (isset($state['trade_license_no'])) {
+            $tenant->trade_license_no = $state['trade_license_no'];
+        }
+        if (isset($state['tin_no'])) {
+            $tenant->tin_no = $state['tin_no'];
+        }
+        if (isset($state['bin_no'])) {
+            $tenant->bin_no = $state['bin_no'];
+        }
+        if (isset($state['pra_no'])) {
+            $tenant->pra_no = $state['pra_no'];
+        }
+        if (isset($state['bmdc_reg_no'])) {
+            $tenant->bmdc_reg_no = $state['bmdc_reg_no'];
         }
         if (isset($state['drug_license_no'])) {
             $tenant->drug_license_no = $state['drug_license_no'];

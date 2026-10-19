@@ -42,9 +42,25 @@ class Tenant extends BaseTenant implements TenantWithDatabase
             'owner_email',
             'owner_phone',
             'plan',
+            'status',
+            'suspended_reason',
+            'suspended_at',
+            'trade_license_no',
+            'trade_license_file',
+            'trade_license_verified_at',
+            'nid_no',
+            'nid_file',
+            'nid_verified_at',
             'drug_license_no',
             'drug_license_file',
             'drug_license_verified_at',
+            'bmdc_reg_no',
+            'bmdc_verified_at',
+            'tin_no',
+            'bin_no',
+            'pra_no',
+            'verification_status',
+            'verification_notes',
             'gateway_credentials',
             'terms_accepted',
         ];
@@ -53,9 +69,61 @@ class Tenant extends BaseTenant implements TenantWithDatabase
     protected function casts(): array
     {
         return [
-            'gateway_credentials' => 'array',
-            'drug_license_verified_at' => 'datetime',
-            'terms_accepted' => 'boolean',
+            'gateway_credentials'       => 'array',
+            'drug_license_verified_at'  => 'datetime',
+            'trade_license_verified_at' => 'datetime',
+            'nid_verified_at'           => 'datetime',
+            'bmdc_verified_at'          => 'datetime',
+            'suspended_at'              => 'datetime',
+            'terms_accepted'            => 'boolean',
         ];
+    }
+
+    /**
+     * Archetype Helpers & Compatibility Resolvers
+     */
+    public function isPhysicalCommerce(): bool
+    {
+        return in_array($this->archetype, ['physical_store', 'commerce'], true);
+    }
+
+    public function isFoodMenu(): bool
+    {
+        return in_array($this->archetype, ['food_menu'], true);
+    }
+
+    public function isServiceBooking(): bool
+    {
+        return in_array($this->archetype, ['service_booking', 'service'], true);
+    }
+
+    public function isListingInquiry(): bool
+    {
+        return in_array($this->archetype, ['listing_inquiry', 'lead_gen', 'lead'], true);
+    }
+
+    public function isDigitalCourse(): bool
+    {
+        return in_array($this->archetype, ['digital_course'], true);
+    }
+
+    public function isPortfolioContent(): bool
+    {
+        return in_array($this->archetype, ['portfolio_content', 'content'], true);
+    }
+
+    public function hasPhysicalInventory(): bool
+    {
+        return $this->isPhysicalCommerce() || $this->isFoodMenu();
+    }
+
+    public function getEffectiveArchetype(): string
+    {
+        if ($this->isFoodMenu()) return 'food_menu';
+        if ($this->isServiceBooking()) return 'service_booking';
+        if ($this->isListingInquiry()) return 'listing_inquiry';
+        if ($this->isDigitalCourse()) return 'digital_course';
+        if ($this->isPortfolioContent()) return 'portfolio_content';
+        return 'physical_store';
     }
 }

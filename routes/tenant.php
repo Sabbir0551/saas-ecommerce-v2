@@ -37,6 +37,13 @@ Route::middleware([
     Route::get('/privacy-policy', [StorefrontController::class, 'privacyPolicy'])->name('storefront.privacy');
     Route::get('/refund-policy', [StorefrontController::class, 'refundPolicy'])->name('storefront.refund');
 
+    // ডিজিটাল কমার্স নির্দেশিকা অনুযায়ী ৭২ ঘণ্টার গ্রাহক অভিযোগ দাখিল
+    Route::get('/disputes', [StorefrontController::class, 'showDisputeForm'])->name('storefront.disputes');
+    Route::post('/disputes/submit', [StorefrontController::class, 'submitDispute'])->name('storefront.disputes.submit');
+
+    // কাস্টমার রিভিউ ও রেটিং সাবমিশন
+    Route::post('/product/{slug}/reviews', [StorefrontController::class, 'submitReview'])->name('storefront.reviews.submit');
+
     // টেন্যান্ট ইনভয়েস প্রিন্ট
     Route::get('/orders/{order}/invoice', [OrderInvoiceController::class, 'print'])
         ->name('orders.invoice')

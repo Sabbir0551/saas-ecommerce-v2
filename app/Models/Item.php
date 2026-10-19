@@ -131,4 +131,29 @@ class Item extends Model
     {
         return $this->hasMany(Inquiry::class);
     }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class)->where('is_hidden', false);
+    }
+
+    public function allReviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    public function orderItems(): HasMany
+    {
+        return $this->hasMany(OrderItem::class);
+    }
+
+    public function getAverageRatingAttribute(): float
+    {
+        return round((float) $this->reviews()->avg('rating') ?: 5.0, 1);
+    }
+
+    public function getTotalReviewsCountAttribute(): int
+    {
+        return $this->reviews()->count();
+    }
 }

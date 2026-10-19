@@ -16,8 +16,15 @@ class Order extends Model
     protected $guarded = [];
 
     protected $casts = [
-        'status' => OrderStatus::class,
-        'payment_status' => PaymentStatus::class,
+        'status'                 => OrderStatus::class,
+        'payment_status'         => PaymentStatus::class,
+        'paid_at'                => 'datetime',
+        'courier_handed_over_at' => 'datetime',
+        'handover_deadline_at'   => 'datetime',
+        'cannot_supply_at'       => 'datetime',
+        'refund_deadline_at'     => 'datetime',
+        'refunded_at'            => 'datetime',
+        'is_ready_to_ship'       => 'boolean',
     ];
 
     protected static function booted(): void
@@ -36,6 +43,14 @@ class Order extends Model
             if (empty($order->status)) {
                 $order->status = OrderStatus::Pending;
             }
+
+            // Digital Commerce Guideline 2021: 48h courier handover countdown when paid
+            if ($order->isDirty('payment_status') && $order->payment_status === PaymentStatus::Paid && empty($order->paid_at)) {
+                $order->paid_at = now();
+                if (empty($order->handover_deadline_at)) {
+                    $order->handover_deadline_at = now()->addHours(48);
+                }
+            }
         });
     }
 
@@ -52,6 +67,34 @@ class Order extends Model
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
+    }
+
+    public function disputes(): HasMany
+    {
+        return $this->hasMany(Dispute::class)->latest();
+    }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class)->latest();
+    }
+
+    /** Digital Commerce Guideline: Checks if 48h courier handover is breached */
+    public function isHandoverBreached(): bool
+    {
+        return $this->payment_status === PaymentStatus::Paid 
+            && empty($this->courier_handed_over_at) 
+            && !empty($this->handover_deadline_at) 
+            && now()->isAfter($this->handover_deadline_at);
+    }
+
+    /** Digital Commerce Guideline: Checks if 72h refund is breached */
+    public function isRefundBreached(): bool
+    {
+        return !empty($this->cannot_supply_at) 
+            && empty($this->refunded_at) 
+            && !empty($this->refund_deadline_at) 
+            && now()->isAfter($this->refund_deadline_at);
     }
 
     public function scopeFilter(Builder $q, array $f): Builder
