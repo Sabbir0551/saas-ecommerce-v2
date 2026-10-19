@@ -15,6 +15,11 @@
     $regularPrice = $product->price;
     $discount = ($product->sale_price && $product->sale_price < $product->price) ? ($product->price - $product->sale_price) : 0;
 
+    $hasVideo = $product->has_video ?? (!empty($product->video_path) || !empty($product->video_url) || !empty($product->embed_video_url) || !empty($videoEmbedUrl));
+    $videoType = $product->video_type ?? (!empty($product->video_path) ? 'file' : 'embed');
+    $videoSourceUrl = $product->video_source_url ?? (!empty($product->video_path) ? asset('storage/' . $product->video_path) : ($product->embed_video_url ?? $product->video_url ?? $videoEmbedUrl));
+    $videoTitle = $product->video_title ?? 'Official Video Review & Unboxing';
+
     $isTechCategory = in_array($category ?? '', ['laptop_computer', 'electronics', 'mobile_gadgets']) || !empty($specs['processor_model']);
 
     $brand = $specs['brand'] ?? $product->brand ?? null;
@@ -108,23 +113,13 @@
             <!-- Main Viewer -->
             <div class="aspect-square bg-zinc-50 rounded-2xl overflow-hidden relative flex items-center justify-center border border-zinc-100 group">
                 @if(!empty($firstImage))
-                    <img x-show="activeMediaType === 'image'" 
-                         :src="activeImage" 
+                    <img :src="activeImage" 
                          src="{{ $firstImage }}"
                          alt="{{ $product->name }}" 
                          class="w-full h-full object-contain p-4 transition-all duration-300 group-hover:scale-105">
-                    <div x-show="activeMediaType === 'image' && !activeImage" style="display: none;" class="w-full h-full flex items-center justify-center text-6xl text-zinc-300">
-                        📦
-                    </div>
                 @else
-                    <div x-show="activeMediaType === 'image'" class="w-full h-full flex items-center justify-center text-6xl text-zinc-300">
+                    <div class="w-full h-full flex items-center justify-center text-6xl text-zinc-300">
                         📦
-                    </div>
-                @endif
-
-                @if(!empty($videoEmbedUrl))
-                    <div x-show="activeMediaType === 'video'" x-cloak class="w-full h-full">
-                        <iframe :src="galleryVideoUrl" class="w-full h-full rounded-2xl" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
                     </div>
                 @endif
 
@@ -137,27 +132,17 @@
 
             <!-- Horizontal Thumbnails Strip -->
             @php $validImages = is_array($images) ? $images : []; @endphp
-            @if(count($validImages) > 1 || !empty($videoEmbedUrl))
+            @if(count($validImages) > 1)
                 <div class="flex items-center gap-2.5 overflow-x-auto pb-1 scrollbar-thin">
                     @foreach($validImages as $img)
                         @php $imgUrl = asset('storage/' . $img); @endphp
                         <button type="button" 
-                                x-on:click="showImage('{{ $imgUrl }}')"
-                                :class="(activeMediaType === 'image' && activeImage === '{{ $imgUrl }}') ? 'border-theme-primary ring-2 ring-blue-200' : 'border-zinc-200 hover:border-zinc-400'"
+                                x-on:click="activeImage = '{{ $imgUrl }}'"
+                                :class="(activeImage === '{{ $imgUrl }}') ? 'border-theme-primary ring-2 ring-blue-200' : 'border-zinc-200 hover:border-zinc-400'"
                                 class="w-16 h-16 rounded-xl border-2 p-1 bg-white overflow-hidden flex-shrink-0 transition-all focus:outline-none cursor-pointer">
                             <img src="{{ $imgUrl }}" class="w-full h-full object-contain rounded-lg" alt="Thumbnail">
                         </button>
                     @endforeach
-
-                    @if(!empty($videoEmbedUrl))
-                        <button type="button" 
-                                x-on:click="showVideo('{{ $videoEmbedUrl }}')"
-                                :class="activeMediaType === 'video' ? 'border-red-600 bg-red-100 ring-2 ring-red-200' : 'border-red-500 bg-red-50 hover:bg-red-100'"
-                                class="w-16 h-16 rounded-xl border-2 p-1 overflow-hidden flex-shrink-0 flex flex-col items-center justify-center text-red-600 transition-all focus:outline-none cursor-pointer">
-                            <svg class="w-6 h-6 animate-pulse" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                            <span class="text-[9px] font-black mt-0.5 uppercase">Video</span>
-                        </button>
-                    @endif
                 </div>
             @endif
 
@@ -176,6 +161,28 @@
                     <span>Fast Dispatch</span>
                 </div>
             </div>
+
+            <!-- Dedicated Video Section (Outside Gallery) -->
+            @if($hasVideo && !empty($videoSourceUrl))
+                <div class="mt-4 bg-white rounded-3xl border border-zinc-200/90 p-5 shadow-xs space-y-3">
+                    <div class="flex items-center justify-between border-b border-zinc-100 pb-2.5">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-red-600 animate-pulse"></span>
+                            <span class="text-xs font-bold uppercase tracking-wider text-zinc-800">
+                                {{ $videoTitle }}
+                            </span>
+                        </div>
+                        <span class="text-[10px] bg-red-50 text-red-600 font-semibold px-2 py-0.5 rounded-full border border-red-100">ভিডিও বার্তা</span>
+                    </div>
+                    <div class="w-full aspect-video rounded-xl overflow-hidden bg-zinc-950 border border-zinc-200 shadow-inner">
+                        @if($videoType === 'file')
+                            <video src="{{ $videoSourceUrl }}" controls class="w-full h-full" playsinline preload="metadata"></video>
+                        @else
+                            <iframe src="{{ $videoSourceUrl }}" class="w-full h-full" frameborder="0" allowfullscreen></iframe>
+                        @endif
+                    </div>
+                </div>
+            @endif
 
         </div>
     </div>
@@ -400,7 +407,7 @@
             </button>
         @endif
 
-        @if(!empty($videoEmbedUrl))
+        @if($hasVideo && !empty($videoSourceUrl))
             <button type="button" 
                     x-on:click="activeTab = 'video'" 
                     :class="activeTab === 'video' ? 'border-theme-primary text-zinc-950 font-black bg-white border-b-2' : 'border-transparent text-zinc-500 hover:text-zinc-800 font-bold'"
@@ -457,15 +464,19 @@
         </div>
     @endif
 
-    <!-- Tab 2: Embedded YouTube Video Review -->
-    @if(!empty($videoEmbedUrl))
+    <!-- Tab 2: Embedded or Uploaded Video -->
+    @if($hasVideo && !empty($videoSourceUrl))
         <div x-show="activeTab === 'video'" class="p-6 sm:p-8">
             <h2 class="text-lg font-black text-zinc-900 mb-4 flex items-center gap-2">
                 <span>🎥</span>
-                <span>Official Video Review</span>
+                <span>{{ $videoTitle }}</span>
             </h2>
-            <div class="aspect-video w-full max-w-4xl mx-auto rounded-2xl overflow-hidden border border-zinc-200 shadow-lg">
-                <iframe src="{{ $videoEmbedUrl }}" class="w-full h-full" frameborder="0" allowfullscreen></iframe>
+            <div class="aspect-video w-full max-w-4xl mx-auto rounded-2xl overflow-hidden border border-zinc-200 shadow-lg bg-zinc-950">
+                @if($videoType === 'file')
+                    <video src="{{ $videoSourceUrl }}" controls class="w-full h-full" playsinline preload="metadata"></video>
+                @else
+                    <iframe src="{{ $videoSourceUrl }}" class="w-full h-full" frameborder="0" allowfullscreen></iframe>
+                @endif
             </div>
         </div>
     @endif

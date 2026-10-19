@@ -77,9 +77,7 @@
             selectedVariantId: {{ $product->variants->first()?->id ?? 'null' }},
 
             activeTab: '{{ !empty($specs) ? 'specs' : 'description' }}',
-            activeMediaType: 'image',
             activeImage: '{{ $firstImage }}',
-            galleryVideoUrl: '{{ $videoEmbedUrl }}',
 
             selectedDate: '{{ date('Y-m-d') }}',
             selectedTime: '',
@@ -93,13 +91,7 @@
             },
 
             showImage(url) {
-                this.activeMediaType = 'image';
                 this.activeImage = url;
-            },
-
-            showVideo(url) {
-                this.activeMediaType = 'video';
-                this.galleryVideoUrl = url;
             },
 
             selectVariant(id, price) {

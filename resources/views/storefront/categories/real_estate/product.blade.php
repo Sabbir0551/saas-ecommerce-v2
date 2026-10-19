@@ -9,7 +9,11 @@
 
     $rawSpecs = $product->item_attributes ?? $product->specs;
     $specs = is_array($rawSpecs) ? $rawSpecs : (is_string($rawSpecs) ? (json_decode($rawSpecs, true) ?? []) : []);
-    $videoEmbedUrl = $product->embed_video_url ?? null;
+
+    $hasVideo = $product->has_video ?? (!empty($product->video_path) || !empty($product->video_url) || !empty($product->embed_video_url));
+    $videoType = $product->video_type ?? (!empty($product->video_path) ? 'file' : 'embed');
+    $videoSourceUrl = $product->video_source_url ?? (!empty($product->video_path) ? asset('storage/' . $product->video_path) : ($product->embed_video_url ?? $product->video_url));
+    $videoTitle = $product->video_title ?? 'প্রপার্টি ভার্চুয়াল ভিডিও ট্যুর';
 
     $ownerPhone = tenant('owner_phone') ?? '01700000000';
     $cleanPhone = preg_replace('/[^0-9]/', '', $ownerPhone);
@@ -19,17 +23,7 @@
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" 
      x-data="{
-        activeMediaType: 'image',
-        activeImage: '{{ $firstImage }}',
-        galleryVideoUrl: '{{ $videoEmbedUrl }}',
-        showImage(url) {
-            this.activeMediaType = 'image';
-            this.activeImage = url;
-        },
-        showVideo(url) {
-            this.activeMediaType = 'video';
-            this.galleryVideoUrl = url;
-        }
+        activeImage: '{{ $firstImage }}'
      }">
 
     @if(session('success'))
@@ -71,53 +65,64 @@
         <!-- Main Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             
-            <!-- Left: Gallery & Specs -->
+            <!-- Left: Gallery, Specs & Dedicated Video Section -->
             <div class="lg:col-span-8 space-y-6">
+                <!-- Pure Image Gallery (No Video Mixed In) -->
                 <div class="bg-white rounded-3xl border border-zinc-200 p-4 sm:p-5 shadow-sm space-y-4">
                     <div class="aspect-[16/10] bg-zinc-100 rounded-2xl overflow-hidden relative border border-zinc-200 flex items-center justify-center">
                         @if(!empty($firstImage))
-                            <img x-show="activeMediaType === 'image'" 
-                                 :src="activeImage" 
+                            <img :src="activeImage" 
                                  src="{{ $firstImage }}" 
                                  alt="{{ $productTitle }}" 
                                  class="w-full h-full object-cover transition-all duration-300">
                         @else
-                            <div x-show="activeMediaType === 'image'" class="w-full h-full flex flex-col items-center justify-center text-zinc-300">
+                            <div class="w-full h-full flex flex-col items-center justify-center text-zinc-300">
                                 <span class="text-6xl">🏢</span>
                                 <span class="text-xs text-zinc-400 mt-2">কোনো ছবি সংযুক্ত করা হয়নি</span>
                             </div>
                         @endif
-                        @if(!empty($videoEmbedUrl))
-                            <div x-show="activeMediaType === 'video'" x-cloak class="w-full h-full bg-black">
-                                <iframe :src="galleryVideoUrl" class="w-full h-full" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                            </div>
-                        @endif
                     </div>
 
-                    @if(count($images) > 1 || !empty($videoEmbedUrl))
+                    @if(count($images) > 1)
                         <div class="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-thin">
                             @foreach($images as $img)
                                 @php $imgUrl = asset('storage/' . $img); @endphp
                                 <button type="button" 
-                                        x-on:click="showImage('{{ $imgUrl }}')"
-                                        :class="(activeMediaType === 'image' && activeImage === '{{ $imgUrl }}') ? 'border-indigo-600 ring-4 ring-indigo-600/20' : 'border-zinc-200 opacity-75 hover:opacity-100'"
+                                        x-on:click="activeImage = '{{ $imgUrl }}'"
+                                        :class="(activeImage === '{{ $imgUrl }}') ? 'border-indigo-600 ring-4 ring-indigo-600/20' : 'border-zinc-200 opacity-75 hover:opacity-100'"
                                         class="w-20 h-16 rounded-xl border-2 p-0.5 overflow-hidden flex-shrink-0 transition-all focus:outline-none cursor-pointer">
                                     <img src="{{ $imgUrl }}" class="w-full h-full object-cover rounded-lg" alt="Thumbnail">
                                 </button>
                             @endforeach
-
-                            @if(!empty($videoEmbedUrl))
-                                <button type="button" 
-                                        x-on:click="showVideo('{{ $videoEmbedUrl }}')"
-                                        :class="activeMediaType === 'video' ? 'border-red-600 bg-red-100 ring-4 ring-red-500/20' : 'border-red-500 bg-red-50 hover:bg-red-100'"
-                                        class="w-20 h-16 rounded-xl border-2 p-0.5 overflow-hidden flex-shrink-0 flex flex-col items-center justify-center text-red-600 transition-all focus:outline-none cursor-pointer">
-                                    <svg class="w-6 h-6 animate-pulse" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                                    <span class="text-[10px] font-bold mt-0.5">ভিডিও ট্যুর</span>
-                                </button>
-                            @endif
                         </div>
                     @endif
                 </div>
+
+                <!-- Dedicated Video Section (Outside Gallery) -->
+                @if($hasVideo && !empty($videoSourceUrl))
+                    <div class="bg-white rounded-3xl border border-zinc-200 p-6 sm:p-7 shadow-sm space-y-4">
+                        <div class="flex items-center justify-between border-b border-zinc-100 pb-3.5">
+                            <div class="flex items-center gap-2.5">
+                                <span class="w-2.5 h-2.5 rounded-full bg-rose-600 animate-pulse"></span>
+                                <h3 class="text-sm sm:text-base font-black text-zinc-900 tracking-tight uppercase">
+                                    {{ $videoTitle }}
+                                </h3>
+                            </div>
+                            <span class="text-xs bg-rose-50 text-rose-600 font-bold px-3 py-1 rounded-full border border-rose-100 flex items-center gap-1.5">
+                                <span>🎥</span>
+                                <span>ভিডিও ট্যুর</span>
+                            </span>
+                        </div>
+
+                        <div class="aspect-video w-full rounded-2xl overflow-hidden bg-zinc-950 border border-zinc-200 shadow-inner">
+                            @if($videoType === 'file')
+                                <video src="{{ $videoSourceUrl }}" controls class="w-full h-full" playsinline preload="metadata"></video>
+                            @else
+                                <iframe src="{{ $videoSourceUrl }}" class="w-full h-full" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                            @endif
+                        </div>
+                    </div>
+                @endif
 
                 <!-- Property Specs -->
                 @if(!empty($specs))
@@ -181,26 +186,26 @@
 
                         <div>
                             <label class="block text-xs font-bold text-zinc-700 mb-1">আপনার নাম <span class="text-rose-500">*</span></label>
-                            <input type="text" name="customer_name" required value="{{ old('customer_name') }}" placeholder="যেমন: ইঞ্জিনিয়ার তানভীর" class="w-full bg-zinc-50 border border-zinc-300 rounded-xl py-2.5 px-3.5 text-xs focus:outline-none focus:border-indigo-600 focus:bg-white transition">
+                            <input type="text" name="customer_name" required value="{{ old('customer_name') }}" placeholder="যেমন: ইঞ্জিনিয়ার তানভীর" class="w-full bg-zinc-50 border border-zinc-200 rounded-xl py-2 px-3 text-xs focus:outline-none focus:border-indigo-600 focus:bg-white transition">
                         </div>
 
                         <div>
                             <label class="block text-xs font-bold text-zinc-700 mb-1">মোবাইল নম্বর <span class="text-rose-500">*</span></label>
-                            <input type="tel" name="customer_phone" required value="{{ old('customer_phone') }}" placeholder="০১xxxxxxxxx (১১ ডিজিট)" class="w-full bg-zinc-50 border border-zinc-300 rounded-xl py-2.5 px-3.5 text-xs focus:outline-none focus:border-indigo-600 focus:bg-white transition">
+                            <input type="tel" name="customer_phone" required value="{{ old('customer_phone') }}" placeholder="০১xxxxxxxxx (১১ ডিজিট)" class="w-full bg-zinc-50 border border-zinc-200 rounded-xl py-2 px-3 text-xs focus:outline-none focus:border-indigo-600 focus:bg-white transition">
                         </div>
 
                         <div>
                             <label class="block text-xs font-bold text-zinc-700 mb-1">আপনার ইনকোয়ারি বা বার্তা</label>
-                            <textarea name="shipping_address" rows="3" placeholder="দাম আলোচনা বা ভিজিট করার সম্ভাব্য সময় লিখুন..." class="w-full bg-zinc-50 border border-zinc-300 rounded-xl py-2 px-3.5 text-xs focus:outline-none focus:border-indigo-600 focus:bg-white transition">{{ old('shipping_address') }}</textarea>
+                            <textarea name="shipping_address" rows="3" placeholder="দাম আলোচনা বা ভিজিট করার সম্ভাব্য সময় লিখুন..." class="w-full bg-zinc-50 border border-zinc-200 rounded-xl py-2 px-3 text-xs focus:outline-none focus:border-indigo-600 focus:bg-white transition">{{ old('shipping_address') }}</textarea>
                         </div>
 
-                        <button type="submit" class="w-full bg-zinc-900 hover:bg-black text-white font-bold py-3.5 px-4 rounded-xl text-xs transition flex items-center justify-center gap-2 cursor-pointer shadow-md">
+                        <button type="submit" class="w-full bg-zinc-900 hover:bg-zinc-800 text-white font-bold py-3 px-4 rounded-xl text-xs transition shadow-md flex items-center justify-center gap-1.5 cursor-pointer">
                             <span>ইনকোয়ারি পাঠান</span>
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                         </button>
                     </form>
                 </div>
             </div>
-
         </div>
     </div>
 </div>

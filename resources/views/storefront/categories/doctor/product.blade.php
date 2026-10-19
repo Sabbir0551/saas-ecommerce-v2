@@ -9,7 +9,10 @@
 
     $rawSpecs = $product->item_attributes ?? $product->specs;
     $specs = is_array($rawSpecs) ? $rawSpecs : (is_string($rawSpecs) ? (json_decode($rawSpecs, true) ?? []) : []);
-    $videoEmbedUrl = $product->embed_video_url ?? null;
+
+    $hasVideo = $product->has_video ?? (!empty($product->video_path) || !empty($product->embed_video_url));
+    $videoType = $product->video_type ?? (!empty($product->video_path) ? 'file' : 'embed');
+    $videoSourceUrl = $product->video_source_url ?? $product->embed_video_url;
 
     $visitingHoursText = $specs['visiting_hours'] ?? '05:00 PM - 09:00 PM';
     $priceLabel = match($category) {
@@ -19,7 +22,6 @@
     };
     $validImages = $images;
     $validSpecs = $specs;
-    $hasVideo = !empty($videoEmbedUrl);
 @endphp
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" 
@@ -96,30 +98,6 @@
                             @endforeach
                         </div>
                     @endif
-
-                    <!-- Video Section -->
-                    @if($hasVideo)
-                        <div class="mt-4 bg-white rounded-2xl p-3 sm:p-4 text-zinc-900 shadow-sm border border-zinc-200 space-y-3">
-                            <div class="flex items-center justify-between border-b border-zinc-100 pb-2.5">
-                                <div class="flex items-center gap-2">
-                                    <span class="w-2.5 h-2.5 rounded-full bg-red-600 animate-pulse"></span>
-                                    <span class="text-xs font-bold uppercase tracking-wider text-zinc-800">
-                                        {{ $product->video_title ?? 'ডাক্তারের পরিচিতি ও পরামর্শ ভিডিও' }}
-                                    </span>
-                                </div>
-                                <span class="text-[10px] bg-red-50 text-red-600 font-semibold px-2 py-0.5 rounded-full border border-red-100">ভিডিও বার্তা</span>
-                            </div>
-                            <div class="w-full aspect-video rounded-xl overflow-hidden bg-zinc-900 border border-zinc-200 shadow-inner">
-                                <iframe src="{{ $videoEmbedUrl }}" 
-                                        class="w-full h-full" 
-                                        frameborder="0" 
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                                        allowfullscreen>
-                                </iframe>
-                            </div>
-                        </div>
-                    @endif
-
                 </div>
 
                 <!-- Doctor Profile Details (Right Frame) -->
@@ -189,6 +167,31 @@
 
             </div>
         </div>
+
+        <!-- Dedicated Video Showcase Section (Outside Gallery) -->
+        @if($hasVideo && !empty($videoSourceUrl))
+            <div class="bg-white rounded-3xl border border-zinc-200 p-6 sm:p-8 shadow-sm space-y-4">
+                <div class="flex items-center justify-between border-b border-zinc-100 pb-3">
+                    <div class="flex items-center gap-2.5">
+                        <span class="w-2.5 h-2.5 rounded-full bg-red-600 animate-pulse"></span>
+                        <h3 class="text-sm sm:text-base font-black text-zinc-900 tracking-tight uppercase">
+                            {{ $product->video_title ?? 'ডাক্তারের পরিচিতি ও ভিডিও বার্তা' }}
+                        </h3>
+                    </div>
+                    <span class="text-xs bg-red-50 text-red-600 font-bold px-3 py-1 rounded-full border border-red-100 flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                        ভিডিও বার্তা
+                    </span>
+                </div>
+                <div class="aspect-video w-full rounded-2xl overflow-hidden bg-zinc-950 border border-zinc-200 shadow-inner">
+                    @if($videoType === 'file')
+                        <video src="{{ $videoSourceUrl }}" controls class="w-full h-full" playsinline preload="metadata"></video>
+                    @else
+                        <iframe src="{{ $videoSourceUrl }}" class="w-full h-full" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    @endif
+                </div>
+            </div>
+        @endif
 
         <!-- Booking Form -->
         <div class="max-w-3xl mx-auto">

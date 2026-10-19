@@ -58,6 +58,39 @@ class Item extends Model
     }
 
     /**
+     * পণ্যটিতে ভিডিও আছে কিনা যাচাই
+     */
+    public function getHasVideoAttribute(): bool
+    {
+        return !empty($this->video_path) || !empty($this->video_url);
+    }
+
+    /**
+     * ভিডিওর ধরন নির্ধারণ (file অথবা embed)
+     */
+    public function getVideoTypeAttribute(): ?string
+    {
+        if (!empty($this->video_path)) {
+            return 'file';
+        }
+        if (!empty($this->video_url)) {
+            return 'embed';
+        }
+        return null;
+    }
+
+    /**
+     * ভিডিওর চূড়ান্ত প্লেয়ার ইউআরএল
+     */
+    public function getVideoSourceUrlAttribute(): ?string
+    {
+        if (!empty($this->video_path)) {
+            return asset('storage/' . $this->video_path);
+        }
+        return $this->embed_video_url;
+    }
+
+    /**
      * তথ্য পূর্ণতা স্কোর গণনা (Completeness Meter 0-100%)
      */
     public function calculateCompletenessScore(): int

@@ -245,6 +245,32 @@ class ItemResource extends Resource
                             ->maxFiles(8)
                             ->columnSpanFull(),
 
+                        Section::make('Product Video (Upload or Embed Link)')
+                            ->description('ভিডিও আপলোড করুন অথবা ইউটিউব/ফেসবুক ভিডিও লিংক দিন')
+                            ->schema([
+                                TextInput::make('video_title')
+                                    ->label('ভিডিওর শিরোনাম (Video Title)')
+                                    ->placeholder('যেমন: প্রপার্টি ভার্চুয়াল ট্যুর অথবা প্রোডাক্ট আনবক্সিং ও রিভিউ')
+                                    ->columnSpanFull(),
+
+                                FileUpload::make('video_path')
+                                    ->label('সরাসরি ভিডিও ফাইল আপলোড (Direct Video Upload)')
+                                    ->helperText('MP4, WebM অথবা MOV ফাইল আপলোড করুন (সর্বোচ্চ ১০০ মেগাবাইট)')
+                                    ->directory('items/videos')
+                                    ->acceptedFileTypes(['video/mp4', 'video/webm', 'video/quicktime', 'video/ogg'])
+                                    ->maxSize(102400)
+                                    ->columnSpan(1),
+
+                                TextInput::make('video_url')
+                                    ->label('অথবা ইউটিউব / ভিডিও লিংক (YouTube / Video URL)')
+                                    ->placeholder('https://www.youtube.com/watch?v=...')
+                                    ->helperText('ইউটিউব, ভিমিও বা ফেসবুক ভিডিও লিংক পেস্ট করুন')
+                                    ->columnSpan(1),
+                            ])
+                            ->columns(2)
+                            ->collapsible()
+                            ->columnSpanFull(),
+
                         RichEditor::make('description')
                             ->label('Detailed Description & Features')
                             ->toolbarButtons([

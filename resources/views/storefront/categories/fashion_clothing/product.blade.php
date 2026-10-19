@@ -37,6 +37,10 @@
     $discount = ($product->sale_price && $product->sale_price < $product->price) ? ($product->price - $product->sale_price) : 0;
 
     $variants = $product->variants()->where('is_active', true)->get();
+
+    $hasVideo = $product->has_video ?? (!empty($product->video_path) || !empty($product->embed_video_url));
+    $videoType = $product->video_type ?? (!empty($product->video_path) ? 'file' : 'embed');
+    $videoSourceUrl = $product->video_source_url ?? $product->embed_video_url;
 @endphp
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" 
@@ -98,6 +102,31 @@
                     </div>
                 @endif
             </div>
+
+            <!-- Dedicated Video Showcase Section (Outside Gallery) -->
+            @if($hasVideo && !empty($videoSourceUrl))
+                <div class="bg-white rounded-3xl border border-zinc-200 p-5 sm:p-6 shadow-xs space-y-3">
+                    <div class="flex items-center justify-between border-b border-zinc-100 pb-2.5">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-red-600 animate-pulse"></span>
+                            <span class="text-xs font-bold uppercase tracking-wider text-zinc-800">
+                                {{ $product->video_title ?? 'পণ্যের রিভিউ / ফ্যাশন ভিডিও' }}
+                            </span>
+                        </div>
+                        <span class="text-[10px] bg-red-50 text-red-600 font-semibold px-2.5 py-0.5 rounded-full border border-red-100 flex items-center gap-1">
+                            <span>🎥</span>
+                            <span>ভিডিও ডেমো</span>
+                        </span>
+                    </div>
+                    <div class="aspect-video w-full rounded-2xl overflow-hidden bg-zinc-950 border border-zinc-200 shadow-inner">
+                        @if($videoType === 'file')
+                            <video src="{{ $videoSourceUrl }}" controls class="w-full h-full" playsinline preload="metadata"></video>
+                        @else
+                            <iframe src="{{ $videoSourceUrl }}" class="w-full h-full" frameborder="0" allowfullscreen></iframe>
+                        @endif
+                    </div>
+                </div>
+            @endif
 
             <!-- Fabric & Care Specifications -->
             <div class="bg-white rounded-3xl border border-zinc-200 p-6 sm:p-8 shadow-xs space-y-6">

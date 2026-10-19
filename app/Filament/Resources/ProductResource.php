@@ -158,11 +158,22 @@ class ProductResource extends Resource
 
                         TextInput::make('video_title')
                             ->label('ভিডিওর শিরোনাম')
-                            ->placeholder('যেমন: চেম্বার পরিচিতি অথবা প্রপার্টি ভার্চুয়াল ট্যুর'),
+                            ->placeholder('যেমন: চেম্বার পরিচিতি অথবা প্রপার্টি ভার্চুয়াল ট্যুর')
+                            ->columnSpanFull(),
+
+                        FileUpload::make('video_path')
+                            ->label('সরাসরি ভিডিও ফাইল আপলোড')
+                            ->helperText('MP4, WebM অথবা MOV ফাইল আপলোড করুন (সর্বোচ্চ ১০০MB)')
+                            ->directory('products/videos')
+                            ->acceptedFileTypes(['video/mp4', 'video/webm', 'video/quicktime', 'video/ogg'])
+                            ->maxSize(102400)
+                            ->columnSpan(1),
 
                         TextInput::make('embed_video_url')
                             ->label('ইউটিউব / ভিডিও এমবেড ইউআরএল')
-                            ->placeholder('https://www.youtube.com/embed/...'),
+                            ->placeholder('https://www.youtube.com/embed/...')
+                            ->helperText('ইউটিউব বা অন্য কোনো ভিডিও লিংক')
+                            ->columnSpan(1),
                     ])->columns(2),
 
                     // ফিজিক্যাল কমার্সের জন্য ভ্যারিয়েন্ট রিপিটার

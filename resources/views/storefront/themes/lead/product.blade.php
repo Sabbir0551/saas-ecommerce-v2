@@ -35,6 +35,16 @@
         $isTravel => 'ট্যুর বুকিং বা বিস্তারিত শিডিউল জানতে আবেদন করুন।',
         default => 'অর্ডার শিডিউল বা বিস্তারিত তথ্যের জন্য আবেদন করুন।',
     };
+
+    $hasVideo = $product->has_video ?? (!empty($product->video_path) || !empty($product->video_url) || !empty($product->embed_video_url));
+    $videoType = $product->video_type ?? (!empty($product->video_path) ? 'file' : 'embed');
+    $videoSourceUrl = $product->video_source_url ?? (!empty($product->video_path) ? asset('storage/' . $product->video_path) : ($product->embed_video_url ?? $product->video_url));
+    $videoTitle = $product->video_title ?? match(true) {
+        $isRealEstate => 'প্রপার্টি ভার্চুয়াল ভিডিও ট্যুর',
+        $isVehicle => 'গাড়ির ফুল ভিডিও রিভিউ ও টেস্ট ড্রাইভ',
+        $isTravel => 'ট্যুর প্যাকেজ হাইলাইটস ভিডিও',
+        default => 'এক্সক্লুসিভ প্রেজেন্টেশন ভিডিও',
+    };
 @endphp
 
 <div class="space-y-8">
@@ -69,55 +79,66 @@
     <!-- Main Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
-        <!-- Left: Gallery & Specs -->
+        <!-- Left: Gallery, Specs & Video Section -->
         <div class="lg:col-span-8 space-y-6">
+            <!-- Pure Image Gallery (No Video Mixed In) -->
             <div class="bg-white rounded-3xl border border-zinc-200 p-4 sm:p-5 shadow-sm space-y-4">
                 <div class="aspect-[16/10] bg-zinc-100 rounded-2xl overflow-hidden relative border border-zinc-200 flex items-center justify-center">
                     @if(!empty($firstImage))
-                        <img x-show="activeMediaType === 'image'" 
-                             :src="activeImage" 
+                        <img :src="activeImage" 
                              src="{{ $firstImage }}" 
                              alt="{{ $productTitle }}" 
                              class="w-full h-full object-cover transition-all duration-300">
                     @else
-                        <div x-show="activeMediaType === 'image'" class="w-full h-full flex flex-col items-center justify-center text-zinc-300">
+                        <div class="w-full h-full flex flex-col items-center justify-center text-zinc-300">
                             <span class="text-6xl">{{ $isVehicle ? '🚗' : ($isTravel ? '✈️' : '🏢') }}</span>
                             <span class="text-xs text-zinc-400 mt-2">কোনো ছবি সংযুক্ত করা হয়নি</span>
-                        </div>
-                    @endif
-                    @if(!empty($videoEmbedUrl))
-                        <div x-show="activeMediaType === 'video'" x-cloak class="w-full h-full bg-black">
-                            <iframe :src="galleryVideoUrl" class="w-full h-full" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                         </div>
                     @endif
                 </div>
 
                 <!-- Thumbnails Strip -->
                 @php $validImages = is_array($images) ? $images : []; @endphp
-                @if(count($validImages) > 1 || !empty($videoEmbedUrl))
+                @if(count($validImages) > 1)
                     <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">
                         @foreach($validImages as $img)
                             @php $imgUrl = asset('storage/' . $img); @endphp
                             <button type="button" 
                                     x-on:click="showImage('{{ $imgUrl }}')"
-                                    :class="(activeMediaType === 'image' && activeImage === '{{ $imgUrl }}') ? 'border-indigo-600 ring-2 ring-indigo-200' : 'border-zinc-200 hover:border-zinc-400'"
+                                    :class="(activeImage === '{{ $imgUrl }}') ? 'border-indigo-600 ring-2 ring-indigo-200' : 'border-zinc-200 hover:border-zinc-400'"
                                     class="w-16 h-14 rounded-xl border-2 p-0.5 bg-white overflow-hidden flex-shrink-0 transition-all focus:outline-none cursor-pointer">
                                 <img src="{{ $imgUrl }}" class="w-full h-full object-cover rounded-lg" alt="Thumbnail">
                             </button>
                         @endforeach
-
-                        @if(!empty($videoEmbedUrl))
-                            <button type="button" 
-                                    x-on:click="showVideo('{{ $videoEmbedUrl }}')"
-                                    :class="activeMediaType === 'video' ? 'border-red-600 bg-red-100 ring-2 ring-red-200' : 'border-red-500 bg-red-50 hover:bg-red-100'"
-                                    class="w-16 h-14 rounded-xl border-2 p-0.5 overflow-hidden flex-shrink-0 flex flex-col items-center justify-center text-red-600 transition-all focus:outline-none cursor-pointer">
-                                <svg class="w-6 h-6 animate-pulse" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                                <span class="text-[10px] font-bold mt-0.5">ভিডিও</span>
-                            </button>
-                        @endif
                     </div>
                 @endif
             </div>
+
+            <!-- Dedicated Video Section (Outside Gallery) -->
+            @if($hasVideo && !empty($videoSourceUrl))
+                <div class="bg-white rounded-3xl border border-zinc-200 p-6 sm:p-7 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between border-b border-zinc-100 pb-3.5">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-2.5 h-2.5 rounded-full bg-rose-600 animate-pulse"></span>
+                            <h3 class="text-sm sm:text-base font-black text-zinc-900 tracking-tight uppercase">
+                                {{ $videoTitle }}
+                            </h3>
+                        </div>
+                        <span class="text-xs bg-rose-50 text-rose-600 font-bold px-3 py-1 rounded-full border border-rose-100 flex items-center gap-1.5">
+                            <span>🎥</span>
+                            <span>ভিডিও ট্যুর / প্রেজেন্টেশন</span>
+                        </span>
+                    </div>
+
+                    <div class="aspect-video w-full rounded-2xl overflow-hidden bg-zinc-950 border border-zinc-200 shadow-inner">
+                        @if($videoType === 'file')
+                            <video src="{{ $videoSourceUrl }}" controls class="w-full h-full" playsinline preload="metadata"></video>
+                        @else
+                            <iframe src="{{ $videoSourceUrl }}" class="w-full h-full" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                        @endif
+                    </div>
+                </div>
+            @endif
 
             <!-- Specs Grid -->
             @if(!empty($specs))
