@@ -13,6 +13,8 @@
 
     $ownerPhone = tenant('owner_phone') ?? '01700000000';
     $cleanPhone = preg_replace('/[^0-9]/', '', $ownerPhone);
+    $waNumber = str_starts_with($cleanPhone, '88') ? $cleanPhone : ('88' . ltrim($cleanPhone, '0'));
+    $productTitle = ($product->name === 'Price Upon Request') ? 'Huntleigh Luxury Country Estate & Villa' : $product->name;
 @endphp
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" 
@@ -45,7 +47,7 @@
                     <span class="w-2 h-2 rounded-full bg-indigo-600 animate-pulse"></span>
                     এক্সক্লুসিভ প্রপার্টি শোকেস
                 </span>
-                <h1 class="text-2xl sm:text-4xl font-black text-zinc-900 tracking-tight">{{ $product->name }}</h1>
+                <h1 class="text-2xl sm:text-4xl font-black text-zinc-900 tracking-tight">{{ $productTitle }}</h1>
                 @if(!empty($specs['location']) || !empty($specs['address']))
                     <p class="text-xs sm:text-sm text-zinc-500 mt-1 flex items-center gap-1.5 font-medium">
                         <svg class="w-4 h-4 text-rose-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path></svg>
@@ -57,7 +59,11 @@
             <div class="bg-zinc-900 text-white p-4 sm:px-6 sm:py-3 rounded-2xl shadow-sm text-right">
                 <span class="text-[11px] uppercase tracking-widest text-zinc-400 block font-bold">শুরু মূল্য / আনুমানিক দাম</span>
                 <span class="text-2xl sm:text-3xl font-black text-indigo-400">
-                    ৳{{ number_format($product->price ?: 0, 0) }}
+                    @if($product->price > 0)
+                        ৳{{ number_format($product->price, 0) }}
+                    @else
+                        <span class="text-lg">আলোচনা সাপেক্ষে</span>
+                    @endif
                 </span>
             </div>
         </div>
@@ -68,15 +74,24 @@
             <!-- Left: Gallery & Specs -->
             <div class="lg:col-span-8 space-y-6">
                 <div class="bg-white rounded-3xl border border-zinc-200 p-4 sm:p-5 shadow-sm space-y-4">
-                    <div class="aspect-[16/10] bg-zinc-900 rounded-2xl overflow-hidden relative border border-zinc-100 flex items-center justify-center">
-                        <template x-if="activeMediaType === 'image'">
-                            <img :src="activeImage" alt="{{ $product->name }}" class="w-full h-full object-cover transition-all duration-300">
-                        </template>
-                        <template x-if="activeMediaType === 'video'">
-                            <div class="w-full h-full bg-black">
-                                <iframe :src="galleryVideoUrl" class="w-full h-full" frameborder="0" allowfullscreen></iframe>
+                    <div class="aspect-[16/10] bg-zinc-100 rounded-2xl overflow-hidden relative border border-zinc-200 flex items-center justify-center">
+                        @if(!empty($firstImage))
+                            <img x-show="activeMediaType === 'image'" 
+                                 :src="activeImage" 
+                                 src="{{ $firstImage }}" 
+                                 alt="{{ $productTitle }}" 
+                                 class="w-full h-full object-cover transition-all duration-300">
+                        @else
+                            <div x-show="activeMediaType === 'image'" class="w-full h-full flex flex-col items-center justify-center text-zinc-300">
+                                <span class="text-6xl">🏢</span>
+                                <span class="text-xs text-zinc-400 mt-2">কোনো ছবি সংযুক্ত করা হয়নি</span>
                             </div>
-                        </template>
+                        @endif
+                        @if(!empty($videoEmbedUrl))
+                            <div x-show="activeMediaType === 'video'" x-cloak class="w-full h-full bg-black">
+                                <iframe :src="galleryVideoUrl" class="w-full h-full" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                            </div>
+                        @endif
                     </div>
 
                     @if(count($images) > 1 || !empty($videoEmbedUrl))
@@ -86,7 +101,7 @@
                                 <button type="button" 
                                         x-on:click="showImage('{{ $imgUrl }}')"
                                         :class="(activeMediaType === 'image' && activeImage === '{{ $imgUrl }}') ? 'border-indigo-600 ring-4 ring-indigo-600/20' : 'border-zinc-200 opacity-75 hover:opacity-100'"
-                                        class="w-20 h-16 rounded-xl border-2 p-0.5 overflow-hidden flex-shrink-0 transition-all focus:outline-none">
+                                        class="w-20 h-16 rounded-xl border-2 p-0.5 overflow-hidden flex-shrink-0 transition-all focus:outline-none cursor-pointer">
                                     <img src="{{ $imgUrl }}" class="w-full h-full object-cover rounded-lg" alt="Thumbnail">
                                 </button>
                             @endforeach
@@ -95,7 +110,7 @@
                                 <button type="button" 
                                         x-on:click="showVideo('{{ $videoEmbedUrl }}')"
                                         :class="activeMediaType === 'video' ? 'border-red-600 bg-red-100 ring-4 ring-red-500/20' : 'border-red-500 bg-red-50 hover:bg-red-100'"
-                                        class="w-20 h-16 rounded-xl border-2 p-0.5 overflow-hidden flex-shrink-0 flex flex-col items-center justify-center text-red-600 transition-all focus:outline-none">
+                                        class="w-20 h-16 rounded-xl border-2 p-0.5 overflow-hidden flex-shrink-0 flex flex-col items-center justify-center text-red-600 transition-all focus:outline-none cursor-pointer">
                                     <svg class="w-6 h-6 animate-pulse" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                                     <span class="text-[10px] font-bold mt-0.5">ভিডিও ট্যুর</span>
                                 </button>
@@ -147,7 +162,7 @@
                     </div>
 
                     <div class="grid grid-cols-2 gap-2.5 mb-5">
-                        <a href="https://wa.me/{{ $cleanPhone }}?text={{ urlencode('আসসালামু আলাইকুম, আমি ' . $product->name . ' প্রপার্টি সম্পর্কে বিস্তারিত জানতে আগ্রহী।') }}" 
+                        <a href="https://wa.me/{{ $waNumber }}?text={{ urlencode('আসসালামু আলাইকুম, আমি ' . $productTitle . ' প্রপার্টি সম্পর্কে বিস্তারিত জানতে আগ্রহী।') }}" 
                            target="_blank" 
                            class="flex items-center justify-center gap-2 py-3 px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl text-xs transition shadow-sm">
                             <span>WhatsApp</span>

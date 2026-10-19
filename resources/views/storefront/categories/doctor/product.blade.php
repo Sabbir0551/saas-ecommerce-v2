@@ -70,14 +70,16 @@
                     
                     <!-- Main Image Preview Box -->
                     <div class="w-full aspect-[4/3] bg-zinc-100 rounded-2xl overflow-hidden relative flex items-center justify-center border border-zinc-200 shadow-inner">
-                        <template x-if="activeImage">
-                            <img :src="activeImage" alt="{{ $product->name }}" class="w-full h-full object-cover transition-all duration-300">
-                        </template>
-                        <template x-if="!activeImage">
+                        @if($firstImage)
+                            <img x-show="activeImage" :src="activeImage" src="{{ $firstImage }}" alt="{{ $product->name }}" class="w-full h-full object-cover transition-all duration-300">
+                            <div x-show="!activeImage" style="display: none;" class="w-full h-full flex items-center justify-center text-zinc-400">
+                                <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                            </div>
+                        @else
                             <div class="w-full h-full flex items-center justify-center text-zinc-400">
                                 <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
                             </div>
-                        </template>
+                        @endif
                     </div>
 
                     <!-- Thumbnails Gallery -->

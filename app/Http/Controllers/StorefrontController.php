@@ -91,6 +91,7 @@ class StorefrontController extends Controller
      */
     protected function resolveView(string $viewName, array $data = [])
     {
+        $data['errors'] = $data['errors'] ?? session('errors') ?? new \Illuminate\Support\ViewErrorBag();
         $category = tenant('business_category') ?? 'default';
         $archetype = tenant('archetype') ?? 'physical_store';
 

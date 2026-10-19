@@ -64,14 +64,16 @@
         <div class="lg:col-span-7 space-y-8">
             <div class="bg-white rounded-3xl border border-zinc-200 p-4 sm:p-6 shadow-xs space-y-4">
                 <div class="w-full aspect-[4/3] bg-zinc-100 rounded-2xl overflow-hidden relative border border-zinc-100 flex items-center justify-center">
-                    <template x-if="activeImage">
-                        <img :src="activeImage" alt="{{ $product->name }}" class="w-full h-full object-cover transition-all duration-300">
-                    </template>
-                    <template x-if="!activeImage">
+                    @if($firstImage)
+                        <img x-show="activeImage" :src="activeImage" src="{{ $firstImage }}" alt="{{ $product->name }}" class="w-full h-full object-cover transition-all duration-300">
+                        <div x-show="!activeImage" style="display: none;" class="w-full h-full flex items-center justify-center text-5xl text-zinc-300">
+                            🍔
+                        </div>
+                    @else
                         <div class="w-full h-full flex items-center justify-center text-5xl text-zinc-300">
                             🍔
                         </div>
-                    </template>
+                    @endif
                 </div>
 
                 @if(count($images) > 1)

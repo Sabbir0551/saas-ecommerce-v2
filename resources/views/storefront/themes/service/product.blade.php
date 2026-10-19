@@ -1,10 +1,21 @@
 @php
-    $visitingHoursText = $specs['visiting_hours'] ?? '05:00 PM - 09:00 PM';
+    $isMedical = ($category ?? '') === 'doctor';
+    $visitingHoursText = $specs['visiting_hours'] ?? ($isMedical ? '05:00 PM - 09:00 PM' : '10:00 AM - 08:00 PM');
     $priceLabel = match($category ?? '') {
         'doctor' => 'কনসালটেশন ফি',
         'barber_salon', 'tailors', 'coaching_service' => 'সার্ভিস চার্জ / ফি',
         default => 'ফি / চার্জ',
     };
+    $bookingBadge = $isMedical ? 'সরাসরি চেম্বার সিরিয়াল বুকিং' : 'সরাসরি সার্ভিস স্লট বুকিং';
+    $videoTitle = $product->video_title ?? ($isMedical ? 'ডাক্তারের পরিচিতি ও পরামর্শ ভিডিও' : 'সার্ভিস পরিচিতি ও ডেমো ভিডিও');
+    $scheduleTitle = $isMedical ? 'ভিজিটিং সময়সূচি' : 'সেবা প্রদানের সময়সূচি';
+    $locationTitle = $isMedical ? 'চেম্বার / লোকেশন' : 'সার্ভিস লোকেশন';
+    $customerNameLabel = $isMedical ? 'রোগী / ক্লায়েন্টের নাম' : 'গ্রাহক / ক্লায়েন্টের নাম';
+    $scheduleNote = $isMedical ? 'ডাক্তারের নিয়মিত সময়সূচি:' : 'নিয়মিত সেবার সময়সূচি:';
+    $slotLimitNote = $isMedical ? 'প্রতি ১ ঘণ্টার স্লটে সর্বোচ্চ ১০ জন রোগী দেখা হবে।' : 'প্রতিটি স্লটে নির্দিষ্ট সংখ্যক ক্লায়েন্ট সেবা পাবেন।';
+    $serviceNotePlaceholder = $isMedical ? 'রোগীর বয়স বা শারীরিক সমস্যা উল্লেখ করুন...' : 'প্রয়োজনীয় সেবা বা বিশেষ নির্দেশাবলী উল্লেখ করুন...';
+    $feeTimingText = $isMedical ? 'চেম্বারে উপস্থিত হয়ে সাক্ষাৎকালে পরিশোধযোগ্য' : 'সেবা গ্রহণের সময় পরিশোধযোগ্য';
+
     $validImages = is_array($images) ? $images : [];
     $validSpecs = is_array($specs) ? $specs : [];
     $hasVideo = !empty($videoEmbedUrl);
@@ -14,19 +25,21 @@
     <div class="bg-white rounded-3xl border border-zinc-200 p-6 sm:p-8 shadow-sm">
         <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
             
-            <!-- Media Left Frame (Images & Dedicated White Video Section Below) -->
+            <!-- Media Left Frame -->
             <div class="md:col-span-5 space-y-5">
                 
                 <!-- Main Image Preview Box -->
                 <div class="w-full aspect-[4/3] bg-zinc-100 rounded-2xl overflow-hidden relative flex items-center justify-center border border-zinc-200 shadow-inner">
-                    <template x-if="activeImage">
-                        <img :src="activeImage" alt="{{ $product->name }}" class="w-full h-full object-cover transition-all duration-300">
-                    </template>
-                    <template x-if="!activeImage">
+                    @if(!empty($firstImage))
+                        <img x-show="activeImage" :src="activeImage" src="{{ $firstImage }}" alt="{{ $product->name }}" class="w-full h-full object-cover transition-all duration-300">
+                        <div x-show="!activeImage" style="display: none;" class="w-full h-full flex items-center justify-center text-zinc-400">
+                            <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                        </div>
+                    @else
                         <div class="w-full h-full flex items-center justify-center text-zinc-400">
                             <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
                         </div>
-                    </template>
+                    @endif
                 </div>
 
                 <!-- Thumbnails Gallery -->
@@ -44,14 +57,14 @@
                     </div>
                 @endif
 
-                <!-- Dedicated Video Section (হোয়াইট কার্ড থিম) -->
+                <!-- Dedicated Video Section -->
                 @if($hasVideo)
                     <div class="mt-4 bg-white rounded-2xl p-3 sm:p-4 text-zinc-900 shadow-sm border border-zinc-200 space-y-3">
                         <div class="flex items-center justify-between border-b border-zinc-100 pb-2.5">
                             <div class="flex items-center gap-2">
                                 <span class="w-2.5 h-2.5 rounded-full bg-red-600 animate-pulse"></span>
                                 <span class="text-xs font-bold uppercase tracking-wider text-zinc-800">
-                                    {{ $product->video_title ?? 'ডাক্তারের পরিচিতি ও পরামর্শ ভিডিও' }}
+                                    {{ $videoTitle }}
                                 </span>
                             </div>
                             <span class="text-[10px] bg-red-50 text-red-600 font-semibold px-2 py-0.5 rounded-full border border-red-100">ভিডিও বার্তা</span>
@@ -69,11 +82,11 @@
 
             </div>
 
-            <!-- Doctor Profile Details (Right Frame) -->
+            <!-- Profile Details (Right Frame) -->
             <div class="md:col-span-7 space-y-4">
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200">
                     <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    সরাসরি চেম্বার সিরিয়াল বুকিং
+                    {{ $bookingBadge }}
                 </div>
 
                 <h1 class="text-2xl sm:text-3xl font-extrabold text-zinc-900 leading-snug">{{ $product->name }}</h1>
@@ -94,18 +107,18 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                     <div class="p-3 bg-zinc-50 rounded-xl border border-zinc-100">
-                        <span class="block text-[11px] font-bold text-zinc-400 uppercase mb-1">ভিজিটিং সময়সূচি</span>
+                        <span class="block text-[11px] font-bold text-zinc-400 uppercase mb-1">{{ $scheduleTitle }}</span>
                         <span class="text-xs font-bold text-zinc-800">{{ $visitingHoursText }}</span>
                     </div>
                     @if(!empty($specs['chamber_location']))
                         <div class="p-3 bg-zinc-50 rounded-xl border border-zinc-100">
-                            <span class="block text-[11px] font-bold text-zinc-400 uppercase mb-1">চেম্বার / লোকেশন</span>
+                            <span class="block text-[11px] font-bold text-zinc-400 uppercase mb-1">{{ $locationTitle }}</span>
                             <span class="text-xs font-bold text-zinc-800">{{ $specs['chamber_location'] }}</span>
                         </div>
                     @endif
                 </div>
 
-                <!-- Doctor Profile Specs Grid -->
+                <!-- Specs Grid -->
                 @if(!empty($validSpecs))
                     <div class="bg-zinc-50 rounded-xl p-4 border border-zinc-200 space-y-3">
                         <div class="flex items-center gap-2">
@@ -145,8 +158,8 @@
                     <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                     সিরিয়াল বুকিং ফর্ম
                 </span>
-                <h2 class="text-xl font-bold text-zinc-900">আপনার সিরিয়াল নিশ্চিত করতে ফর্মটি পূরণ করুন</h2>
-                <p class="text-xs text-zinc-500 mt-1">ডাক্তারের নিয়মিত সময়সূচি: <strong>{{ $visitingHoursText }}</strong></p>
+                <h2 class="text-xl font-bold text-zinc-900">আপনার বুকিং নিশ্চিত করতে ফর্মটি পূরণ করুন</h2>
+                <p class="text-xs text-zinc-500 mt-1">{{ $scheduleNote }} <strong>{{ $visitingHoursText }}</strong></p>
             </div>
 
             <form action="{{ route('storefront.order.place') }}" method="POST" class="space-y-4">
@@ -158,7 +171,7 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold text-zinc-700 mb-1">রোগী / ক্লায়েন্টের নাম <span class="text-rose-500">*</span></label>
+                        <label class="block text-xs font-bold text-zinc-700 mb-1">{{ $customerNameLabel }} <span class="text-rose-500">*</span></label>
                         <input type="text" name="customer_name" required value="{{ old('customer_name') }}" placeholder="যেমন: শামীম আহমেদ" class="w-full bg-zinc-50 border border-zinc-300 rounded-xl py-2.5 px-3.5 text-sm focus:outline-none focus:border-emerald-500 focus:bg-white transition">
                     </div>
 
@@ -199,19 +212,19 @@
                                 </option>
                             </template>
                         </select>
-                        <span class="block text-[11px] text-zinc-500 mt-1">প্রতি ১ ঘণ্টার স্লটে সর্বোচ্চ ১০ জন রোগী দেখা হবে।</span>
+                        <span class="block text-[11px] text-zinc-500 mt-1">{{ $slotLimitNote }}</span>
                     </div>
                 </div>
 
                 <div>
                     <label class="block text-xs font-bold text-zinc-700 mb-1">সমস্যা বা সেবার সংক্ষিপ্ত বিবরণ (ঐচ্ছিক)</label>
-                    <textarea name="shipping_address" rows="2" placeholder="রোগীর বয়স বা শারীরিক সমস্যা উল্লেখ করুন..." class="w-full bg-zinc-50 border border-zinc-300 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-emerald-500 focus:bg-white transition">{{ old('shipping_address') }}</textarea>
+                    <textarea name="shipping_address" rows="2" placeholder="{{ $serviceNotePlaceholder }}" class="w-full bg-zinc-50 border border-zinc-300 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-emerald-500 focus:bg-white transition">{{ old('shipping_address') }}</textarea>
                 </div>
 
                 <div class="bg-emerald-50 rounded-2xl p-4 border border-emerald-200 flex justify-between items-center text-xs">
                     <div>
-                        <span class="font-bold text-emerald-950 block">কনসালটেশন ফি:</span>
-                        <span class="text-[11px] text-emerald-700">চেম্বারে উপস্থিত হয়ে সাক্ষাৎকালে পরিশোধযোগ্য</span>
+                        <span class="font-bold text-emerald-950 block">{{ $priceLabel }}:</span>
+                        <span class="text-[11px] text-emerald-700">{{ $feeTimingText }}</span>
                     </div>
                     <span class="text-xl font-black text-emerald-700">৳{{ number_format($product->sale_price ?: $product->price, 0) }}</span>
                 </div>

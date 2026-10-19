@@ -44,7 +44,7 @@
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6" x-data="universalStoreApp()">
 
-    @if($errors->any())
+    @if(($errors ?? null)?->any())
         <div class="bg-rose-50 border border-rose-200 text-rose-800 p-4 rounded-2xl mb-6 text-sm">
             <ul class="list-disc list-inside space-y-1">
                 @foreach($errors->all() as $error)
@@ -67,7 +67,6 @@
 
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 <script>
     function universalStoreApp() {
         return {
@@ -77,7 +76,7 @@
             district: 'Dhaka',
             selectedVariantId: {{ $product->variants->first()?->id ?? 'null' }},
 
-            activeTab: 'specs',
+            activeTab: '{{ !empty($specs) ? 'specs' : 'description' }}',
             activeMediaType: 'image',
             activeImage: '{{ $firstImage }}',
             galleryVideoUrl: '{{ $videoEmbedUrl }}',

@@ -74,14 +74,16 @@
             <!-- Main Photo Presentation -->
             <div class="bg-white rounded-3xl border border-zinc-200 p-6 shadow-xs space-y-4">
                 <div class="w-full aspect-[4/3] bg-zinc-50 rounded-2xl overflow-hidden relative border border-zinc-100 flex items-center justify-center p-6">
-                    <template x-if="activeImage">
-                        <img :src="activeImage" alt="{{ $product->name }}" class="w-full h-full object-contain transition-all duration-300">
-                    </template>
-                    <template x-if="!activeImage">
+                    @if($firstImage)
+                        <img x-show="activeImage" :src="activeImage" src="{{ $firstImage }}" alt="{{ $product->name }}" class="w-full h-full object-contain transition-all duration-300">
+                        <div x-show="!activeImage" style="display: none;" class="w-full h-full flex items-center justify-center text-6xl text-emerald-300">
+                            💊
+                        </div>
+                    @else
                         <div class="w-full h-full flex items-center justify-center text-6xl text-emerald-300">
                             💊
                         </div>
-                    </template>
+                    @endif
 
                     <!-- Rx Tag on Image -->
                     <div class="absolute top-4 left-4">

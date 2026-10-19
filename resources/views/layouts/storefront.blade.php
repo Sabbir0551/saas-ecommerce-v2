@@ -26,6 +26,9 @@
         $showroomDhaka = $branding['showroom_address'] ?? ($branding['office_address'] ?? 'Dhaka, Bangladesh');
         $showroomCtg = $branding['showroom_address_branch'] ?? null;
         $waDigits = preg_replace('/[^0-9]/', '', $whatsapp);
+        if (str_starts_with($waDigits, '01')) {
+            $waDigits = '88' . $waDigits;
+        }
         $footerAbout = $branding['footer_about'] ?? ($categoryDefaults['footer_about'] ?? 'Premier online storefront offering verified quality, secure checkout, and prompt nationwide delivery.');
 
         $catIcon = match($category) {
@@ -41,6 +44,8 @@
     <title>{{ $storeName }} - {{ $storeTagline }}</title>
     <!-- Tailwind Play CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Alpine.js Core for Storefront Reactivity -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -56,6 +61,7 @@
         .hover\:bg-theme-primary:hover { background-color: var(--theme-primary) !important; }
         .hover\:text-theme-primary:hover { color: var(--theme-primary) !important; }
         .ring-theme-primary { --tw-ring-color: var(--theme-primary) !important; }
+        [x-cloak] { display: none !important; }
 
         @media print {
             header, footer, .no-print {
@@ -109,11 +115,23 @@
                 </div>
             </a>
 
+            @php
+                $searchPlaceholder = match($category) {
+                    'real_estate', 'house_rental' => 'Search location, property, ready flat or plot...',
+                    'fashion_clothing', 'shoes_footwear' => 'Search clothing, dress, panjabi, saree or collection...',
+                    'restaurant', 'bakery_pastry' => 'Search food items, platters, burgers, meals or drinks...',
+                    'doctor', 'barber_salon' => 'Search doctor, specialist, chamber or service...',
+                    'pharmacy' => 'Search medicine, generic name, healthcare equipment...',
+                    'mobile_gadgets' => 'Search smartphone, brand, smartwatch, accessories...',
+                    'laptop_computer' => 'Search laptop model, processor, brand (e.g. ThinkPad, MacBook)...',
+                    default => 'Search products, brands or catalog...',
+                };
+            @endphp
             <!-- Search Bar -->
             <form action="{{ route('storefront.home') }}" method="GET" class="hidden md:flex items-center flex-1 max-w-lg mx-6">
                 <div class="relative w-full flex items-center">
                     <input type="text" name="search" value="{{ request('search') }}" 
-                           placeholder="Search laptop model, processor, or brand (e.g. ThinkPad, EliteBook, i5)..." 
+                           placeholder="{{ $searchPlaceholder }}" 
                            class="w-full bg-zinc-100/80 border border-zinc-300 rounded-xl py-2 pl-4 pr-12 text-xs sm:text-sm focus:outline-none focus:border-theme-primary focus:bg-white transition shadow-inner">
                     <button type="submit" class="absolute right-1.5 bg-theme-primary text-white p-1.5 rounded-lg transition hover:opacity-90">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
@@ -345,7 +363,7 @@
     </footer>
 
     <!-- Floating WhatsApp Direct Support Button -->
-    <a href="https://wa.me/88{{ $waDigits }}?text={{ urlencode('Hello, I would like to inquire about products from ' . $storeName . '.') }}" 
+    <a href="https://wa.me/{{ $waDigits }}?text={{ urlencode('Hello, I would like to inquire about products from ' . $storeName . '.') }}" 
        target="_blank" 
        class="fixed bottom-6 right-6 z-50 bg-emerald-600 hover:bg-emerald-700 text-white p-3.5 rounded-full shadow-2xl flex items-center gap-2 group transition-all duration-300 hover:scale-105 print:hidden"
        title="Chat on WhatsApp">

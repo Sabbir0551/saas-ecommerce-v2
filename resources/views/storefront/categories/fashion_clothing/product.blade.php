@@ -16,6 +16,9 @@
     $hotline = $branding['hotline_number'] ?? '+880 1700-000000';
     $whatsapp = $branding['whatsapp_number'] ?? '+880 1700-000000';
     $waDigits = preg_replace('/[^0-9]/', '', $whatsapp);
+    if (str_starts_with($waDigits, '01')) {
+        $waDigits = '88' . $waDigits;
+    }
 
     $rawImages = $product->images;
     $images = is_array($rawImages) ? $rawImages : (is_string($rawImages) ? (json_decode($rawImages, true) ?? []) : []);
@@ -69,14 +72,16 @@
             <!-- Main Photo Gallery -->
             <div class="bg-white rounded-3xl border border-zinc-200 p-4 sm:p-6 shadow-xs space-y-4">
                 <div class="w-full aspect-[4/5] bg-zinc-100 rounded-2xl overflow-hidden relative border border-zinc-100 flex items-center justify-center">
-                    <template x-if="activeImage">
-                        <img :src="activeImage" alt="{{ $product->name }}" class="w-full h-full object-cover transition-all duration-300">
-                    </template>
-                    <template x-if="!activeImage">
+                    @if($firstImage)
+                        <img x-show="activeImage" :src="activeImage" src="{{ $firstImage }}" alt="{{ $product->name }}" class="w-full h-full object-cover transition-all duration-300">
+                        <div x-show="!activeImage" style="display: none;" class="w-full h-full flex items-center justify-center text-5xl text-zinc-300">
+                            👗
+                        </div>
+                    @else
                         <div class="w-full h-full flex items-center justify-center text-5xl text-zinc-300">
                             👗
                         </div>
-                    </template>
+                    @endif
                 </div>
 
                 @if(count($images) > 1)
@@ -139,7 +144,7 @@
                     <h4 class="text-sm font-bold text-rose-300">7 Days Easy Size Exchange Guarantee</h4>
                     <p class="text-xs text-zinc-400">If the size does not fit comfortably, we exchange it at your doorstep within 7 days.</p>
                 </div>
-                <a href="https://wa.me/88{{ $waDigits }}?text={{ urlencode('Hello, I have a question about ' . $product->name) }}" target="_blank"
+                <a href="https://wa.me/{{ $waDigits }}?text={{ urlencode('Hello, I have a question about ' . $product->name) }}" target="_blank"
                    class="px-5 py-2.5 rounded-xl bg-white text-zinc-950 text-xs font-bold hover:bg-zinc-100 transition flex-shrink-0 flex items-center gap-2">
                     <span>Ask on WhatsApp</span>
                 </a>
