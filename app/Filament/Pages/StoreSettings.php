@@ -3,15 +3,17 @@
 namespace App\Filament\Pages;
 
 use App\Models\StoreModule;
+use Filament\Forms\Components\CheckboxList;
+use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\Tabs;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -37,6 +39,9 @@ class StoreSettings extends Page implements HasForms
     public function mount(): void
     {
         $tenant = tenant();
+        $category = $tenant->business_category ?? 'default';
+        $categoryDefaults = config("business_presets.category_defaults.{$category}")
+            ?? config("business_presets.category_defaults.default", []);
         $creds = $tenant->gateway_credentials ?? [];
         $branding = $tenant->branding ?? $creds['branding'] ?? [];
 
@@ -45,49 +50,62 @@ class StoreSettings extends Page implements HasForms
 
         $this->form->fill([
             // Branding & Design
-            'store_name'              => $branding['store_name'] ?? ($tenant->name ?? 'Best Laptop Gallery'),
-            'store_tagline'           => $branding['store_tagline'] ?? 'Certified Gadget & Laptop Store',
+            'store_name'              => $branding['store_name'] ?? ($tenant->name ?? 'Official Store'),
+            'store_tagline'           => $branding['store_tagline'] ?? ($categoryDefaults['store_tagline'] ?? 'Official Online Store'),
             'store_logo'              => $branding['store_logo'] ?? '',
-            'primary_color'           => $branding['primary_color'] ?? '#2563eb', // Default: Royal Blue
+            'primary_color'           => $branding['primary_color'] ?? ($categoryDefaults['theme_color'] ?? '#2563eb'),
             'currency_symbol'         => $branding['currency_symbol'] ?? 'BDT',
 
+            // Navigation Bar & Trust Badges
+            'nav_trust_tag_1'         => $branding['nav_trust_tag_1'] ?? ($categoryDefaults['nav_trust_tag_1'] ?? ''),
+            'nav_trust_tag_2'         => $branding['nav_trust_tag_2'] ?? ($categoryDefaults['nav_trust_tag_2'] ?? ''),
+            'nav_items'               => $branding['nav_items'] ?? ($categoryDefaults['nav_items'] ?? []),
+
             // Top Bar & Contact Info
-            'top_announcement'        => $branding['top_announcement'] ?? '🔥 Limited Time Deal: Get up to 10% OFF on all laptops! Free nationwide shipping + free wireless mouse.',
+            'top_announcement'        => $branding['top_announcement'] ?? ($categoryDefaults['top_announcement'] ?? '✨ Welcome to our official online store!'),
             'hotline_number'          => $branding['hotline_number'] ?? '+880 1700-000000',
             'whatsapp_number'         => $branding['whatsapp_number'] ?? '+880 1700-000000',
             'support_hours'           => $branding['support_hours'] ?? 'Mon - Sun: 9:00 AM - 10:00 PM',
-            'showroom_address'        => $branding['showroom_address'] ?? 'Shop #502, 5th Floor, Multiplan Center, New Elephant Road, Dhaka-1205',
-            'showroom_address_branch' => $branding['showroom_address_branch'] ?? 'Shop #314, 3rd Floor, Akhtaruzzaman Center, Agrabad, Chittagong',
+            'showroom_address'        => $branding['showroom_address'] ?? ($categoryDefaults['showroom_address'] ?? 'Dhaka, Bangladesh'),
+            'showroom_address_branch' => $branding['showroom_address_branch'] ?? '',
 
             // Hero Section
-            'hero_badge'              => $branding['hero_badge'] ?? '✨ Premium Certified Quality',
-            'hero_title'              => $branding['hero_title'] ?? 'High-Performance & Certified Business Laptops',
-            'hero_subtitle'           => $branding['hero_subtitle'] ?? 'Buy original brand-new and certified laptops directly with up to 2 years official service warranty and 15 days replacement guarantee.',
-            'hero_btn_text'           => $branding['hero_btn_text'] ?? 'Explore Laptops',
+            'hero_badge'              => $branding['hero_badge'] ?? ($categoryDefaults['hero_badge'] ?? '✨ Premium Quality'),
+            'hero_title'              => $branding['hero_title'] ?? ($categoryDefaults['hero_title'] ?? 'Discover Quality Products & Services'),
+            'hero_subtitle'           => $branding['hero_subtitle'] ?? ($categoryDefaults['hero_subtitle'] ?? ''),
+            'hero_btn_text'           => $branding['hero_btn_text'] ?? ($categoryDefaults['hero_btn_text'] ?? 'Explore Catalog'),
             'hero_btn_url'            => $branding['hero_btn_url'] ?? '#products',
 
             // 4 Trust Perks
-            'perk_1_title'            => $branding['perk_1_title'] ?? 'Nationwide Cash on Delivery',
-            'perk_1_desc'             => $branding['perk_1_desc'] ?? 'Fast delivery within 24 hours in Dhaka and 48 hours nationwide.',
-            'perk_2_title'            => $branding['perk_2_title'] ?? '15 Days Replacement Guarantee',
-            'perk_2_desc'             => $branding['perk_2_desc'] ?? 'Hassle-free replacement for any hardware defects within 15 days.',
-            'perk_3_title'            => $branding['perk_3_title'] ?? '2 Years Official Warranty',
-            'perk_3_desc'             => $branding['perk_3_desc'] ?? 'Free servicing and dedicated lifetime technical software support.',
-            'perk_4_title'            => $branding['perk_4_title'] ?? '100% Genuine & Authentic',
-            'perk_4_desc'             => $branding['perk_4_desc'] ?? 'Certified authentic laptops with genuine OEM fast chargers.',
+            'perk_1_title'            => $branding['perk_1_title'] ?? ($categoryDefaults['perk_1_title'] ?? 'Nationwide Cash on Delivery'),
+            'perk_1_desc'             => $branding['perk_1_desc'] ?? ($categoryDefaults['perk_1_desc'] ?? 'Fast delivery within 24-48 hours.'),
+            'perk_2_title'            => $branding['perk_2_title'] ?? ($categoryDefaults['perk_2_title'] ?? 'Quality Guarantee'),
+            'perk_2_desc'             => $branding['perk_2_desc'] ?? ($categoryDefaults['perk_2_desc'] ?? 'Hassle-free replacement for any defects.'),
+            'perk_3_title'            => $branding['perk_3_title'] ?? ($categoryDefaults['perk_3_title'] ?? 'Dedicated Support'),
+            'perk_3_desc'             => $branding['perk_3_desc'] ?? ($categoryDefaults['perk_3_desc'] ?? 'Free assistance and lifetime support.'),
+            'perk_4_title'            => $branding['perk_4_title'] ?? ($categoryDefaults['perk_4_title'] ?? '100% Genuine & Authentic'),
+            'perk_4_desc'             => $branding['perk_4_desc'] ?? ($categoryDefaults['perk_4_desc'] ?? 'Direct verified sourcing.'),
 
             // Why Choose Us
-            'why_1_title'             => $branding['why_1_title'] ?? 'Certified Grade-A Quality',
-            'why_1_desc'              => $branding['why_1_desc'] ?? 'Every machine is tested across 30+ diagnostic hardware checkpoints.',
-            'why_2_title'             => $branding['why_2_title'] ?? 'Live Video Call Inspection',
-            'why_2_desc'              => $branding['why_2_desc'] ?? 'Inspect your selected laptop via WhatsApp video call before dispatch.',
-            'why_3_title'             => $branding['why_3_title'] ?? '0% EMI & Flexible Payment',
-            'why_3_desc'              => $branding['why_3_desc'] ?? 'Easy 3 to 12-month EMI plans across 31 leading bank credit cards.',
+            'why_1_title'             => $branding['why_1_title'] ?? 'Grade-A Certified Quality',
+            'why_1_desc'              => $branding['why_1_desc'] ?? 'Every item is tested across diagnostic quality checkpoints.',
+            'why_2_title'             => $branding['why_2_title'] ?? 'Direct Video Call / Inquiry',
+            'why_2_desc'              => $branding['why_2_desc'] ?? 'Inspect your items or talk directly with our specialists.',
+            'why_3_title'             => $branding['why_3_title'] ?? 'Flexible Payment & Assistance',
+            'why_3_desc'              => $branding['why_3_desc'] ?? 'Cash on delivery, digital wallets, and bank transfers.',
 
             // Consultation Banner
-            'consultation_title'      => $branding['consultation_title'] ?? 'Confused which laptop fits your needs?',
-            'consultation_subtitle'   => $branding['consultation_subtitle'] ?? 'Talk directly to our hardware specialists for personalized guidance and budget-friendly model selection.',
+            'consultation_title'      => $branding['consultation_title'] ?? 'Confused which option fits your needs?',
+            'consultation_subtitle'   => $branding['consultation_subtitle'] ?? 'Talk directly to our specialists for personalized guidance.',
             'consultation_phone'      => $branding['consultation_phone'] ?? '+880 1700-000000',
+
+            // Footer Customization
+            'footer_about'            => $branding['footer_about'] ?? ($categoryDefaults['footer_about'] ?? ''),
+            'footer_featured_title'   => $branding['footer_featured_title'] ?? ($categoryDefaults['footer_featured_title'] ?? 'Featured Categories'),
+            'footer_featured_links'   => $branding['footer_featured_links'] ?? ($categoryDefaults['footer_featured_links'] ?? []),
+            'footer_merchant_badge_text' => $branding['footer_merchant_badge_text'] ?? ($categoryDefaults['footer_merchant_badge_text'] ?? 'ব্যক্তিগত রিটেইল মার্চেন্ট একাউন্ট'),
+            'footer_payment_methods'  => $branding['footer_payment_methods'] ?? ($categoryDefaults['footer_payment_methods'] ?? ['cod', 'bkash', 'nagad', 'visa_master']),
+            'footer_logistics_text'   => $branding['footer_logistics_text'] ?? ($categoryDefaults['footer_logistics_text'] ?? 'Official Logistics: Steadfast Courier & Pathao Express'),
 
             // Payment Gateways
             'bkash_app_key'           => $this->maskSecret($creds['bkash_app_key'] ?? ''),
@@ -287,6 +305,119 @@ class StoreSettings extends Page implements HasForms
                         ]),
                     ]),
 
+                // Tab: Header & Navigation
+                Tabs\Tab::make('Header & Navigation')
+                    ->icon('heroicon-o-bars-3-bottom-left')
+                    ->schema([
+                        Section::make('Category Navigation Bar Links (হেডার সাব-মেনু লিংকসমূহ)')
+                            ->description('স্টোরফ্রন্টের উপরের সাব-নেভিগেশনে প্রদর্শিত ক্যাটাগরি বা ফিল্টার লিংকসমূহ। ফাঁকা রাখলে স্বয়ংক্রিয়ভাবে আপনার ব্যবসার ক্যাটাগরি অনুযায়ী প্রিসেট প্রদর্শিত হবে।')
+                            ->schema([
+                                Repeater::make('nav_items')
+                                    ->label('Navigation Links (মেনু আইটেমসমূহ)')
+                                    ->schema([
+                                        TextInput::make('label')
+                                            ->label('Menu Title (নাম)')
+                                            ->required()
+                                            ->placeholder('e.g., Ready Apartments or ThinkPad'),
+
+                                        TextInput::make('url')
+                                            ->label('Target Link / Search (ইউআরএল)')
+                                            ->required()
+                                            ->placeholder('e.g., /?search=ThinkPad or /properties'),
+
+                                        TextInput::make('icon')
+                                            ->label('Icon / Emoji')
+                                            ->placeholder('e.g., 🏢, 💻, 👗'),
+                                    ])
+                                    ->columns(3)
+                                    ->defaultItems(0)
+                                    ->reorderable()
+                                    ->collapsible()
+                                    ->cloneable()
+                                    ->itemLabel(fn (array $state): ?string => $state['label'] ?? null),
+                            ]),
+
+                        Section::make('Header Trust Badges (হেডার ট্রাস্ট ট্যাগসমূহ)')
+                            ->description('নেভিগেশন বারের ডানপাশে প্রদর্শিত ২টি বিশেষ কোয়ালিটি বা নিশ্চয়তা ব্যাজ')
+                            ->schema([
+                                TextInput::make('nav_trust_tag_1')
+                                    ->label('Trust Badge 1')
+                                    ->placeholder('e.g., ● 100% Genuine Certified or ● 100% Verified Legal Titles'),
+
+                                TextInput::make('nav_trust_tag_2')
+                                    ->label('Trust Badge 2')
+                                    ->placeholder('e.g., ● 2-Year Service Warranty or ● Bank Loan Support up to 80%'),
+                            ])->columns(2),
+                    ]),
+
+                // Tab: Footer Customization
+                Tabs\Tab::make('Footer Customization')
+                    ->icon('heroicon-o-window')
+                    ->schema([
+                        Section::make('Store Bio & Overview (কলাম ১ - স্টোরের বিবরণ)')
+                            ->schema([
+                                Textarea::make('footer_about')
+                                    ->label('Store About Description (ফুটার সংক্ষিপ্ত বিবরণ)')
+                                    ->rows(3)
+                                    ->placeholder('ওয়েবসাইটের ফুটারে আপনার প্রতিষ্ঠান সম্পর্কে সংক্ষিপ্ত বর্ণনা লিখুন...')
+                                    ->columnSpanFull(),
+                            ]),
+
+                        Section::make('Quick Links & Featured Categories (কলাম ৩ - ফিচার্ড লিংকসমূহ)')
+                            ->description('ফুটারে আপনার ব্যবসার ক্যাটাগরি বা জনপ্রিয় সেকশনের লিংকগুলো এডিট করুন')
+                            ->schema([
+                                TextInput::make('footer_featured_title')
+                                    ->label('Column 3 Heading Title (শিরোনাম)')
+                                    ->placeholder('e.g., Featured Properties, Popular Collections, Signature Menus')
+                                    ->columnSpanFull(),
+
+                                Repeater::make('footer_featured_links')
+                                    ->label('Featured Links List (লিংকসমূহ)')
+                                    ->schema([
+                                        TextInput::make('label')
+                                            ->label('Link Label (নাম)')
+                                            ->required()
+                                            ->placeholder('e.g., Ready Luxury Apartments or Chef Combos'),
+
+                                        TextInput::make('url')
+                                            ->label('Target URL / Search Filter (লিংক)')
+                                            ->required()
+                                            ->placeholder('e.g., /?search=Apartment or /menu'),
+                                    ])
+                                    ->columns(2)
+                                    ->defaultItems(0)
+                                    ->reorderable()
+                                    ->collapsible()
+                                    ->cloneable()
+                                    ->itemLabel(fn (array $state): ?string => $state['label'] ?? null),
+                            ]),
+
+                        Section::make('Identity, Payment Badges & Logistics (কলাম ৪ - মার্চেন্ট পরিচয় ও পেমেন্ট)')
+                            ->schema([
+                                TextInput::make('footer_merchant_badge_text')
+                                    ->label('Merchant Identity Note (ট্রেড লাইসেন্স না থাকলে যে পরিচয় দেখাবে)')
+                                    ->placeholder('e.g., ব্যক্তিগত রিটেইল মার্চেন্ট একাউন্ট বা অনুমোদিত ডিলার'),
+
+                                CheckboxList::make('footer_payment_methods')
+                                    ->label('Accepted Payment Badges (ফুটারে যে পেমেন্ট ব্যাজগুলো প্রদর্শিত হবে)')
+                                    ->options([
+                                        'cod'           => '💵 Cash on Delivery',
+                                        'bkash'         => 'bKash (বিকাশ)',
+                                        'nagad'         => 'Nagad (নগদ)',
+                                        'rocket'        => 'Rocket (রকেট)',
+                                        'upay'          => 'Upay (উপায়)',
+                                        'visa_master'   => 'Visa / Mastercard (কার্ড)',
+                                        'bank_transfer' => '🏦 Bank Transfer / Cheque (ব্যাংক)',
+                                    ])
+                                    ->columns(2),
+
+                                TextInput::make('footer_logistics_text')
+                                    ->label('Delivery & Logistics Note (ডেলিভারি পার্টনার বা সার্ভিস নোট)')
+                                    ->placeholder('e.g., Official Logistics: Steadfast Courier & Pathao Express')
+                                    ->columnSpanFull(),
+                            ]),
+                    ]),
+
                 // Tab 4: Payment Gateways
                 Tabs\Tab::make('Payment Gateways')
                     ->icon('heroicon-o-credit-card')
@@ -471,6 +602,9 @@ class StoreSettings extends Page implements HasForms
             'perk_3_title', 'perk_3_desc', 'perk_4_title', 'perk_4_desc',
             'consultation_title', 'consultation_subtitle', 'consultation_phone',
             'why_1_title', 'why_1_desc', 'why_2_title', 'why_2_desc', 'why_3_title', 'why_3_desc',
+            'nav_trust_tag_1', 'nav_trust_tag_2', 'nav_items',
+            'footer_about', 'footer_featured_title', 'footer_featured_links',
+            'footer_merchant_badge_text', 'footer_payment_methods', 'footer_logistics_text',
         ];
 
         $brandingData = [];

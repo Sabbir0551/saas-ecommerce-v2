@@ -144,28 +144,49 @@
         <div class="bg-zinc-900 text-white text-xs border-t border-zinc-800">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between overflow-x-auto scrollbar-none py-2 gap-4">
                 <div class="flex items-center gap-1 sm:gap-2 whitespace-nowrap">
-                    <a href="{{ route('storefront.home') }}" class="px-3 py-1 rounded-lg {{ !request('search') && !request('category') ? 'bg-theme-primary font-bold text-white' : 'hover:bg-zinc-800 text-zinc-300' }} transition">
-                        🏠 All Laptops
-                    </a>
-                    <a href="{{ route('storefront.home', ['search' => 'ThinkPad']) }}" class="px-3 py-1 rounded-lg hover:bg-zinc-800 text-zinc-300 transition">
-                        Lenovo ThinkPad
-                    </a>
-                    <a href="{{ route('storefront.home', ['search' => 'Latitude']) }}" class="px-3 py-1 rounded-lg hover:bg-zinc-800 text-zinc-300 transition">
-                        Dell Latitude
-                    </a>
-                    <a href="{{ route('storefront.home', ['search' => 'EliteBook']) }}" class="px-3 py-1 rounded-lg hover:bg-zinc-800 text-zinc-300 transition">
-                        HP EliteBook
-                    </a>
-                    <a href="{{ route('storefront.home', ['search' => 'MacBook']) }}" class="px-3 py-1 rounded-lg hover:bg-zinc-800 text-zinc-300 transition">
-                        Apple MacBook
-                    </a>
-                    <a href="{{ route('storefront.home', ['search' => 'Gaming']) }}" class="px-3 py-1 rounded-lg hover:bg-zinc-800 text-zinc-300 transition">
-                        🎮 Gaming Laptops
-                    </a>
+                    @php
+                        $navItems = $branding['nav_items'] ?? ($categoryDefaults['nav_items'] ?? []);
+                        $currentUrl = request()->fullUrl();
+                        $currentSearch = request('search');
+                    @endphp
+                    @forelse($navItems as $index => $item)
+                        @php
+                            $label = $item['label'] ?? '';
+                            $url = $item['url'] ?? route('storefront.home');
+                            $icon = $item['icon'] ?? '';
+                            
+                            $isActive = false;
+                            if ($index === 0 && empty($currentSearch) && (request()->routeIs('storefront.home') && empty(request()->query()))) {
+                                $isActive = true;
+                            } elseif (!empty($currentSearch) && str_contains(strtolower($url), strtolower($currentSearch))) {
+                                $isActive = true;
+                            } elseif ($url === $currentUrl) {
+                                $isActive = true;
+                            }
+                        @endphp
+                        <a href="{{ $url }}" class="px-3 py-1 rounded-lg {{ $isActive ? 'bg-theme-primary font-bold text-white shadow-xs' : 'hover:bg-zinc-800 text-zinc-300' }} transition flex items-center gap-1.5">
+                            @if(!empty($icon))
+                                <span>{{ $icon }}</span>
+                            @endif
+                            <span>{{ $label }}</span>
+                        </a>
+                    @empty
+                        <a href="{{ route('storefront.home') }}" class="px-3 py-1 rounded-lg bg-theme-primary font-bold text-white transition">
+                            {{ $catIcon }} All Items
+                        </a>
+                    @endforelse
                 </div>
                 <div class="hidden sm:flex items-center gap-3 text-zinc-400 whitespace-nowrap text-[11px] font-semibold">
-                    <span class="text-emerald-400">● 100% Genuine Certified</span>
-                    <span>● 2-Year Service Warranty</span>
+                    @php
+                        $trust1 = $branding['nav_trust_tag_1'] ?? ($categoryDefaults['nav_trust_tag_1'] ?? null);
+                        $trust2 = $branding['nav_trust_tag_2'] ?? ($categoryDefaults['nav_trust_tag_2'] ?? null);
+                    @endphp
+                    @if(!empty($trust1))
+                        <span class="text-emerald-400">{{ $trust1 }}</span>
+                    @endif
+                    @if(!empty($trust2))
+                        <span>{{ $trust2 }}</span>
+                    @endif
                 </div>
             </div>
         </div>
@@ -221,50 +242,24 @@
                     </ul>
                 </div>
 
-                <!-- Column 3: Category Specific Links -->
+                <!-- Column 3: Category / Custom Featured Links -->
                 <div class="space-y-3">
                     <h3 class="text-white font-bold text-sm tracking-wider uppercase border-b border-zinc-800 pb-2">
-                        @if($category === 'fashion_clothing') Popular Collections
-                        @elseif($category === 'restaurant') Signature Menus
-                        @elseif($category === 'doctor') Healthcare Services
-                        @elseif($category === 'real_estate') Featured Properties
-                        @elseif($category === 'pharmacy') Healthcare Categories
-                        @else Popular Categories
-                        @endif
+                        {{ $branding['footer_featured_title'] ?? ($categoryDefaults['footer_featured_title'] ?? 'Featured Categories') }}
                     </h3>
                     <ul class="space-y-2 text-xs">
-                        @if($category === 'fashion_clothing')
-                            <li><a href="{{ route('storefront.home') }}" class="hover:text-white transition">✨ New Season Arrivals</a></li>
-                            <li><a href="{{ route('storefront.home', ['search' => 'Cotton']) }}" class="hover:text-white transition">Pure Cotton Fabrics</a></li>
-                            <li><a href="{{ route('storefront.home', ['search' => 'Silk']) }}" class="hover:text-white transition">Exclusive Silk Collections</a></li>
-                            <li><a href="{{ route('storefront.home', ['search' => 'Casual']) }}" class="hover:text-white transition">Chic & Casual Daily Wear</a></li>
-                            <li><a href="{{ route('storefront.home', ['search' => 'Festive']) }}" class="hover:text-white transition">Festive & Special Occasions</a></li>
-                        @elseif($category === 'restaurant')
-                            <li><a href="{{ route('storefront.home') }}" class="hover:text-white transition">🔥 Chef Special Combos</a></li>
-                            <li><a href="{{ route('storefront.home', ['search' => 'Platter']) }}" class="hover:text-white transition">Signature Platters</a></li>
-                            <li><a href="{{ route('storefront.home', ['search' => 'Burger']) }}" class="hover:text-white transition">Gourmet Burgers & Snacks</a></li>
-                            <li><a href="{{ route('storefront.home', ['search' => 'Dessert']) }}" class="hover:text-white transition">Fresh Drinks & Desserts</a></li>
-                        @elseif($category === 'doctor')
-                            <li><a href="{{ route('storefront.home') }}" class="hover:text-white transition">🩺 Chamber Doctor Appointments</a></li>
-                            <li><a href="{{ route('storefront.home') }}" class="hover:text-white transition">Specialist Consultation Serials</a></li>
-                            <li><a href="{{ route('storefront.home') }}" class="hover:text-white transition">Follow-up Diagnostic Checkups</a></li>
-                            <li><a href="tel:{{ $hotline }}" class="hover:text-white transition">Emergency Consultation Line</a></li>
-                        @elseif($category === 'real_estate')
-                            <li><a href="{{ route('storefront.home', ['search' => 'Apartment']) }}" class="hover:text-white transition">🏢 Ready Luxury Apartments</a></li>
-                            <li><a href="{{ route('storefront.home', ['search' => 'Commercial']) }}" class="hover:text-white transition">Prime Commercial Spaces</a></li>
-                            <li><a href="{{ route('storefront.home', ['search' => 'Plot']) }}" class="hover:text-white transition">Residential Approved Plots</a></li>
-                            <li><a href="{{ route('storefront.home') }}" class="hover:text-white transition">Free Site Visit Guide</a></li>
-                        @elseif($category === 'pharmacy')
-                            <li><a href="{{ route('storefront.home') }}" class="hover:text-white transition">💊 Prescription Medicines</a></li>
-                            <li><a href="{{ route('storefront.home', ['search' => 'Baby']) }}" class="hover:text-white transition">Baby Food & Care Products</a></li>
-                            <li><a href="{{ route('storefront.home', ['search' => 'Device']) }}" class="hover:text-white transition">Medical Diagnostic Devices</a></li>
-                            <li><a href="{{ route('storefront.home', ['search' => 'Wellness']) }}" class="hover:text-white transition">Daily Wellness & Vitamins</a></li>
-                        @else
-                            <li><a href="{{ route('storefront.home', ['search' => 'Lenovo']) }}" class="hover:text-white transition">Lenovo ThinkPad & IdeaPad</a></li>
-                            <li><a href="{{ route('storefront.home', ['search' => 'Dell']) }}" class="hover:text-white transition">Dell Latitude, XPS & Inspiron</a></li>
-                            <li><a href="{{ route('storefront.home', ['search' => 'HP']) }}" class="hover:text-white transition">HP EliteBook & ProBook</a></li>
-                            <li><a href="{{ route('storefront.home', ['search' => 'Apple']) }}" class="hover:text-white transition">Apple MacBook Pro & Air</a></li>
-                        @endif
+                        @php
+                            $footerLinks = $branding['footer_featured_links'] ?? ($categoryDefaults['footer_featured_links'] ?? []);
+                        @endphp
+                        @forelse($footerLinks as $fLink)
+                            <li>
+                                <a href="{{ $fLink['url'] ?? '#' }}" class="hover:text-white transition">
+                                    {{ $fLink['label'] ?? '' }}
+                                </a>
+                            </li>
+                        @empty
+                            <li><a href="{{ route('storefront.home') }}" class="hover:text-white transition">All Catalog Items</a></li>
+                        @endforelse
                     </ul>
                 </div>
 
@@ -299,19 +294,45 @@
                             <p class="text-zinc-400">bKash PRA মার্চেন্ট: <strong class="text-pink-300">{{ tenant('pra_no') }}</strong></p>
                         @endif
                         @if(!tenant('trade_license_no') && !tenant('drug_license_no') && !tenant('bmdc_reg_no') && !tenant('pra_no'))
-                            <p class="text-zinc-500 italic">ব্যক্তিগত রিটেইল মার্চেন্ট একাউন্ট</p>
+                            <p class="text-zinc-500 italic">{{ $branding['footer_merchant_badge_text'] ?? ($categoryDefaults['footer_merchant_badge_text'] ?? 'ব্যক্তিগত রিটেইল মার্চেন্ট একাউন্ট') }}</p>
                         @endif
                     </div>
 
+                    @php
+                        $activePayments = (array)($branding['footer_payment_methods'] ?? ($categoryDefaults['footer_payment_methods'] ?? ['cod', 'bkash', 'nagad', 'visa_master']));
+                    @endphp
                     <div class="flex flex-wrap gap-2 text-xs font-bold">
-                        <span class="px-2.5 py-1 bg-zinc-900 border border-zinc-800 rounded-lg text-emerald-400">💵 Cash on Delivery</span>
-                        <span class="px-2.5 py-1 bg-pink-950/60 border border-pink-800/60 rounded-lg text-pink-300">bKash</span>
-                        <span class="px-2.5 py-1 bg-orange-950/60 border border-orange-800/60 rounded-lg text-orange-300">Nagad</span>
-                        <span class="px-2.5 py-1 bg-blue-950/60 border border-blue-800/60 rounded-lg text-blue-300">Visa / Master</span>
+                        @if(in_array('cod', $activePayments))
+                            <span class="px-2.5 py-1 bg-zinc-900 border border-zinc-800 rounded-lg text-emerald-400">💵 Cash on Delivery</span>
+                        @endif
+                        @if(in_array('bkash', $activePayments))
+                            <span class="px-2.5 py-1 bg-pink-950/60 border border-pink-800/60 rounded-lg text-pink-300">bKash</span>
+                        @endif
+                        @if(in_array('nagad', $activePayments))
+                            <span class="px-2.5 py-1 bg-orange-950/60 border border-orange-800/60 rounded-lg text-orange-300">Nagad</span>
+                        @endif
+                        @if(in_array('rocket', $activePayments))
+                            <span class="px-2.5 py-1 bg-purple-950/60 border border-purple-800/60 rounded-lg text-purple-300">Rocket</span>
+                        @endif
+                        @if(in_array('upay', $activePayments))
+                            <span class="px-2.5 py-1 bg-amber-950/60 border border-amber-800/60 rounded-lg text-amber-300">Upay</span>
+                        @endif
+                        @if(in_array('visa_master', $activePayments))
+                            <span class="px-2.5 py-1 bg-blue-950/60 border border-blue-800/60 rounded-lg text-blue-300">Visa / Master</span>
+                        @endif
+                        @if(in_array('bank_transfer', $activePayments))
+                            <span class="px-2.5 py-1 bg-emerald-950/60 border border-emerald-800/60 rounded-lg text-emerald-300">🏦 Bank Transfer</span>
+                        @endif
                     </div>
-                    <div class="pt-1 text-xs text-zinc-500">
-                        Official Logistics: <strong>Steadfast Courier</strong> & <strong>Pathao Express</strong>
-                    </div>
+
+                    @php
+                        $logisticsText = $branding['footer_logistics_text'] ?? ($categoryDefaults['footer_logistics_text'] ?? 'Official Logistics: Steadfast Courier & Pathao Express');
+                    @endphp
+                    @if(!empty($logisticsText))
+                        <div class="pt-1 text-xs text-zinc-500">
+                            {{ $logisticsText }}
+                        </div>
+                    @endif
                 </div>
             </div>
 
