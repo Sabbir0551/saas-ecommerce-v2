@@ -1,0 +1,241 @@
+{
+  "tenantId": "petshopbd",
+  "subdomain": "petshopbd",
+  "dbName": "tenant_petshopbd",
+  "createdAt": "2026-10-22T06:59:45.036Z",
+  "businessType": "pet_care",
+  "archetype": "PHYSICAL_STORE",
+  "settings": {
+    "name": "Pet Shop BD & Veterinary Care",
+    "phone": "+880 1715-667788",
+    "email": "care@petshopbd.com",
+    "address": "Shop 14, Block C, Banani Super Market, Dhaka",
+    "currency": "BDT",
+    "theme": "amber_warm",
+    "announcementText": "🐾 100% Imported Nutrition: Royal Canin, Whiskas & Veterinary Vitamins with Same-Day Delivery!",
+    "themeConfig": {
+      "primaryColor": "#f59e0b",
+      "accentColor": "#fbbf24"
+    },
+    "slogan": "🐾 100% Imported Nutrition: Royal Canin, Whiskas & Veterinary Vitamins with Same-Day Delivery!",
+    "logo": null,
+    "bannerImage": null
+  },
+  "categories": [
+    {
+      "id": "cat_pet_1",
+      "name": "Cat Food & Treats",
+      "slug": "cat-food---treats",
+      "promoSlogan": "Nutritious dry kibbles and tasty wet gravy pouches"
+    },
+    {
+      "id": "cat_pet_2",
+      "name": "Dog Nutrition & Chews",
+      "slug": "dog-nutrition---chews",
+      "promoSlogan": "Calcium bones, dental sticks, and puppy formula"
+    },
+    {
+      "id": "cat_pet_3",
+      "name": "Litter & Odor Control",
+      "slug": "litter---odor-control",
+      "promoSlogan": "Bentonite and biodegradable clumping tofu litters"
+    },
+    {
+      "id": "cat_pet_4",
+      "name": "Veterinary Vitamins & Care",
+      "slug": "veterinary-vitamins---care",
+      "promoSlogan": "Omega 3 oils, flea collars, and anti-tick shampoos"
+    }
+  ],
+  "brands": [
+    {
+      "id": "brand_pet_1",
+      "name": "Royal Canin",
+      "slug": "royal-canin"
+    },
+    {
+      "id": "brand_pet_2",
+      "name": "Whiskas Petcare",
+      "slug": "whiskas"
+    },
+    {
+      "id": "brand_pet_3",
+      "name": "Pedigree",
+      "slug": "pedigree"
+    }
+  ],
+  "items": [
+    {
+      "id": "item_pet_1",
+      "title": "Royal Canin Indoor Adult Cat Dry Food (4kg)",
+      "slug": "royal-canin-indoor-adult-cat-food",
+      "shortDescription": "Balanced nutritional profile designed specifically to support gut health and reduce stool odor for indoor felines.",
+      "description": "<p>Formulated with highly digestible proteins (L.I.P.), moderate calorie content, and specialized fibers to stimulate the elimination of ingested hair.</p>",
+      "price": 4800,
+      "comparePrice": 5200,
+      "stockQuantity": 30,
+      "itemType": "PHYSICAL_PRODUCT",
+      "images": [
+        "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&w=800&q=80"
+      ],
+      "sku": "PET-RC-IND-4KG",
+      "barcode": "195949001301",
+      "costPrice": 3800,
+      "safetyStock": 6,
+      "locationId": "loc_main",
+      "bin": "PET-SHELF-01"
+    },
+    {
+      "id": "item_pet_2",
+      "title": "Pedigree Meat Jerky Roasted Lamb Adult Dog Treats (80g)",
+      "slug": "pedigree-meat-jerky-roasted-lamb",
+      "shortDescription": "Tender chewy dog treats with rich roasted lamb flavor for training and reward.",
+      "description": "<p>The perfect combination of great taste and soft texture that dogs love. High in protein with no artificial colorants.</p>",
+      "price": 350,
+      "comparePrice": 420,
+      "stockQuantity": 60,
+      "itemType": "PHYSICAL_PRODUCT",
+      "images": [
+        "https://images.unsplash.com/photo-1568640347023-a616a30bc3bd?auto=format&fit=crop&w=800&q=80"
+      ],
+      "sku": "PET-PED-JERK-80G",
+      "barcode": "195949001302",
+      "costPrice": 220,
+      "safetyStock": 15,
+      "locationId": "loc_main",
+      "bin": "PET-SHELF-02"
+    }
+  ],
+  "orders": [
+    {
+      "id": "ord_pet_1",
+      "orderNumber": "ORD-PS-1301",
+      "customerName": "Farhana Haque",
+      "customerPhone": "+880 1714-998877",
+      "customerEmail": "farhana.h@gmail.com",
+      "shippingAddress": "House 11, Road 72, Gulshan 2",
+      "city": "Dhaka",
+      "businessCategory": "pet_care",
+      "orderType": "PHYSICAL_PRODUCT",
+      "items": [
+        {
+          "itemTitle": "Royal Canin Indoor Adult Cat Dry Food (4kg)",
+          "variantTitle": "4kg Bag",
+          "quantity": 2,
+          "price": 4800,
+          "subtotal": 9600
+        }
+      ],
+      "deliveryCharge": 60,
+      "totalAmount": 9660,
+      "paymentMethod": "COD",
+      "orderStatus": "DELIVERED",
+      "courier": "Pathao Courier",
+      "trackingCode": "PATH-PS-3321",
+      "notes": "Knock gently, baby sleeping",
+      "createdAt": "2026-10-21T10:45:00Z"
+    }
+  ],
+  "media": [
+    {
+      "id": "med_petshopbd_1",
+      "title": "Pet Shop BD & Veterinary Care - Official Showcase & Product Review",
+      "categoryId": "all",
+      "categoryName": "Featured Highlights",
+      "type": "YOUTUBE",
+      "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "embedUrl": "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?rel=0",
+      "thumbnail": "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&w=800&q=80",
+      "createdAt": "2026-10-22T06:59:45.036Z"
+    },
+    {
+      "id": "med_petshopbd_2",
+      "title": "Customer Unboxing & Live Walkthrough Video",
+      "categoryId": "all",
+      "categoryName": "Customer Reviews",
+      "type": "FACEBOOK",
+      "url": "https://www.facebook.com/facebook/videos/10153231379946729/",
+      "embedUrl": "https://www.facebook.com/plugins/video.php?height=314&href=https%3A%2F%2Fwww.facebook.com%2Ffacebook%2Fvideos%2F10153231379946729%2F&show_text=false&width=560",
+      "thumbnail": "https://images.unsplash.com/photo-1568640347023-a616a30bc3bd?auto=format&fit=crop&w=800&q=80",
+      "createdAt": "2026-10-22T06:59:45.036Z"
+    }
+  ],
+  "locations": [
+    {
+      "id": "loc_main",
+      "name": "Main Central Warehouse (ঢাকা কেন্দ্রীয় গুদাম)",
+      "code": "WH-MAIN",
+      "address": "Tejgaon Industrial Area, Dhaka",
+      "bins": [
+        "A-01-01",
+        "A-01-02",
+        "B-01-01",
+        "B-01-02",
+        "C-01-01"
+      ],
+      "isDefault": true,
+      "createdAt": "2026-10-22T06:59:45.036Z"
+    },
+    {
+      "id": "loc_showroom",
+      "name": "Pet Shop BD & Veterinary Care Showroom & Pickup Point",
+      "code": "SH-MAIN",
+      "address": "Shop 14, Block C, Banani Super Market, Dhaka",
+      "bins": [
+        "SH-FRONT",
+        "SH-BACK",
+        "SH-SHELF-01"
+      ],
+      "isDefault": false,
+      "createdAt": "2026-10-22T06:59:45.036Z"
+    }
+  ],
+  "stockReservations": [],
+  "stockLedger": [
+    {
+      "id": "ldg_init_item_pet_1",
+      "itemId": "item_pet_1",
+      "sku": "PET-RC-IND-4KG",
+      "itemTitle": "Royal Canin Indoor Adult Cat Dry Food (4kg)",
+      "locationId": "loc_main",
+      "locationName": "WH-MAIN (Tejgaon Central)",
+      "bin": "PET-SHELF-01",
+      "movementType": "OPENING_BALANCE",
+      "qtyChange": 30,
+      "balanceAfter": 30,
+      "unitCost": 3800,
+      "totalValue": 114000,
+      "reference": "OB-INIT-2026",
+      "notes": "System Baseline Opening Stock",
+      "performedBy": "System Auditor",
+      "createdAt": "2026-10-22T06:59:45.036Z"
+    },
+    {
+      "id": "ldg_init_item_pet_2",
+      "itemId": "item_pet_2",
+      "sku": "PET-PED-JERK-80G",
+      "itemTitle": "Pedigree Meat Jerky Roasted Lamb Adult Dog Treats (80g)",
+      "locationId": "loc_main",
+      "locationName": "WH-MAIN (Tejgaon Central)",
+      "bin": "PET-SHELF-02",
+      "movementType": "OPENING_BALANCE",
+      "qtyChange": 60,
+      "balanceAfter": 60,
+      "unitCost": 220,
+      "totalValue": 13200,
+      "reference": "OB-INIT-2026",
+      "notes": "System Baseline Opening Stock",
+      "performedBy": "System Auditor",
+      "createdAt": "2026-10-22T06:59:45.036Z"
+    }
+  ],
+  "users": [
+    {
+      "id": "usr_petshopbd_admin",
+      "name": "Pet Shop BD & Veterinary Care Admin",
+      "email": "admin@petshopbd.com",
+      "role": "TENANT_ADMIN",
+      "createdAt": "2026-10-22T06:59:45.036Z"
+    }
+  ]
+}

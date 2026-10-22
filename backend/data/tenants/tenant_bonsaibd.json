@@ -1,0 +1,236 @@
+{
+  "tenantId": "bonsaibd",
+  "subdomain": "bonsaibd",
+  "dbName": "tenant_bonsaibd",
+  "createdAt": "2026-10-22T06:59:45.035Z",
+  "businessType": "plant_nursery",
+  "archetype": "PHYSICAL_STORE",
+  "settings": {
+    "name": "BonsaiBD & Botanical Garden",
+    "phone": "+880 1718-223355",
+    "email": "plants@bonsaibd.com",
+    "address": "Agargaon Nursery Zone, Sher-e-Bangla Nagar, Dhaka",
+    "currency": "BDT",
+    "theme": "sage_green",
+    "announcementText": "🌿 Breathe Pure Air: Air-Purifying Houseplants & Exotic 5-Year Master-Sculpted Bonsai!",
+    "themeConfig": {
+      "primaryColor": "#15803d",
+      "accentColor": "#22c55e"
+    },
+    "slogan": "🌿 Breathe Pure Air: Air-Purifying Houseplants & Exotic 5-Year Master-Sculpted Bonsai!",
+    "logo": null,
+    "bannerImage": null
+  },
+  "categories": [
+    {
+      "id": "cat_plant_1",
+      "name": "Sculpted Bonsai Trees",
+      "slug": "sculpted-bonsai-trees",
+      "promoSlogan": "Ficus, Juniper, and Jade miniature trees"
+    },
+    {
+      "id": "cat_plant_2",
+      "name": "Air-Purifying Houseplants",
+      "slug": "air-purifying-houseplants",
+      "promoSlogan": "Snake plants, Monstera, and Peace Lilies"
+    },
+    {
+      "id": "cat_plant_3",
+      "name": "Handmade Ceramic Planters",
+      "slug": "handmade-ceramic-planters",
+      "promoSlogan": "Glazed artisan pots with drainage trays"
+    },
+    {
+      "id": "cat_plant_4",
+      "name": "Organic Soil & Fertilizers",
+      "slug": "organic-soil---fertilizers",
+      "promoSlogan": "Perlite, coco-peat, and slow-release plant food"
+    }
+  ],
+  "brands": [
+    {
+      "id": "brand_plant_1",
+      "name": "BonsaiBD Atelier",
+      "slug": "bonsaibd-atelier"
+    },
+    {
+      "id": "brand_plant_2",
+      "name": "GreenThumb Botanics",
+      "slug": "greenthumb"
+    }
+  ],
+  "items": [
+    {
+      "id": "item_plant_1",
+      "title": "Ficus Microcarpa Ginseng Bonsai (Ceramic Pot Included)",
+      "slug": "ficus-ginseng-bonsai",
+      "shortDescription": "5-year-old sculpted hardy bonsai tree with glossy deep green foliage, ideal for living rooms and office desks.",
+      "description": "<p>Ficus Ginseng features sculptural thick aerial roots and resilient glossy leaves. Tolerant of indoor lighting and infrequent watering. Placed in a high-fire glazed ceramic planter.</p>",
+      "price": 3200,
+      "comparePrice": 3800,
+      "stockQuantity": 20,
+      "itemType": "PHYSICAL_PRODUCT",
+      "images": [
+        "https://images.unsplash.com/photo-1512428813834-c702c7702b78?auto=format&fit=crop&w=800&q=80"
+      ],
+      "sku": "PLN-BON-FICUS-05",
+      "barcode": "195949001001",
+      "costPrice": 1900,
+      "safetyStock": 4,
+      "locationId": "loc_main",
+      "bin": "GREENHOUSE-01"
+    },
+    {
+      "id": "item_plant_2",
+      "title": "Monstera Deliciosa (Swiss Cheese Plant in Terracotta)",
+      "slug": "monstera-deliciosa-terracotta",
+      "shortDescription": "Stunning tropical foliage with natural fenestrations, potted in natural porous clay.",
+      "description": "<p>A classic statement houseplant. Purifies indoor air while transforming any room into a lush tropical oasis.</p>",
+      "price": 1800,
+      "comparePrice": 2200,
+      "stockQuantity": 25,
+      "itemType": "PHYSICAL_PRODUCT",
+      "images": [
+        "https://images.unsplash.com/photo-1614594975525-e45190c55d0b?auto=format&fit=crop&w=800&q=80"
+      ],
+      "sku": "PLN-MONS-DEL-01",
+      "barcode": "195949001002",
+      "costPrice": 950,
+      "safetyStock": 5,
+      "locationId": "loc_main",
+      "bin": "GREENHOUSE-02"
+    }
+  ],
+  "orders": [
+    {
+      "id": "ord_plant_1",
+      "orderNumber": "ORD-BD-1001",
+      "customerName": "Tasnim Ferdous",
+      "customerPhone": "+880 1713-334466",
+      "customerEmail": "tasnim.ferdous@gmail.com",
+      "shippingAddress": "Apartment 3A, Green View, Dhanmondi 8/A",
+      "city": "Dhaka",
+      "businessCategory": "plant_nursery",
+      "orderType": "PHYSICAL_PRODUCT",
+      "items": [
+        {
+          "itemTitle": "Ficus Microcarpa Ginseng Bonsai (Ceramic Pot Included)",
+          "variantTitle": "Glazed Blue Pot",
+          "quantity": 1,
+          "price": 3200,
+          "subtotal": 3200
+        }
+      ],
+      "deliveryCharge": 80,
+      "totalAmount": 3280,
+      "paymentMethod": "COD",
+      "orderStatus": "SHIPPED",
+      "courier": "PlantCare Careful Courier",
+      "trackingCode": "PLT-BD-8802",
+      "notes": "Handle with care - live potted plant",
+      "createdAt": "2026-10-21T09:30:00Z"
+    }
+  ],
+  "media": [
+    {
+      "id": "med_bonsaibd_1",
+      "title": "BonsaiBD & Botanical Garden - Official Showcase & Product Review",
+      "categoryId": "all",
+      "categoryName": "Featured Highlights",
+      "type": "YOUTUBE",
+      "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "embedUrl": "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?rel=0",
+      "thumbnail": "https://images.unsplash.com/photo-1512428813834-c702c7702b78?auto=format&fit=crop&w=800&q=80",
+      "createdAt": "2026-10-22T06:59:45.035Z"
+    },
+    {
+      "id": "med_bonsaibd_2",
+      "title": "Customer Unboxing & Live Walkthrough Video",
+      "categoryId": "all",
+      "categoryName": "Customer Reviews",
+      "type": "FACEBOOK",
+      "url": "https://www.facebook.com/facebook/videos/10153231379946729/",
+      "embedUrl": "https://www.facebook.com/plugins/video.php?height=314&href=https%3A%2F%2Fwww.facebook.com%2Ffacebook%2Fvideos%2F10153231379946729%2F&show_text=false&width=560",
+      "thumbnail": "https://images.unsplash.com/photo-1614594975525-e45190c55d0b?auto=format&fit=crop&w=800&q=80",
+      "createdAt": "2026-10-22T06:59:45.035Z"
+    }
+  ],
+  "locations": [
+    {
+      "id": "loc_main",
+      "name": "Main Central Warehouse (ঢাকা কেন্দ্রীয় গুদাম)",
+      "code": "WH-MAIN",
+      "address": "Tejgaon Industrial Area, Dhaka",
+      "bins": [
+        "A-01-01",
+        "A-01-02",
+        "B-01-01",
+        "B-01-02",
+        "C-01-01"
+      ],
+      "isDefault": true,
+      "createdAt": "2026-10-22T06:59:45.035Z"
+    },
+    {
+      "id": "loc_showroom",
+      "name": "BonsaiBD & Botanical Garden Showroom & Pickup Point",
+      "code": "SH-MAIN",
+      "address": "Agargaon Nursery Zone, Sher-e-Bangla Nagar, Dhaka",
+      "bins": [
+        "SH-FRONT",
+        "SH-BACK",
+        "SH-SHELF-01"
+      ],
+      "isDefault": false,
+      "createdAt": "2026-10-22T06:59:45.035Z"
+    }
+  ],
+  "stockReservations": [],
+  "stockLedger": [
+    {
+      "id": "ldg_init_item_plant_1",
+      "itemId": "item_plant_1",
+      "sku": "PLN-BON-FICUS-05",
+      "itemTitle": "Ficus Microcarpa Ginseng Bonsai (Ceramic Pot Included)",
+      "locationId": "loc_main",
+      "locationName": "WH-MAIN (Tejgaon Central)",
+      "bin": "GREENHOUSE-01",
+      "movementType": "OPENING_BALANCE",
+      "qtyChange": 20,
+      "balanceAfter": 20,
+      "unitCost": 1900,
+      "totalValue": 38000,
+      "reference": "OB-INIT-2026",
+      "notes": "System Baseline Opening Stock",
+      "performedBy": "System Auditor",
+      "createdAt": "2026-10-22T06:59:45.035Z"
+    },
+    {
+      "id": "ldg_init_item_plant_2",
+      "itemId": "item_plant_2",
+      "sku": "PLN-MONS-DEL-01",
+      "itemTitle": "Monstera Deliciosa (Swiss Cheese Plant in Terracotta)",
+      "locationId": "loc_main",
+      "locationName": "WH-MAIN (Tejgaon Central)",
+      "bin": "GREENHOUSE-02",
+      "movementType": "OPENING_BALANCE",
+      "qtyChange": 25,
+      "balanceAfter": 25,
+      "unitCost": 950,
+      "totalValue": 23750,
+      "reference": "OB-INIT-2026",
+      "notes": "System Baseline Opening Stock",
+      "performedBy": "System Auditor",
+      "createdAt": "2026-10-22T06:59:45.035Z"
+    }
+  ],
+  "users": [
+    {
+      "id": "usr_bonsaibd_admin",
+      "name": "BonsaiBD & Botanical Garden Admin",
+      "email": "admin@bonsaibd.com",
+      "role": "TENANT_ADMIN",
+      "createdAt": "2026-10-22T06:59:45.035Z"
+    }
+  ]
+}

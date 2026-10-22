@@ -1,0 +1,236 @@
+{
+  "tenantId": "luxewood",
+  "subdomain": "luxewood",
+  "dbName": "tenant_luxewood",
+  "createdAt": "2026-10-22T06:59:45.033Z",
+  "businessType": "furniture_decor",
+  "archetype": "PHYSICAL_STORE",
+  "settings": {
+    "name": "LuxeWood Modern Living Furniture",
+    "phone": "+880 1716-889911",
+    "email": "info@luxewoodfurniture.com",
+    "address": "Pragati Sarani, Kuril Chowrasta, Dhaka",
+    "currency": "BDT",
+    "theme": "warm_wood",
+    "announcementText": "🛋️ Seasoned Solid Mahogany & Canadian Oak: Crafted For Generations with 10-Year Warranty!",
+    "themeConfig": {
+      "primaryColor": "#78350f",
+      "accentColor": "#b45309"
+    },
+    "slogan": "🛋️ Seasoned Solid Mahogany & Canadian Oak: Crafted For Generations with 10-Year Warranty!",
+    "logo": null,
+    "bannerImage": null
+  },
+  "categories": [
+    {
+      "id": "cat_furn_1",
+      "name": "Solid Wood Dining Sets",
+      "slug": "solid-wood-dining-sets",
+      "promoSlogan": "Handcrafted oak & mahogany 6-seater and 8-seater tables"
+    },
+    {
+      "id": "cat_furn_2",
+      "name": "Living Room Sectionals",
+      "slug": "living-room-sectionals",
+      "promoSlogan": "Stain-resistant imported fabric and leatherette sofas"
+    },
+    {
+      "id": "cat_furn_3",
+      "name": "Ergonomic Executive Desks",
+      "slug": "ergonomic-executive-desks",
+      "promoSlogan": "Cable-managed home office workstations"
+    },
+    {
+      "id": "cat_furn_4",
+      "name": "Master Bedrooms & Mattresses",
+      "slug": "master-bedrooms---mattresses",
+      "promoSlogan": "Orthopedic pocket spring mattresses and bed frames"
+    }
+  ],
+  "brands": [
+    {
+      "id": "brand_furn_1",
+      "name": "LuxeWood Studio",
+      "slug": "luxewood-studio"
+    },
+    {
+      "id": "brand_furn_2",
+      "name": "Nordic Craft Co.",
+      "slug": "nordic-craft"
+    }
+  ],
+  "items": [
+    {
+      "id": "item_furn_1",
+      "title": "Nordic Minimalist Oak Dining Table with 6 Chairs",
+      "slug": "nordic-minimalist-oak-dining-table",
+      "shortDescription": "Kiln-dried solid oak wood, lacquer finish, ergonomic contoured chairs with stain-resistant fabric.",
+      "description": "<p>A centerpiece for modern dining rooms. Made from seasoned imported Canadian White Oak with polyurethane scratch-resistant matte coat.</p>",
+      "price": 68000,
+      "comparePrice": 75000,
+      "stockQuantity": 10,
+      "itemType": "PHYSICAL_PRODUCT",
+      "images": [
+        "https://images.unsplash.com/photo-1617806118233-18e1de247200?auto=format&fit=crop&w=800&q=80"
+      ],
+      "sku": "FRN-DIN-OAK-06",
+      "barcode": "195949000801",
+      "costPrice": 48000,
+      "safetyStock": 2,
+      "locationId": "loc_main",
+      "bin": "BAY-FURN-01"
+    },
+    {
+      "id": "item_furn_2",
+      "title": "Italian Velvet 3-Seater Recliner Sofa (Emerald Green)",
+      "slug": "italian-velvet-3-seater-sofa",
+      "shortDescription": "High-density foam core, steel frame recliner mechanism, plush velvet upholstery.",
+      "description": "<p>Unmatched relaxation with dual-stage smooth manual recliner footrests and reinforced hardwood subframe.</p>",
+      "price": 45000,
+      "comparePrice": 52000,
+      "stockQuantity": 8,
+      "itemType": "PHYSICAL_PRODUCT",
+      "images": [
+        "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80"
+      ],
+      "sku": "FRN-SOF-3ST-GRN",
+      "barcode": "195949000802",
+      "costPrice": 32000,
+      "safetyStock": 2,
+      "locationId": "loc_main",
+      "bin": "BAY-FURN-02"
+    }
+  ],
+  "orders": [
+    {
+      "id": "ord_furn_1",
+      "orderNumber": "ORD-LW-801",
+      "customerName": "Zubair Hossain",
+      "customerPhone": "+880 1712-990011",
+      "customerEmail": "zubair.h@outlook.com",
+      "shippingAddress": "Apartment 9C, Shanta Pinnacle, Gulshan 2",
+      "city": "Dhaka",
+      "businessCategory": "furniture_decor",
+      "orderType": "PHYSICAL_PRODUCT",
+      "items": [
+        {
+          "itemTitle": "Nordic Minimalist Oak Dining Table with 6 Chairs",
+          "variantTitle": "Natural Oak",
+          "quantity": 1,
+          "price": 68000,
+          "subtotal": 68000
+        }
+      ],
+      "deliveryCharge": 1200,
+      "totalAmount": 69200,
+      "paymentMethod": "COD",
+      "orderStatus": "PROCESSING",
+      "courier": "LuxeWood Covered Van Crew",
+      "trackingCode": "VAN-LW-3301",
+      "notes": "Service elevator required for 9th floor delivery",
+      "createdAt": "2026-10-21T08:15:00Z"
+    }
+  ],
+  "media": [
+    {
+      "id": "med_luxewood_1",
+      "title": "LuxeWood Modern Living Furniture - Official Showcase & Product Review",
+      "categoryId": "all",
+      "categoryName": "Featured Highlights",
+      "type": "YOUTUBE",
+      "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "embedUrl": "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?rel=0",
+      "thumbnail": "https://images.unsplash.com/photo-1617806118233-18e1de247200?auto=format&fit=crop&w=800&q=80",
+      "createdAt": "2026-10-22T06:59:45.033Z"
+    },
+    {
+      "id": "med_luxewood_2",
+      "title": "Customer Unboxing & Live Walkthrough Video",
+      "categoryId": "all",
+      "categoryName": "Customer Reviews",
+      "type": "FACEBOOK",
+      "url": "https://www.facebook.com/facebook/videos/10153231379946729/",
+      "embedUrl": "https://www.facebook.com/plugins/video.php?height=314&href=https%3A%2F%2Fwww.facebook.com%2Ffacebook%2Fvideos%2F10153231379946729%2F&show_text=false&width=560",
+      "thumbnail": "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80",
+      "createdAt": "2026-10-22T06:59:45.033Z"
+    }
+  ],
+  "locations": [
+    {
+      "id": "loc_main",
+      "name": "Main Central Warehouse (ঢাকা কেন্দ্রীয় গুদাম)",
+      "code": "WH-MAIN",
+      "address": "Tejgaon Industrial Area, Dhaka",
+      "bins": [
+        "A-01-01",
+        "A-01-02",
+        "B-01-01",
+        "B-01-02",
+        "C-01-01"
+      ],
+      "isDefault": true,
+      "createdAt": "2026-10-22T06:59:45.033Z"
+    },
+    {
+      "id": "loc_showroom",
+      "name": "LuxeWood Modern Living Furniture Showroom & Pickup Point",
+      "code": "SH-MAIN",
+      "address": "Pragati Sarani, Kuril Chowrasta, Dhaka",
+      "bins": [
+        "SH-FRONT",
+        "SH-BACK",
+        "SH-SHELF-01"
+      ],
+      "isDefault": false,
+      "createdAt": "2026-10-22T06:59:45.033Z"
+    }
+  ],
+  "stockReservations": [],
+  "stockLedger": [
+    {
+      "id": "ldg_init_item_furn_1",
+      "itemId": "item_furn_1",
+      "sku": "FRN-DIN-OAK-06",
+      "itemTitle": "Nordic Minimalist Oak Dining Table with 6 Chairs",
+      "locationId": "loc_main",
+      "locationName": "WH-MAIN (Tejgaon Central)",
+      "bin": "BAY-FURN-01",
+      "movementType": "OPENING_BALANCE",
+      "qtyChange": 10,
+      "balanceAfter": 10,
+      "unitCost": 48000,
+      "totalValue": 480000,
+      "reference": "OB-INIT-2026",
+      "notes": "System Baseline Opening Stock",
+      "performedBy": "System Auditor",
+      "createdAt": "2026-10-22T06:59:45.033Z"
+    },
+    {
+      "id": "ldg_init_item_furn_2",
+      "itemId": "item_furn_2",
+      "sku": "FRN-SOF-3ST-GRN",
+      "itemTitle": "Italian Velvet 3-Seater Recliner Sofa (Emerald Green)",
+      "locationId": "loc_main",
+      "locationName": "WH-MAIN (Tejgaon Central)",
+      "bin": "BAY-FURN-02",
+      "movementType": "OPENING_BALANCE",
+      "qtyChange": 8,
+      "balanceAfter": 8,
+      "unitCost": 32000,
+      "totalValue": 256000,
+      "reference": "OB-INIT-2026",
+      "notes": "System Baseline Opening Stock",
+      "performedBy": "System Auditor",
+      "createdAt": "2026-10-22T06:59:45.033Z"
+    }
+  ],
+  "users": [
+    {
+      "id": "usr_luxewood_admin",
+      "name": "LuxeWood Modern Living Furniture Admin",
+      "email": "admin@luxewood.com",
+      "role": "TENANT_ADMIN",
+      "createdAt": "2026-10-22T06:59:45.033Z"
+    }
+  ]
+}

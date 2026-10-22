@@ -1,0 +1,230 @@
+{
+  "tenantId": "medicare",
+  "subdomain": "medicare",
+  "dbName": "tenant_medicare",
+  "createdAt": "2026-10-22T06:59:45.036Z",
+  "businessType": "healthcare_service",
+  "archetype": "APPOINTMENT_BOOKING",
+  "settings": {
+    "name": "MediCare Specialized Health Clinic",
+    "phone": "+880 1912-345678",
+    "email": "care@medicareclinic.com",
+    "address": "House 42, Road 7, Dhanmondi, Dhaka",
+    "currency": "BDT",
+    "theme": "emerald_clinic",
+    "announcementText": "🏥 Senior Doctor Consultations: Guaranteed 1-Hour Confirmed Time Slot Booking with Digital Prescription!",
+    "themeConfig": {
+      "primaryColor": "#059669",
+      "accentColor": "#0284c7"
+    },
+    "slogan": "🏥 Senior Doctor Consultations: Guaranteed 1-Hour Confirmed Time Slot Booking with Digital Prescription!",
+    "logo": null,
+    "bannerImage": null
+  },
+  "categories": [
+    {
+      "id": "cat_med_1",
+      "name": "Dental Surgery & Orthodontics",
+      "slug": "dental-surgery---orthodontics",
+      "promoSlogan": "Painless root canal and digital panoramic X-ray"
+    },
+    {
+      "id": "cat_med_2",
+      "name": "Cosmetic Dental Esthetics",
+      "slug": "cosmetic-dental-esthetics",
+      "promoSlogan": "Laser teeth whitening and ceramic veneer consultations"
+    },
+    {
+      "id": "cat_med_3",
+      "name": "General Physician & Diagnostics",
+      "slug": "general-physician---diagnostics",
+      "promoSlogan": "Comprehensive health screening and diabetes care"
+    }
+  ],
+  "brands": [
+    {
+      "id": "brand_med_1",
+      "name": "MediCare Dental Suite",
+      "slug": "medicare-dental-suite"
+    },
+    {
+      "id": "brand_med_2",
+      "name": "BioLase Laser Systems",
+      "slug": "biolase-laser-systems"
+    }
+  ],
+  "items": [
+    {
+      "id": "item_med_1",
+      "title": "Senior Dental Consultation & Full OPG Screening",
+      "slug": "senior-dental-consultation",
+      "shortDescription": "Comprehensive oral examination by FCPS dental surgeon with digital panoramic X-ray.",
+      "description": "<p>Consultation includes 3D oral cavity inspection, diagnosis of gingival health, high-resolution digital OPG X-ray, and a tailored treatment plan with no hidden fees.</p>",
+      "price": 500,
+      "comparePrice": 800,
+      "stockQuantity": 100,
+      "itemType": "SERVICE_APPOINTMENT",
+      "images": [
+        "https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=800&q=80"
+      ],
+      "sku": "MED-DENT-001",
+      "barcode": "8809110001",
+      "costPrice": 200,
+      "safetyStock": 10,
+      "locationId": "loc_main",
+      "bin": "CLINIC-SLOT"
+    },
+    {
+      "id": "item_med_2",
+      "title": "Laser Teeth Whitening & Ultrasonic Scaling",
+      "slug": "laser-teeth-whitening",
+      "shortDescription": "Advanced ultrasonic plaque removal and painless dental enamel brightening.",
+      "description": "<p>A 60-minute in-chair laser cosmetic procedure. Eliminates tough stains from tea, coffee, and tobacco while fortifying tooth enamel with fluoride varnish.</p>",
+      "price": 2500,
+      "comparePrice": 3500,
+      "stockQuantity": 50,
+      "itemType": "SERVICE_APPOINTMENT",
+      "images": [
+        "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&w=800&q=80"
+      ],
+      "sku": "MED-WHIT-002",
+      "barcode": "8809110002",
+      "costPrice": 800,
+      "safetyStock": 5,
+      "locationId": "loc_main",
+      "bin": "CLINIC-SLOT"
+    }
+  ],
+  "orders": [
+    {
+      "id": "ord_med_1",
+      "orderNumber": "APPT-MC-1201",
+      "customerName": "Tahmina Parveen",
+      "customerPhone": "+880 1819-223344",
+      "customerEmail": "tahmina.p@gmail.com",
+      "shippingAddress": "House 19, Road 4, Dhanmondi",
+      "city": "Dhaka",
+      "businessCategory": "healthcare_service",
+      "orderType": "SERVICE_APPOINTMENT",
+      "items": [
+        {
+          "itemTitle": "Senior Dental Consultation & Full OPG Screening",
+          "variantTitle": "Slot: 10:00 AM - 11:00 AM",
+          "quantity": 1,
+          "price": 500,
+          "subtotal": 500
+        }
+      ],
+      "deliveryCharge": 0,
+      "totalAmount": 500,
+      "paymentMethod": "COD",
+      "orderStatus": "DELIVERED",
+      "courier": "Digital Clinic Slot",
+      "trackingCode": "TOKEN-MC-42",
+      "notes": "First visit, medical records sent via email",
+      "createdAt": "2026-10-21T08:00:00Z"
+    }
+  ],
+  "media": [
+    {
+      "id": "med_medicare_1",
+      "title": "MediCare Specialized Health Clinic - Official Showcase & Product Review",
+      "categoryId": "all",
+      "categoryName": "Featured Highlights",
+      "type": "YOUTUBE",
+      "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "embedUrl": "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?rel=0",
+      "thumbnail": "https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=800&q=80",
+      "createdAt": "2026-10-22T06:59:45.036Z"
+    },
+    {
+      "id": "med_medicare_2",
+      "title": "Customer Unboxing & Live Walkthrough Video",
+      "categoryId": "all",
+      "categoryName": "Customer Reviews",
+      "type": "FACEBOOK",
+      "url": "https://www.facebook.com/facebook/videos/10153231379946729/",
+      "embedUrl": "https://www.facebook.com/plugins/video.php?height=314&href=https%3A%2F%2Fwww.facebook.com%2Ffacebook%2Fvideos%2F10153231379946729%2F&show_text=false&width=560",
+      "thumbnail": "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&w=800&q=80",
+      "createdAt": "2026-10-22T06:59:45.036Z"
+    }
+  ],
+  "locations": [
+    {
+      "id": "loc_main",
+      "name": "Main Central Warehouse (ঢাকা কেন্দ্রীয় গুদাম)",
+      "code": "WH-MAIN",
+      "address": "Tejgaon Industrial Area, Dhaka",
+      "bins": [
+        "A-01-01",
+        "A-01-02",
+        "B-01-01",
+        "B-01-02",
+        "C-01-01"
+      ],
+      "isDefault": true,
+      "createdAt": "2026-10-22T06:59:45.036Z"
+    },
+    {
+      "id": "loc_showroom",
+      "name": "MediCare Specialized Health Clinic Showroom & Pickup Point",
+      "code": "SH-MAIN",
+      "address": "House 42, Road 7, Dhanmondi, Dhaka",
+      "bins": [
+        "SH-FRONT",
+        "SH-BACK",
+        "SH-SHELF-01"
+      ],
+      "isDefault": false,
+      "createdAt": "2026-10-22T06:59:45.036Z"
+    }
+  ],
+  "stockReservations": [],
+  "stockLedger": [
+    {
+      "id": "ldg_init_item_med_1",
+      "itemId": "item_med_1",
+      "sku": "MED-DENT-001",
+      "itemTitle": "Senior Dental Consultation & Full OPG Screening",
+      "locationId": "loc_main",
+      "locationName": "WH-MAIN (Tejgaon Central)",
+      "bin": "CLINIC-SLOT",
+      "movementType": "OPENING_BALANCE",
+      "qtyChange": 100,
+      "balanceAfter": 100,
+      "unitCost": 200,
+      "totalValue": 20000,
+      "reference": "OB-INIT-2026",
+      "notes": "System Baseline Opening Stock",
+      "performedBy": "System Auditor",
+      "createdAt": "2026-10-22T06:59:45.036Z"
+    },
+    {
+      "id": "ldg_init_item_med_2",
+      "itemId": "item_med_2",
+      "sku": "MED-WHIT-002",
+      "itemTitle": "Laser Teeth Whitening & Ultrasonic Scaling",
+      "locationId": "loc_main",
+      "locationName": "WH-MAIN (Tejgaon Central)",
+      "bin": "CLINIC-SLOT",
+      "movementType": "OPENING_BALANCE",
+      "qtyChange": 50,
+      "balanceAfter": 50,
+      "unitCost": 800,
+      "totalValue": 40000,
+      "reference": "OB-INIT-2026",
+      "notes": "System Baseline Opening Stock",
+      "performedBy": "System Auditor",
+      "createdAt": "2026-10-22T06:59:45.036Z"
+    }
+  ],
+  "users": [
+    {
+      "id": "usr_medicare_admin",
+      "name": "MediCare Specialized Health Clinic Admin",
+      "email": "admin@medicare.com",
+      "role": "TENANT_ADMIN",
+      "createdAt": "2026-10-22T06:59:45.036Z"
+    }
+  ]
+}

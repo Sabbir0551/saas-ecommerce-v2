@@ -1,0 +1,243 @@
+{
+  "tenantId": "greenagro",
+  "subdomain": "greenagro",
+  "dbName": "tenant_greenagro",
+  "createdAt": "2026-10-22T06:59:45.034Z",
+  "businessType": "agro_farm",
+  "archetype": "PHYSICAL_STORE",
+  "settings": {
+    "name": "GreenAgro Organic Farm & Livestock",
+    "phone": "+880 1717-112244",
+    "email": "harvest@greenagrobd.com",
+    "address": "Green Valley Agro Park, Sreepur, Gazipur",
+    "currency": "BDT",
+    "theme": "emerald_farm",
+    "announcementText": "🌾 100% Antibiotic-Free Dairy Milk, Sundarbans Wild Honey & Healthy Breeding Cattle!",
+    "themeConfig": {
+      "primaryColor": "#059669",
+      "accentColor": "#10b981"
+    },
+    "slogan": "🌾 100% Antibiotic-Free Dairy Milk, Sundarbans Wild Honey & Healthy Breeding Cattle!",
+    "logo": null,
+    "bannerImage": null
+  },
+  "categories": [
+    {
+      "id": "cat_agro_1",
+      "name": "Fresh Dairy & Ghee",
+      "slug": "fresh-dairy---ghee",
+      "promoSlogan": "Pure unpasteurized cows milk and traditional bilona ghee"
+    },
+    {
+      "id": "cat_agro_2",
+      "name": "Sundarbans Natural Honey",
+      "slug": "sundarbans-natural-honey",
+      "promoSlogan": "Raw unprocessed wildflower honey from deep mangroves"
+    },
+    {
+      "id": "cat_agro_3",
+      "name": "Certified Qurbani Livestock",
+      "slug": "certified-qurbani-livestock",
+      "promoSlogan": "Organic grain-fed Shahiwal, Brahman, and Red Chittagong cattle"
+    },
+    {
+      "id": "cat_agro_4",
+      "name": "Bio-Organic Fertilizers",
+      "slug": "bio-organic-fertilizers",
+      "promoSlogan": "Earthworm vermicompost and fermented bio-slurry"
+    }
+  ],
+  "brands": [
+    {
+      "id": "brand_agro_1",
+      "name": "GreenAgro Organics",
+      "slug": "greenagro-organics"
+    },
+    {
+      "id": "brand_agro_2",
+      "name": "Sundarbans Forest Reserve",
+      "slug": "sundarbans-reserve"
+    }
+  ],
+  "items": [
+    {
+      "id": "item_agro_1",
+      "title": "100% Pure Raw Wildflower Honey (1kg Glass Jar)",
+      "slug": "pure-raw-wildflower-honey",
+      "shortDescription": "Unprocessed, unpasteurized natural honey harvested directly from certified Sundarbans apiaries.",
+      "description": "<p>Zero added sugar, zero thermal processing. Packed with active bee pollen, live enzymes, and medicinal antioxidants straight from nature.</p>",
+      "price": 1400,
+      "comparePrice": 1600,
+      "stockQuantity": 45,
+      "itemType": "PHYSICAL_PRODUCT",
+      "images": [
+        "https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&w=800&q=80"
+      ],
+      "sku": "AGR-HON-WILD-1KG",
+      "barcode": "195949000901",
+      "costPrice": 950,
+      "safetyStock": 10,
+      "locationId": "loc_main",
+      "bin": "COLD-01"
+    },
+    {
+      "id": "item_agro_2",
+      "title": "Farm-Fresh Pasteurized Cow Milk (Pack of 5 Liters)",
+      "slug": "fresh-pasteurized-cow-milk-5l",
+      "shortDescription": "Full-fat creamy dairy milk chilled to 4°C within minutes of milking.",
+      "description": "<p>Collected from grass-fed Holstein Friesian cows. Free from hormone injections or artificial preservatives. Delivered in chilled insulated bottles.</p>",
+      "price": 550,
+      "comparePrice": 650,
+      "stockQuantity": 60,
+      "itemType": "PHYSICAL_PRODUCT",
+      "images": [
+        "https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=800&q=80"
+      ],
+      "sku": "AGR-MILK-PAS-5L",
+      "barcode": "195949000902",
+      "costPrice": 380,
+      "safetyStock": 15,
+      "locationId": "loc_main",
+      "bin": "CHILLER-01"
+    }
+  ],
+  "orders": [
+    {
+      "id": "ord_agro_1",
+      "orderNumber": "ORD-GA-901",
+      "customerName": "Nasir Chowdhury",
+      "customerPhone": "+880 1819-001122",
+      "customerEmail": "nasir.c@gmail.com",
+      "shippingAddress": "House 34, Road 12, Uttara Sector 3",
+      "city": "Dhaka",
+      "businessCategory": "agro_farm",
+      "orderType": "PHYSICAL_PRODUCT",
+      "items": [
+        {
+          "itemTitle": "100% Pure Raw Wildflower Honey (1kg Glass Jar)",
+          "variantTitle": "1kg Glass",
+          "quantity": 2,
+          "price": 1400,
+          "subtotal": 2800
+        },
+        {
+          "itemTitle": "Farm-Fresh Pasteurized Cow Milk (Pack of 5 Liters)",
+          "variantTitle": "5L Pack",
+          "quantity": 1,
+          "price": 550,
+          "subtotal": 550
+        }
+      ],
+      "deliveryCharge": 60,
+      "totalAmount": 3410,
+      "paymentMethod": "COD",
+      "orderStatus": "DELIVERED",
+      "courier": "GreenAgro Morning Express",
+      "trackingCode": "EXP-GA-1122",
+      "notes": "Deliver early morning before 8 AM",
+      "createdAt": "2026-10-21T06:00:00Z"
+    }
+  ],
+  "media": [
+    {
+      "id": "med_greenagro_1",
+      "title": "GreenAgro Organic Farm & Livestock - Official Showcase & Product Review",
+      "categoryId": "all",
+      "categoryName": "Featured Highlights",
+      "type": "YOUTUBE",
+      "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "embedUrl": "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?rel=0",
+      "thumbnail": "https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&w=800&q=80",
+      "createdAt": "2026-10-22T06:59:45.034Z"
+    },
+    {
+      "id": "med_greenagro_2",
+      "title": "Customer Unboxing & Live Walkthrough Video",
+      "categoryId": "all",
+      "categoryName": "Customer Reviews",
+      "type": "FACEBOOK",
+      "url": "https://www.facebook.com/facebook/videos/10153231379946729/",
+      "embedUrl": "https://www.facebook.com/plugins/video.php?height=314&href=https%3A%2F%2Fwww.facebook.com%2Ffacebook%2Fvideos%2F10153231379946729%2F&show_text=false&width=560",
+      "thumbnail": "https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=800&q=80",
+      "createdAt": "2026-10-22T06:59:45.034Z"
+    }
+  ],
+  "locations": [
+    {
+      "id": "loc_main",
+      "name": "Main Central Warehouse (ঢাকা কেন্দ্রীয় গুদাম)",
+      "code": "WH-MAIN",
+      "address": "Tejgaon Industrial Area, Dhaka",
+      "bins": [
+        "A-01-01",
+        "A-01-02",
+        "B-01-01",
+        "B-01-02",
+        "C-01-01"
+      ],
+      "isDefault": true,
+      "createdAt": "2026-10-22T06:59:45.034Z"
+    },
+    {
+      "id": "loc_showroom",
+      "name": "GreenAgro Organic Farm & Livestock Showroom & Pickup Point",
+      "code": "SH-MAIN",
+      "address": "Green Valley Agro Park, Sreepur, Gazipur",
+      "bins": [
+        "SH-FRONT",
+        "SH-BACK",
+        "SH-SHELF-01"
+      ],
+      "isDefault": false,
+      "createdAt": "2026-10-22T06:59:45.034Z"
+    }
+  ],
+  "stockReservations": [],
+  "stockLedger": [
+    {
+      "id": "ldg_init_item_agro_1",
+      "itemId": "item_agro_1",
+      "sku": "AGR-HON-WILD-1KG",
+      "itemTitle": "100% Pure Raw Wildflower Honey (1kg Glass Jar)",
+      "locationId": "loc_main",
+      "locationName": "WH-MAIN (Tejgaon Central)",
+      "bin": "COLD-01",
+      "movementType": "OPENING_BALANCE",
+      "qtyChange": 45,
+      "balanceAfter": 45,
+      "unitCost": 950,
+      "totalValue": 42750,
+      "reference": "OB-INIT-2026",
+      "notes": "System Baseline Opening Stock",
+      "performedBy": "System Auditor",
+      "createdAt": "2026-10-22T06:59:45.034Z"
+    },
+    {
+      "id": "ldg_init_item_agro_2",
+      "itemId": "item_agro_2",
+      "sku": "AGR-MILK-PAS-5L",
+      "itemTitle": "Farm-Fresh Pasteurized Cow Milk (Pack of 5 Liters)",
+      "locationId": "loc_main",
+      "locationName": "WH-MAIN (Tejgaon Central)",
+      "bin": "CHILLER-01",
+      "movementType": "OPENING_BALANCE",
+      "qtyChange": 60,
+      "balanceAfter": 60,
+      "unitCost": 380,
+      "totalValue": 22800,
+      "reference": "OB-INIT-2026",
+      "notes": "System Baseline Opening Stock",
+      "performedBy": "System Auditor",
+      "createdAt": "2026-10-22T06:59:45.034Z"
+    }
+  ],
+  "users": [
+    {
+      "id": "usr_greenagro_admin",
+      "name": "GreenAgro Organic Farm & Livestock Admin",
+      "email": "admin@greenagro.com",
+      "role": "TENANT_ADMIN",
+      "createdAt": "2026-10-22T06:59:45.034Z"
+    }
+  ]
+}

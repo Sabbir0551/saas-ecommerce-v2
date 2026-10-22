@@ -1,0 +1,478 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  TENANT_ADMIN
+  STAFF
+  CUSTOMER
+}
+
+enum ItemType {
+  PHYSICAL_PRODUCT
+  SERVICE_APPOINTMENT
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum DisputeStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  RESOLVED
+  REJECTED
+}
+
+enum StockMovementType {
+  RECEIVE_PO
+  SHIP_ORDER
+  RESERVATION_LOCK
+  RESERVATION_FREE
+  RETURN_RESTOCK
+  RETURN_DAMAGED
+  COUNT_ADJUST
+  DAMAGE_WRITEOFF
+  TRANSFER
+  OPENING_BALANCE
+}
+
+model Tenant {
+  id              String         @id @default(uuid())
+  name            String
+  subdomain       String         @unique
+  customDomain    String?        @unique
+  businessType    String         @default("fashion_clothing") // fashion_clothing, electronics, healthcare_service, beauty_salon, grocery
+  logo            String?
+  bannerImage     String?
+  announcementText String?
+  currency        String         @default("BDT")
+  phone           String?
+  email           String?
+  address         String?
+  themeConfig     String?        // JSON string for primaryColor, heroTitle, headerStyle
+  isActive        Boolean        @default(true)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  users           User[]
+  categories      Category[]
+  brands          Brand[]
+  items           Item[]
+  orders          Order[]
+  bookingSlots    BookingSlot[]
+  bookings        Booking[]
+  disputes        Dispute[]
+  reviews         Review[]
+  storeModules    StoreModule[]
+  locations       Location[]
+  stockLedgers    StockLedger[]
+  stockReservations StockReservation[]
+  stockAudits     StockAudit[]
+
+  @@index([subdomain])
+  @@index([customDomain])
+}
+
+model User {
+  id           String    @id @default(uuid())
+  tenantId     String?
+  tenant       Tenant?   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name         String
+  email        String    @unique
+  password     String
+  phone        String?
+  role         Role      @default(CUSTOMER)
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  orders       Order[]
+
+  @@index([tenantId])
+}
+
+model Category {
+  id          String     @id @default(uuid())
+  tenantId    String
+  tenant      Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name        String
+  slug        String
+  icon        String?
+  image       String?
+  parentId    String?
+  parent      Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children    Category[] @relation("CategoryHierarchy")
+  sortOrder   Int        @default(0)
+  createdAt   DateTime   @default(now())
+
+  items       Item[]
+
+  @@unique([tenantId, slug])
+  @@index([tenantId])
+}
+
+model Brand {
+  id          String    @id @default(uuid())
+  tenantId    String
+  tenant      Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name        String
+  slug        String
+  logo        String?
+  createdAt   DateTime  @default(now())
+
+  items       Item[]
+
+  @@unique([tenantId, slug])
+  @@index([tenantId])
+}
+
+model Item {
+  id                   String        @id @default(uuid())
+  tenantId             String
+  tenant               Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  categoryId           String?
+  category             Category?     @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  brandId              String?
+  brand                Brand?        @relation(fields: [brandId], references: [id], onDelete: SetNull)
+  
+  title                String
+  slug                 String
+  shortDescription     String?
+  description          String?
+  itemType             ItemType      @default(PHYSICAL_PRODUCT)
+  
+  price                Float         @default(0)
+  comparePrice         Float?
+  costPrice            Float?
+  sku                  String?
+  barcode              String?
+  stockQuantity        Int           @default(0)
+  trackInventory       Boolean       @default(true)
+  
+  images               String        @default("[]") // JSON string of image URLs
+  videoUrl             String?
+  isFeatured           Boolean       @default(false)
+  isActive             Boolean       @default(true)
+  
+  // Dynamic custom attributes based on category schema (JSON)
+  customAttributes     Json?         @default("{}")
+  specifications       String?       // JSON string fallback
+
+  // Specific for Service / Doctor appointments
+  durationMinutes      Int?          @default(60)
+  maxCapacityPerSlot   Int?          @default(1)
+  serviceLocation      String?
+  
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+
+  variants             ItemVariant[]
+  orderItems           OrderItem[]
+  bookingSlots         BookingSlot[]
+  bookings             Booking[]
+  reviews              Review[]
+  stockLedgers         StockLedger[]
+
+  @@unique([tenantId, slug])
+  @@index([tenantId, itemType])
+}
+
+model ItemVariant {
+  id            String      @id @default(uuid())
+  itemId        String
+  item          Item        @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  title         String      // e.g. "XL / Red"
+  sku           String?
+  barcode       String?
+  price         Float
+  stockQuantity Int         @default(0)
+  attributes    String      @default("{}") // JSON string { "Size": "XL", "Color": "Red" }
+  createdAt     DateTime    @default(now())
+
+  orderItems    OrderItem[]
+  stockLedgers  StockLedger[]
+
+  @@index([itemId])
+}
+
+model BookingSlot {
+  id           String    @id @default(uuid())
+  tenantId     String
+  tenant       Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  itemId       String    // Service Item ID
+  item         Item      @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  
+  date         String    // YYYY-MM-DD
+  startTime    String    // HH:mm (e.g. 10:00)
+  endTime      String    // HH:mm (e.g. 11:00)
+  capacity     Int       @default(1)
+  bookedCount  Int       @default(0)
+  isBlocked    Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+
+  bookings     Booking[]
+
+  @@unique([tenantId, itemId, date, startTime])
+  @@index([tenantId, date])
+}
+
+model Booking {
+  id             String       @id @default(uuid())
+  tenantId       String
+  tenant         Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  itemId         String
+  item           Item         @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  bookingSlotId  String?
+  bookingSlot    BookingSlot? @relation(fields: [bookingSlotId], references: [id], onDelete: SetNull)
+  orderId        String?      @unique
+  order          Order?       @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  
+  customerName   String
+  customerPhone  String
+  customerEmail  String?
+  bookingDate    String       // YYYY-MM-DD
+  bookingTime    String       // HH:mm
+  status         String       @default("CONFIRMED") // PENDING, CONFIRMED, COMPLETED, CANCELLED
+  serialNumber   Int?         // Patient / Client queue token
+  notes          String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([tenantId, bookingDate])
+}
+
+model Order {
+  id                String               @id @default(uuid())
+  tenantId          String
+  tenant            Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  userId            String?
+  user              User?                @relation(fields: [userId], references: [id], onDelete: SetNull)
+  
+  orderNumber       String               @unique
+  customerName      String
+  customerPhone     String
+  customerEmail     String?
+  shippingAddress   String
+  city              String               @default("Dhaka")
+  notes             String?
+  
+  orderType         String               @default("STANDARD") // STANDARD, PRESCRIPTION, BOOKING, CUSTOM, DIGITAL, QUOTATION, RENTAL, SUBSCRIPTION, DONATION
+  customAttributes  Json?                @default("{}")
+
+  subtotal          Float                @default(0)
+  discountAmount    Float                @default(0)
+  deliveryCharge    Float                @default(0)
+  totalAmount       Float                @default(0)
+  
+  paymentMethod     String               @default("COD") // COD, BKASH, NAGAD, CARD
+  paymentStatus     PaymentStatus        @default(PENDING)
+  orderStatus       OrderStatus          @default(PENDING)
+  
+  // Optional if this order contains a service/appointment
+  bookingDate       String?
+  bookingTime       String?
+  
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+
+  items             OrderItem[]
+  statusHistory     OrderStatusHistory[]
+  booking           Booking?
+
+  @@index([tenantId, orderStatus])
+  @@index([orderNumber])
+}
+
+model OrderItem {
+  id               String       @id @default(uuid())
+  orderId          String
+  order            Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  itemId           String?
+  item             Item?        @relation(fields: [itemId], references: [id], onDelete: SetNull)
+  variantId        String?
+  variant          ItemVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  
+  itemTitle        String
+  variantTitle     String?
+  price            Float
+  quantity         Int
+  subtotal         Float
+  customAttributes Json?        @default("{}")
+
+  @@index([orderId])
+}
+
+model OrderStatusHistory {
+  id        String      @id @default(uuid())
+  orderId   String
+  order     Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  status    OrderStatus
+  notes     String?
+  createdBy String?
+  createdAt DateTime    @default(now())
+
+  @@index([orderId])
+}
+
+model Dispute {
+  id             String        @id @default(uuid())
+  tenantId       String
+  tenant         Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  orderNumber    String
+  customerName   String
+  customerPhone  String
+  customerEmail  String?
+  reason         String        // DAMAGED_GOODS, WRONG_ITEM, DELIVERY_DELAY, REFUND_ISSUE
+  description    String
+  evidenceImages String        @default("[]") // JSON array of images
+  status         DisputeStatus @default(SUBMITTED)
+  adminNotes     String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([tenantId, status])
+}
+
+model Review {
+  id           String    @id @default(uuid())
+  tenantId     String
+  tenant       Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  itemId       String
+  item         Item      @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  customerName String
+  rating       Int       @default(5)
+  comment      String
+  isApproved   Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+
+  @@index([tenantId, itemId])
+}
+
+model StoreModule {
+  id        String   @id @default(uuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  moduleKey String   // e.g. "appointment_booking", "product_reviews", "dispute_system"
+  isEnabled Boolean  @default(true)
+  settings  String   @default("{}") // JSON
+  createdAt DateTime @default(now())
+
+  @@unique([tenantId, moduleKey])
+  @@index([tenantId])
+}
+
+model CategorySchema {
+  id          String   @id @default(uuid())
+  tenantId    String?  // null if system-wide default schema
+  categoryKey String   // e.g. "mobile_gadgets", "fashion_apparel", "pharmacy_medicine"
+  name_bn     String
+  name_en     String
+  orderType   String   @default("STANDARD")
+  schemaJson  Json     // Full FieldDefinition array & order fields
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([tenantId, categoryKey])
+  @@index([categoryKey])
+}
+
+model Location {
+  id          String   @id @default(uuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  code        String   // DHK-WH1, CTG-SHOP2, MAIN-WH
+  name        String
+  type        String   @default("WAREHOUSE") // WAREHOUSE, RETAIL_STORE, 3PL
+  address     String?
+  shelfBin    String?  // Rack / Shelf / Bin details
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  ledgers      StockLedger[]
+  reservations StockReservation[]
+
+  @@unique([tenantId, code])
+  @@index([tenantId])
+}
+
+model StockLedger {
+  id           String            @id @default(uuid())
+  tenantId     String
+  tenant       Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  sku          String
+  barcode      String?
+  itemId       String?
+  item         Item?             @relation(fields: [itemId], references: [id], onDelete: SetNull)
+  variantId    String?
+  variant      ItemVariant?      @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  locationId   String
+  location     Location          @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  movementType StockMovementType
+  qtyChange    Int               // Positive (+) or Negative (-)
+  reference    String            // PO-1001, SO-5001, RMA-301, CNT-12, INIT-01
+  unitCost     Float?
+  notes        String?
+  performedBy  String            @default("SYSTEM")
+  ipAddress    String?
+  createdAt    DateTime          @default(now())
+
+  @@index([tenantId, sku])
+  @@index([tenantId, locationId])
+  @@index([reference])
+}
+
+model StockReservation {
+  id           String    @id @default(uuid())
+  tenantId     String
+  tenant       Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  orderId      String?
+  orderNumber  String?
+  sku          String
+  locationId   String
+  location     Location  @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  quantity     Int
+  expiresAt    DateTime
+  isReleased   Boolean   @default(false)
+  isConsumed   Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+
+  @@index([tenantId, sku])
+  @@index([orderId])
+}
+
+model StockAudit {
+  id           String    @id @default(uuid())
+  tenantId     String
+  tenant       Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  auditNumber  String    // AUDIT-2026-001
+  locationId   String
+  sku          String
+  systemQty    Int
+  physicalQty  Int
+  difference   Int
+  reason       String?
+  approvedBy   String?
+  status       String    @default("PENDING") // PENDING, APPROVED, REJECTED
+  createdAt    DateTime  @default(now())
+
+  @@index([tenantId, auditNumber])
+}

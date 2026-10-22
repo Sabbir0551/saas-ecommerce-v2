@@ -1,0 +1,236 @@
+{
+  "tenantId": "eduexcel",
+  "subdomain": "eduexcel",
+  "dbName": "tenant_eduexcel",
+  "createdAt": "2026-10-22T06:59:45.038Z",
+  "businessType": "coaching_education",
+  "archetype": "APPOINTMENT_BOOKING",
+  "settings": {
+    "name": "EduExcel Academic & IELTS Academy",
+    "phone": "+880 1718-556699",
+    "email": "admissions@eduexcelbd.com",
+    "address": "House 25, Road 4, Sector 11, Uttara, Dhaka",
+    "currency": "BDT",
+    "theme": "crimson_academy",
+    "announcementText": "🎓 IELTS Band 8+ Guaranteed Batch: British Council Certified Trainers & 10 Full Mock Exams Included!",
+    "themeConfig": {
+      "primaryColor": "#dc2626",
+      "accentColor": "#ef4444"
+    },
+    "slogan": "🎓 IELTS Band 8+ Guaranteed Batch: British Council Certified Trainers & 10 Full Mock Exams Included!",
+    "logo": null,
+    "bannerImage": null
+  },
+  "categories": [
+    {
+      "id": "cat_edu_1",
+      "name": "IELTS Band 8+ Masterclass",
+      "slug": "ielts-band-8-masterclass",
+      "promoSlogan": "Daily speaking practice & Cambridge writing evaluation"
+    },
+    {
+      "id": "cat_edu_2",
+      "name": "University Admission Preparation",
+      "slug": "university-admission-preparation",
+      "promoSlogan": "DU, BUET, and Medical college question banks"
+    },
+    {
+      "id": "cat_edu_3",
+      "name": "Full-Stack Web Coding Bootcamp",
+      "slug": "full-stack-web-coding-bootcamp",
+      "promoSlogan": "Next.js, TypeScript, PostgreSQL and real project deployment"
+    },
+    {
+      "id": "cat_edu_4",
+      "name": "Spoken English for Executives",
+      "slug": "spoken-english-for-executives",
+      "promoSlogan": "Accent reduction, boardroom meetings, and presentation confidence"
+    }
+  ],
+  "brands": [
+    {
+      "id": "brand_edu_1",
+      "name": "EduExcel Academic",
+      "slug": "eduexcel-academic"
+    },
+    {
+      "id": "brand_edu_2",
+      "name": "Cambridge Certified Faculty",
+      "slug": "cambridge-faculty"
+    }
+  ],
+  "items": [
+    {
+      "id": "item_edu_1",
+      "title": "IELTS Band 8+ Masterclass & 10 Full Mock Evaluations",
+      "slug": "ielts-band-8-masterclass",
+      "shortDescription": "36 hours of live instruction, 1-on-1 speaking evaluations, and daily writing corrections by Cambridge certified trainers.",
+      "description": "<p>Comprehensive IELTS preparation package covering all four modules: Listening, Reading, Writing (Task 1 & 2), and Speaking. Includes original Cambridge practice test books.</p>",
+      "price": 12000,
+      "comparePrice": 15000,
+      "stockQuantity": 40,
+      "itemType": "SERVICE_APPOINTMENT",
+      "images": [
+        "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80"
+      ],
+      "sku": "EDU-IELTS-B8-01",
+      "barcode": "195949001601",
+      "costPrice": 4000,
+      "safetyStock": 5,
+      "locationId": "loc_main",
+      "bin": "ACADEMY-BATCH"
+    },
+    {
+      "id": "item_edu_2",
+      "title": "Executive Business English & Public Speaking Accelerator",
+      "slug": "executive-business-english-accelerator",
+      "shortDescription": "8-week weekend intensive course for corporate professionals, lawyers, and founders.",
+      "description": "<p>Master executive diplomacy, negotiate international contracts, and deliver compelling keynote presentations with flawless pronunciation.</p>",
+      "price": 16000,
+      "comparePrice": 20000,
+      "stockQuantity": 25,
+      "itemType": "SERVICE_APPOINTMENT",
+      "images": [
+        "https://images.unsplash.com/photo-1577495508048-b635879837f1?auto=format&fit=crop&w=800&q=80"
+      ],
+      "sku": "EDU-CORP-ENG-02",
+      "barcode": "195949001602",
+      "costPrice": 6000,
+      "safetyStock": 5,
+      "locationId": "loc_main",
+      "bin": "ACADEMY-BATCH"
+    }
+  ],
+  "orders": [
+    {
+      "id": "ord_edu_1",
+      "orderNumber": "ENR-EE-1601",
+      "customerName": "Samiul Haque",
+      "customerPhone": "+880 1719-887766",
+      "customerEmail": "samiul.haque@gmail.com",
+      "shippingAddress": "House 12, Road 3, Sector 4, Uttara",
+      "city": "Dhaka",
+      "businessCategory": "coaching_education",
+      "orderType": "SERVICE_APPOINTMENT",
+      "items": [
+        {
+          "itemTitle": "IELTS Band 8+ Masterclass & 10 Full Mock Evaluations",
+          "variantTitle": "Weekend Evening Batch",
+          "quantity": 1,
+          "price": 12000,
+          "subtotal": 12000
+        }
+      ],
+      "deliveryCharge": 0,
+      "totalAmount": 12000,
+      "paymentMethod": "COD",
+      "orderStatus": "DELIVERED",
+      "courier": "Digital Student ID Card",
+      "trackingCode": "STU-EE-4411",
+      "notes": "Access to student LMS granted",
+      "createdAt": "2026-10-21T09:15:00Z"
+    }
+  ],
+  "media": [
+    {
+      "id": "med_eduexcel_1",
+      "title": "EduExcel Academic & IELTS Academy - Official Showcase & Product Review",
+      "categoryId": "all",
+      "categoryName": "Featured Highlights",
+      "type": "YOUTUBE",
+      "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "embedUrl": "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?rel=0",
+      "thumbnail": "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80",
+      "createdAt": "2026-10-22T06:59:45.038Z"
+    },
+    {
+      "id": "med_eduexcel_2",
+      "title": "Customer Unboxing & Live Walkthrough Video",
+      "categoryId": "all",
+      "categoryName": "Customer Reviews",
+      "type": "FACEBOOK",
+      "url": "https://www.facebook.com/facebook/videos/10153231379946729/",
+      "embedUrl": "https://www.facebook.com/plugins/video.php?height=314&href=https%3A%2F%2Fwww.facebook.com%2Ffacebook%2Fvideos%2F10153231379946729%2F&show_text=false&width=560",
+      "thumbnail": "https://images.unsplash.com/photo-1577495508048-b635879837f1?auto=format&fit=crop&w=800&q=80",
+      "createdAt": "2026-10-22T06:59:45.038Z"
+    }
+  ],
+  "locations": [
+    {
+      "id": "loc_main",
+      "name": "Main Central Warehouse (ঢাকা কেন্দ্রীয় গুদাম)",
+      "code": "WH-MAIN",
+      "address": "Tejgaon Industrial Area, Dhaka",
+      "bins": [
+        "A-01-01",
+        "A-01-02",
+        "B-01-01",
+        "B-01-02",
+        "C-01-01"
+      ],
+      "isDefault": true,
+      "createdAt": "2026-10-22T06:59:45.038Z"
+    },
+    {
+      "id": "loc_showroom",
+      "name": "EduExcel Academic & IELTS Academy Showroom & Pickup Point",
+      "code": "SH-MAIN",
+      "address": "House 25, Road 4, Sector 11, Uttara, Dhaka",
+      "bins": [
+        "SH-FRONT",
+        "SH-BACK",
+        "SH-SHELF-01"
+      ],
+      "isDefault": false,
+      "createdAt": "2026-10-22T06:59:45.038Z"
+    }
+  ],
+  "stockReservations": [],
+  "stockLedger": [
+    {
+      "id": "ldg_init_item_edu_1",
+      "itemId": "item_edu_1",
+      "sku": "EDU-IELTS-B8-01",
+      "itemTitle": "IELTS Band 8+ Masterclass & 10 Full Mock Evaluations",
+      "locationId": "loc_main",
+      "locationName": "WH-MAIN (Tejgaon Central)",
+      "bin": "ACADEMY-BATCH",
+      "movementType": "OPENING_BALANCE",
+      "qtyChange": 40,
+      "balanceAfter": 40,
+      "unitCost": 4000,
+      "totalValue": 160000,
+      "reference": "OB-INIT-2026",
+      "notes": "System Baseline Opening Stock",
+      "performedBy": "System Auditor",
+      "createdAt": "2026-10-22T06:59:45.038Z"
+    },
+    {
+      "id": "ldg_init_item_edu_2",
+      "itemId": "item_edu_2",
+      "sku": "EDU-CORP-ENG-02",
+      "itemTitle": "Executive Business English & Public Speaking Accelerator",
+      "locationId": "loc_main",
+      "locationName": "WH-MAIN (Tejgaon Central)",
+      "bin": "ACADEMY-BATCH",
+      "movementType": "OPENING_BALANCE",
+      "qtyChange": 25,
+      "balanceAfter": 25,
+      "unitCost": 6000,
+      "totalValue": 150000,
+      "reference": "OB-INIT-2026",
+      "notes": "System Baseline Opening Stock",
+      "performedBy": "System Auditor",
+      "createdAt": "2026-10-22T06:59:45.038Z"
+    }
+  ],
+  "users": [
+    {
+      "id": "usr_eduexcel_admin",
+      "name": "EduExcel Academic & IELTS Academy Admin",
+      "email": "admin@eduexcel.com",
+      "role": "TENANT_ADMIN",
+      "createdAt": "2026-10-22T06:59:45.038Z"
+    }
+  ]
+}

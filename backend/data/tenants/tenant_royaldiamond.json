@@ -1,0 +1,241 @@
+{
+  "tenantId": "royaldiamond",
+  "subdomain": "royaldiamond",
+  "dbName": "tenant_royaldiamond",
+  "createdAt": "2026-10-22T06:59:45.029Z",
+  "businessType": "jewelry",
+  "archetype": "PHYSICAL_STORE",
+  "settings": {
+    "name": "Royal Diamond & Gold Jewelry",
+    "phone": "+880 1713-112233",
+    "email": "concierge@royaldiamondbd.com",
+    "address": "Baitul Mukarram Gold Market, Ground Floor, Dhaka",
+    "currency": "BDT",
+    "theme": "luxury_gold",
+    "announcementText": "💎 100% Certified 22K Hallmarked Gold & GIA Natural Solitaires with Lifetime Exchange Guarantee.",
+    "themeConfig": {
+      "primaryColor": "#d97706",
+      "accentColor": "#fbbf24"
+    },
+    "slogan": "💎 100% Certified 22K Hallmarked Gold & GIA Natural Solitaires with Lifetime Exchange Guarantee.",
+    "logo": null,
+    "bannerImage": null
+  },
+  "categories": [
+    {
+      "id": "cat_jewel_1",
+      "name": "Bridal Choker Sets",
+      "slug": "bridal-choker-sets",
+      "promoSlogan": "Grand royal wedding jewelry crafted in 22K gold"
+    },
+    {
+      "id": "cat_jewel_2",
+      "name": "GIA Solitaire Rings",
+      "slug": "gia-solitaire-rings",
+      "promoSlogan": "Certified engagement rings with VVS1 clarity"
+    },
+    {
+      "id": "cat_jewel_3",
+      "name": "Traditional Polki Bangles",
+      "slug": "traditional-polki-bangles",
+      "promoSlogan": "Kundan and antique uncut diamond bangles"
+    },
+    {
+      "id": "cat_jewel_4",
+      "name": "Gold Chains & Pendants",
+      "slug": "gold-chains---pendants",
+      "promoSlogan": "Lightweight daily wear elegance"
+    }
+  ],
+  "brands": [
+    {
+      "id": "brand_jewel_1",
+      "name": "Royal Heritage Jewelry",
+      "slug": "royal-heritage"
+    },
+    {
+      "id": "brand_jewel_2",
+      "name": "GIA Certified Diamonds",
+      "slug": "gia-diamonds"
+    },
+    {
+      "id": "brand_jewel_3",
+      "name": "Solitaire Atelier",
+      "slug": "solitaire-atelier"
+    }
+  ],
+  "items": [
+    {
+      "id": "item_jewel_1",
+      "title": "Royal 22K Hallmarked Gold Bridal Choker Set",
+      "slug": "royal-22k-gold-bridal-choker",
+      "shortDescription": "Handcrafted antique floral motifs with certified hallmark stamp and secure storage box.",
+      "description": "<p>Exquisite bridal choker set weighing 42 grams in 22 Karat hallmarked gold. Includes matching jhumka earrings and maang tikka. Comes with government-approved certificate.</p>",
+      "price": 385000,
+      "comparePrice": 410000,
+      "stockQuantity": 4,
+      "itemType": "PHYSICAL_PRODUCT",
+      "images": [
+        "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80"
+      ],
+      "sku": "JWL-CHOKER-22K-01",
+      "barcode": "195949000401",
+      "costPrice": 340000,
+      "safetyStock": 1,
+      "locationId": "loc_main",
+      "bin": "VAULT-01"
+    },
+    {
+      "id": "item_jewel_2",
+      "title": "GIA Certified 1.50 Carat Solitaire Diamond Ring",
+      "slug": "gia-certified-1-50-carat-solitaire-ring",
+      "shortDescription": "Round brilliant cut, F color, VVS1 clarity mounted in 18K white gold.",
+      "description": "<p>Timeless six-prong solitaire ring set with a laser-inscribed natural diamond certified by the Gemological Institute of America (GIA).</p>",
+      "price": 520000,
+      "comparePrice": 560000,
+      "stockQuantity": 3,
+      "itemType": "PHYSICAL_PRODUCT",
+      "images": [
+        "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80"
+      ],
+      "sku": "JWL-RING-GIA-150",
+      "barcode": "195949000402",
+      "costPrice": 460000,
+      "safetyStock": 1,
+      "locationId": "loc_main",
+      "bin": "VAULT-02"
+    }
+  ],
+  "orders": [
+    {
+      "id": "ord_jewel_1",
+      "orderNumber": "ORD-RD-401",
+      "customerName": "Dr. Sharmin Akter",
+      "customerPhone": "+880 1817-654321",
+      "customerEmail": "sharmin.akter@apollo.com",
+      "shippingAddress": "Apartment 7A, Navana Tower, Banani",
+      "city": "Dhaka",
+      "businessCategory": "jewelry",
+      "orderType": "PHYSICAL_PRODUCT",
+      "items": [
+        {
+          "itemTitle": "GIA Certified 1.50 Carat Solitaire Diamond Ring",
+          "variantTitle": "Size 14",
+          "quantity": 1,
+          "price": 520000,
+          "subtotal": 520000
+        }
+      ],
+      "deliveryCharge": 0,
+      "totalAmount": 520000,
+      "paymentMethod": "COD",
+      "orderStatus": "PROCESSING",
+      "courier": "Armored Security Courier",
+      "trackingCode": "SEC-RD-9001",
+      "notes": "VIP client, call before arrival",
+      "createdAt": "2026-10-21T10:15:00Z"
+    }
+  ],
+  "media": [
+    {
+      "id": "med_royaldiamond_1",
+      "title": "Royal Diamond & Gold Jewelry - Official Showcase & Product Review",
+      "categoryId": "all",
+      "categoryName": "Featured Highlights",
+      "type": "YOUTUBE",
+      "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "embedUrl": "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?rel=0",
+      "thumbnail": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80",
+      "createdAt": "2026-10-22T06:59:45.029Z"
+    },
+    {
+      "id": "med_royaldiamond_2",
+      "title": "Customer Unboxing & Live Walkthrough Video",
+      "categoryId": "all",
+      "categoryName": "Customer Reviews",
+      "type": "FACEBOOK",
+      "url": "https://www.facebook.com/facebook/videos/10153231379946729/",
+      "embedUrl": "https://www.facebook.com/plugins/video.php?height=314&href=https%3A%2F%2Fwww.facebook.com%2Ffacebook%2Fvideos%2F10153231379946729%2F&show_text=false&width=560",
+      "thumbnail": "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
+      "createdAt": "2026-10-22T06:59:45.029Z"
+    }
+  ],
+  "locations": [
+    {
+      "id": "loc_main",
+      "name": "Main Central Warehouse (ঢাকা কেন্দ্রীয় গুদাম)",
+      "code": "WH-MAIN",
+      "address": "Tejgaon Industrial Area, Dhaka",
+      "bins": [
+        "A-01-01",
+        "A-01-02",
+        "B-01-01",
+        "B-01-02",
+        "C-01-01"
+      ],
+      "isDefault": true,
+      "createdAt": "2026-10-22T06:59:45.029Z"
+    },
+    {
+      "id": "loc_showroom",
+      "name": "Royal Diamond & Gold Jewelry Showroom & Pickup Point",
+      "code": "SH-MAIN",
+      "address": "Baitul Mukarram Gold Market, Ground Floor, Dhaka",
+      "bins": [
+        "SH-FRONT",
+        "SH-BACK",
+        "SH-SHELF-01"
+      ],
+      "isDefault": false,
+      "createdAt": "2026-10-22T06:59:45.029Z"
+    }
+  ],
+  "stockReservations": [],
+  "stockLedger": [
+    {
+      "id": "ldg_init_item_jewel_1",
+      "itemId": "item_jewel_1",
+      "sku": "JWL-CHOKER-22K-01",
+      "itemTitle": "Royal 22K Hallmarked Gold Bridal Choker Set",
+      "locationId": "loc_main",
+      "locationName": "WH-MAIN (Tejgaon Central)",
+      "bin": "VAULT-01",
+      "movementType": "OPENING_BALANCE",
+      "qtyChange": 4,
+      "balanceAfter": 4,
+      "unitCost": 340000,
+      "totalValue": 1360000,
+      "reference": "OB-INIT-2026",
+      "notes": "System Baseline Opening Stock",
+      "performedBy": "System Auditor",
+      "createdAt": "2026-10-22T06:59:45.029Z"
+    },
+    {
+      "id": "ldg_init_item_jewel_2",
+      "itemId": "item_jewel_2",
+      "sku": "JWL-RING-GIA-150",
+      "itemTitle": "GIA Certified 1.50 Carat Solitaire Diamond Ring",
+      "locationId": "loc_main",
+      "locationName": "WH-MAIN (Tejgaon Central)",
+      "bin": "VAULT-02",
+      "movementType": "OPENING_BALANCE",
+      "qtyChange": 3,
+      "balanceAfter": 3,
+      "unitCost": 460000,
+      "totalValue": 1380000,
+      "reference": "OB-INIT-2026",
+      "notes": "System Baseline Opening Stock",
+      "performedBy": "System Auditor",
+      "createdAt": "2026-10-22T06:59:45.029Z"
+    }
+  ],
+  "users": [
+    {
+      "id": "usr_royaldiamond_admin",
+      "name": "Royal Diamond & Gold Jewelry Admin",
+      "email": "admin@royaldiamond.com",
+      "role": "TENANT_ADMIN",
+      "createdAt": "2026-10-22T06:59:45.029Z"
+    }
+  ]
+}

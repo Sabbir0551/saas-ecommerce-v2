@@ -1,0 +1,240 @@
+{
+  "tenantId": "makeover",
+  "subdomain": "makeover",
+  "dbName": "tenant_makeover",
+  "createdAt": "2026-10-21T10:15:04.529Z",
+  "businessType": "barber_salon",
+  "archetype": "APPOINTMENT_BOOKING",
+  "categories": [
+    {
+      "id": "cat_1",
+      "name": "Hair Styling & Cut",
+      "slug": "hair-styling---cut"
+    },
+    {
+      "id": "cat_2",
+      "name": "Beard Sculpting",
+      "slug": "beard-sculpting"
+    },
+    {
+      "id": "cat_3",
+      "name": "Skin & Facials",
+      "slug": "skin---facials"
+    },
+    {
+      "id": "cat_4",
+      "name": "Bridal & Party Makeover",
+      "slug": "bridal---party-makeover"
+    },
+    {
+      "id": "cat_5",
+      "name": "Scalp Therapy",
+      "slug": "scalp-therapy"
+    }
+  ],
+  "brands": [
+    {
+      "id": "brand_1",
+      "name": "Official Certified",
+      "slug": "official-certified",
+      "logo": null
+    },
+    {
+      "id": "brand_2",
+      "name": "Signature Collection",
+      "slug": "signature-collection",
+      "logo": null
+    }
+  ],
+  "items": [
+    {
+      "id": "item_makeover_1",
+      "title": "Royal Executive Grooming Package (Haircut, Beard Trim & Charcoal Facial)",
+      "slug": "royal-executive-grooming",
+      "shortDescription": "Signature haircut, hot towel beard styling, exfoliating charcoal facial mask, and relaxing shoulder massage.",
+      "description": "<p>Signature haircut, hot towel beard styling, exfoliating charcoal facial mask, and relaxing shoulder massage.</p>",
+      "price": 1800,
+      "comparePrice": 2400,
+      "stockQuantity": 20,
+      "itemType": "SERVICE_APPOINTMENT",
+      "images": [
+        "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=800&q=80"
+      ],
+      "sku": "AL-ROYA-VER1",
+      "barcode": "880106397749",
+      "costPrice": 1170,
+      "safetyStock": 5,
+      "locationId": "loc_main",
+      "bin": "A-01-01"
+    }
+  ],
+  "orders": [
+    {
+      "id": "ord_1792577735105_1",
+      "orderNumber": "ORD-892110",
+      "customerName": "Tanvir Ahmed",
+      "customerPhone": "+880 1711-554433",
+      "customerEmail": "tanvir.ahmed@gmail.com",
+      "shippingAddress": "House 34, Road 11, Banani",
+      "city": "Dhaka",
+      "businessCategory": "fashion_clothing",
+      "orderType": "PHYSICAL_PRODUCT",
+      "items": [
+        {
+          "itemTitle": "Handcrafted Royal Dhakai Jamdani Saree",
+          "variantTitle": "Gold Zari Cream",
+          "quantity": 1,
+          "price": 6500,
+          "subtotal": 6500
+        }
+      ],
+      "deliveryCharge": 60,
+      "totalAmount": 6560,
+      "paymentMethod": "COD",
+      "orderStatus": "SHIPPED",
+      "courier": "Steadfast Courier",
+      "trackingCode": "STEAD-892110-BD",
+      "notes": "Please deliver after 2:00 PM",
+      "createdAt": "2026-10-21T06:15:35.105Z"
+    },
+    {
+      "id": "ord_1792577735105_2",
+      "orderNumber": "ORD-892111",
+      "customerName": "Nusrat Jahan",
+      "customerPhone": "+880 1819-332211",
+      "customerEmail": "nusrat.jahan@hotmail.com",
+      "shippingAddress": "East Nasirabad, GEC Circle",
+      "city": "Chattogram",
+      "businessCategory": "fashion_clothing",
+      "orderType": "PHYSICAL_PRODUCT",
+      "items": [
+        {
+          "itemTitle": "Platinum Cotton Exclusive Semi-Long Panjabi",
+          "variantTitle": "Navy Blue (Size 42)",
+          "quantity": 1,
+          "price": 2850,
+          "subtotal": 2850
+        }
+      ],
+      "deliveryCharge": 120,
+      "totalAmount": 2970,
+      "paymentMethod": "COD",
+      "orderStatus": "PROCESSING",
+      "courier": "RedX Delivery",
+      "trackingCode": "PATH-441098-CTG",
+      "notes": "Call before dispatching",
+      "createdAt": "2026-10-21T09:15:35.105Z",
+      "updatedAt": "2026-10-21T10:17:50.526Z"
+    },
+    {
+      "id": "ord_1792577735105_3",
+      "orderNumber": "ORD-892112",
+      "customerName": "Mahmudul Hasan",
+      "customerPhone": "+880 1912-778899",
+      "customerEmail": "mahmud.h@gmail.com",
+      "shippingAddress": "Sector 4, Uttara Model Town",
+      "city": "Dhaka",
+      "businessCategory": "fashion_clothing",
+      "orderType": "PHYSICAL_PRODUCT",
+      "items": [
+        {
+          "itemTitle": "Handcrafted Royal Dhakai Jamdani Saree",
+          "variantTitle": "Deep Crimson",
+          "quantity": 1,
+          "price": 6500,
+          "subtotal": 6500
+        }
+      ],
+      "deliveryCharge": 60,
+      "totalAmount": 6560,
+      "paymentMethod": "COD",
+      "orderStatus": "PENDING",
+      "courier": "Pending Assignment",
+      "trackingCode": "",
+      "notes": "Urgent delivery requested",
+      "createdAt": "2026-10-21T10:15:35.105Z"
+    }
+  ],
+  "settings": {
+    "name": "Makeover",
+    "phone": "01522552233",
+    "email": "makeover@saasengine.com",
+    "currency": "BDT",
+    "theme": "modern_slate"
+  },
+  "media": [
+    {
+      "id": "med_1792577727981_1",
+      "title": "Exclusive Designer Collection & Fabric Review",
+      "categoryId": "all",
+      "categoryName": "Featured Collection",
+      "type": "YOUTUBE",
+      "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "embedUrl": "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?rel=0",
+      "thumbnail": "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=800&q=80",
+      "createdAt": "2026-10-21T10:15:27.981Z"
+    },
+    {
+      "id": "med_1792577727981_2",
+      "title": "Customer Unboxing & Genuine Quality Review Live Video",
+      "categoryId": "all",
+      "categoryName": "General Highlights",
+      "type": "FACEBOOK",
+      "url": "https://www.facebook.com/facebook/videos/10153231379946729/",
+      "embedUrl": "https://www.facebook.com/plugins/video.php?height=314&href=https%3A%2F%2Fwww.facebook.com%2Ffacebook%2Fvideos%2F10153231379946729%2F&show_text=false&width=560",
+      "thumbnail": "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=800&q=80",
+      "createdAt": "2026-10-21T10:15:27.981Z"
+    }
+  ],
+  "locations": [
+    {
+      "id": "loc_main",
+      "name": "Main Central Warehouse (ঢাকা কেন্দ্রীয় গুদাম)",
+      "code": "WH-MAIN",
+      "address": "Tejgaon Industrial Area, Dhaka",
+      "bins": [
+        "A-01-01",
+        "A-01-02",
+        "B-02-01",
+        "B-02-02",
+        "C-01-01"
+      ],
+      "isDefault": true,
+      "createdAt": "2026-10-21T10:41:57.942Z"
+    },
+    {
+      "id": "loc_showroom",
+      "name": "Dhanmondi Showroom & Pickup Point",
+      "code": "SH-DHN",
+      "address": "Road 27, Dhanmondi, Dhaka",
+      "bins": [
+        "SH-FRONT",
+        "SH-BACK",
+        "SH-SHELF-01"
+      ],
+      "isDefault": false,
+      "createdAt": "2026-10-21T10:41:57.944Z"
+    }
+  ],
+  "stockReservations": [],
+  "stockLedger": [
+    {
+      "id": "ldg_init_item_makeover_1",
+      "itemId": "item_makeover_1",
+      "sku": "AL-ROYA-VER1",
+      "itemTitle": "Royal Executive Grooming Package (Haircut, Beard Trim & Charcoal Facial)",
+      "locationId": "loc_main",
+      "locationName": "WH-MAIN (Tejgaon Central)",
+      "bin": "A-01-01",
+      "movementType": "OPENING_BALANCE",
+      "qtyChange": 20,
+      "balanceAfter": 20,
+      "unitCost": 1170,
+      "totalValue": 23400,
+      "reference": "OB-INIT-2026",
+      "notes": "System Baseline Opening Stock",
+      "performedBy": "System Auditor",
+      "createdAt": "2026-10-21T10:54:15.165Z"
+    }
+  ]
+}

@@ -1,0 +1,273 @@
+{
+  "tenantId": "fashion",
+  "subdomain": "fashion",
+  "dbName": "tenant_fashion",
+  "createdAt": "2026-10-20T10:00:00.000Z",
+  "settings": {
+    "name": "Gulshan Fashion & Boutique",
+    "phone": "+880 1711-223344",
+    "email": "info@gulshanfashion.com",
+    "address": "Road 11, Block D, Gulshan 1, Dhaka",
+    "currency": "BDT",
+    "theme": "modern_slate",
+    "announcementText": "🎉 Special Launch Offer! Free express delivery across the country on all orders",
+    "themeConfig": {
+      "primaryColor": "#e11d48",
+      "accentColor": "#4f46e5"
+    }
+  },
+  "categories": [
+    {
+      "id": "cat_fsh_1",
+      "name": "Handcrafted Jamdani Sarees",
+      "slug": "handcrafted-jamdani-sarees",
+      "promoSlogan": "Original 84-Count Pure Cotton Dhakai Jamdani - Handloom Certified",
+      "bannerImage": "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=1200&q=80"
+    },
+    {
+      "id": "cat_fsh_2",
+      "name": "Exclusive Panjabi & Kurta",
+      "slug": "exclusive-panjabi---kurta",
+      "promoSlogan": "Hand-embroidered Premium Silk & Fine Cotton Eid Panjabi",
+      "bannerImage": null
+    },
+    {
+      "id": "cat_fsh_3",
+      "name": "Silk Scarves & Dupattas",
+      "slug": "silk-scarves---dupattas",
+      "promoSlogan": "Pure Rajshahi Silk with Gold Zari Border",
+      "bannerImage": null
+    },
+    {
+      "id": "cat_fsh_4",
+      "name": "Formal & Festive Wear",
+      "slug": "formal---festive-wear",
+      "promoSlogan": "Designer Wedding & Festive Ethnic Wear",
+      "bannerImage": null
+    }
+  ],
+  "brands": [
+    {
+      "id": "brand_fsh_1",
+      "name": "Gulshan Signature",
+      "slug": "gulshan-signature",
+      "logo": null
+    },
+    {
+      "id": "brand_fsh_2",
+      "name": "Heritage Weaves",
+      "slug": "heritage-weaves",
+      "logo": null
+    },
+    {
+      "id": "brand_fsh_3",
+      "name": "Royal Bengal",
+      "slug": "royal-bengal",
+      "logo": null
+    }
+  ],
+  "items": [
+    {
+      "id": "item_fsh_1",
+      "title": "Handcrafted Royal Dhakai Jamdani Saree (84 Count)",
+      "slug": "royal-jamdani-saree",
+      "shortDescription": "Pure combed cotton with gold zari handwoven by master craftsmen in Rupganj.",
+      "description": "<p>Experience timeless Bengal heritage with this authentic 84-count handloom Dhakai Jamdani Saree. Intricately woven over 45 days with fine metallic gold zari work.</p>",
+      "itemType": "PHYSICAL_PRODUCT",
+      "price": 6500,
+      "comparePrice": 8500,
+      "stockQuantity": 15,
+      "costPrice": 4200,
+      "safetyStock": 3,
+      "sku": "FSH-JAMD-001",
+      "barcode": "8809001001",
+      "bin": "A-01-01",
+      "locationId": "loc_main",
+      "categoryId": "cat_fsh_1",
+      "categoryName": "Handcrafted Jamdani Sarees",
+      "brandId": "brand_fsh_2",
+      "brandName": "Heritage Weaves",
+      "images": [
+        "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=800&q=80"
+      ],
+      "variants": ["Crimson Red", "Royal Navy", "Emerald Green"],
+      "isActive": true,
+      "customAttributes": {
+        "fabric": "84-Count Combed Cotton",
+        "weavingType": "Handloom Jacquard Weave",
+        "origin": "Rupganj, Narayanganj"
+      }
+    },
+    {
+      "id": "item_fsh_2",
+      "title": "Embroidered Royal Silk Men's Festive Panjabi",
+      "slug": "royal-silk-panjabi",
+      "shortDescription": "Raw silk festive panjabi with subtle hand zardosi collar embroidery.",
+      "description": "<p>Tailored for elegance and festive grandeur. Features a tailored mandarin collar with handcrafted metal buttons and micro-thread geometric motif embroidery.</p>",
+      "itemType": "PHYSICAL_PRODUCT",
+      "price": 4200,
+      "comparePrice": 5200,
+      "stockQuantity": 25,
+      "costPrice": 2600,
+      "safetyStock": 5,
+      "sku": "FSH-PANJ-002",
+      "barcode": "8809001002",
+      "bin": "A-01-02",
+      "locationId": "loc_main",
+      "categoryId": "cat_fsh_2",
+      "categoryName": "Exclusive Panjabi & Kurta",
+      "brandId": "brand_fsh_1",
+      "brandName": "Gulshan Signature",
+      "images": [
+        "https://images.unsplash.com/photo-1597983073493-88cd35cf93b0?auto=format&fit=crop&w=800&q=80"
+      ],
+      "variants": ["Size 38 (M)", "Size 40 (L)", "Size 42 (XL)", "Size 44 (XXL)"],
+      "isActive": true,
+      "customAttributes": {
+        "fabric": "Art Raw Silk",
+        "cut": "Regular Fit Slim Silhouette",
+        "care": "Dry Clean Recommended"
+      }
+    },
+    {
+      "id": "item_fsh_3",
+      "title": "Pure Rajshahi Silk Scarf & Festive Dupatta",
+      "slug": "rajshahi-silk-scarf",
+      "shortDescription": "100% genuine Mulberry silk hand-dyed with traditional floral block print.",
+      "description": "<p>Ultra-light, breathable, and lustrous Mulberry silk scarf from the historic silk mills of Rajshahi. Accented with natural vegetable dyes and delicate fringed ends.</p>",
+      "itemType": "PHYSICAL_PRODUCT",
+      "price": 2800,
+      "comparePrice": 3400,
+      "stockQuantity": 18,
+      "costPrice": 1700,
+      "safetyStock": 4,
+      "sku": "FSH-SILK-003",
+      "barcode": "8809001003",
+      "bin": "B-02-01",
+      "locationId": "loc_main",
+      "categoryId": "cat_fsh_3",
+      "categoryName": "Silk Scarves & Dupattas",
+      "brandId": "brand_fsh_3",
+      "brandName": "Royal Bengal",
+      "images": [
+        "https://images.unsplash.com/photo-1601924994987-69e26d50dc26?auto=format&fit=crop&w=800&q=80"
+      ],
+      "variants": ["Gold Mustard", "Rose Quartz Pink", "Midnight Teal"],
+      "isActive": true,
+      "customAttributes": {
+        "material": "100% Pure Mulberry Silk",
+        "length": "2.5 Meters",
+        "weight": "85 Grams"
+      }
+    }
+  ],
+  "orders": [
+    {
+      "id": "ord_fsh_1",
+      "orderNumber": "FSH-261001",
+      "customerName": "Sadia Afrin",
+      "customerPhone": "+880 1712-445566",
+      "customerEmail": "sadia.afrin@gmail.com",
+      "shippingAddress": "House 14, Road 5, Banani, Dhaka",
+      "city": "Dhaka",
+      "businessCategory": "fashion_clothing",
+      "orderType": "STANDARD",
+      "source": "ONLINE_STOREFRONT",
+      "items": [
+        {
+          "itemTitle": "Handcrafted Royal Dhakai Jamdani Saree (84 Count)",
+          "variantTitle": "Crimson Red",
+          "quantity": 1,
+          "price": 6500,
+          "subtotal": 6500
+        }
+      ],
+      "deliveryCharge": 60,
+      "totalAmount": 6560,
+      "paymentMethod": "COD",
+      "orderStatus": "DELIVERED",
+      "courier": "Steadfast Courier",
+      "trackingCode": "ST-9988112",
+      "createdAt": "2026-10-21T09:30:00.000Z"
+    },
+    {
+      "id": "ord_fsh_2",
+      "orderNumber": "FSH-261002",
+      "customerName": "Tariqur Rahman",
+      "customerPhone": "+880 1819-332211",
+      "customerEmail": "tariq.rahman@yahoo.com",
+      "shippingAddress": "Apartment 4B, Sector 7, Uttara, Dhaka",
+      "city": "Dhaka",
+      "businessCategory": "fashion_clothing",
+      "orderType": "STANDARD",
+      "source": "ONLINE_STOREFRONT",
+      "items": [
+        {
+          "itemTitle": "Embroidered Royal Silk Men's Festive Panjabi",
+          "variantTitle": "Size 40 (L)",
+          "quantity": 1,
+          "price": 4200,
+          "subtotal": 4200
+        }
+      ],
+      "deliveryCharge": 60,
+      "totalAmount": 4260,
+      "paymentMethod": "COD",
+      "orderStatus": "PROCESSING",
+      "courier": "Pathao Express",
+      "trackingCode": "PTH-771120",
+      "createdAt": "2026-10-21T14:15:00.000Z"
+    }
+  ],
+  "media": [
+    {
+      "id": "med_fsh_1",
+      "title": "Exclusive Festive Jamdani & Silk Handloom Showcase 2026",
+      "categoryId": "cat_fsh_1",
+      "categoryName": "Handcrafted Jamdani Sarees",
+      "type": "YOUTUBE",
+      "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "embedUrl": "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?rel=0",
+      "thumbnail": "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80",
+      "createdAt": "2026-10-20T10:00:00.000Z"
+    }
+  ],
+  "locations": [
+    {
+      "id": "loc_main",
+      "name": "Gulshan Central Boutique Showroom",
+      "code": "WH-GLS",
+      "address": "Road 11, Block D, Gulshan 1, Dhaka",
+      "bins": ["A-01-01", "A-01-02", "B-02-01"],
+      "isDefault": true,
+      "createdAt": "2026-10-20T10:00:00.000Z"
+    }
+  ],
+  "stockReservations": [],
+  "stockLedger": [
+    {
+      "id": "ldg_init_fsh_1",
+      "itemId": "item_fsh_1",
+      "sku": "FSH-JAMD-001",
+      "itemTitle": "Handcrafted Royal Dhakai Jamdani Saree (84 Count)",
+      "locationId": "loc_main",
+      "locationName": "WH-GLS (Gulshan Central)",
+      "bin": "A-01-01",
+      "movementType": "OPENING_BALANCE",
+      "qtyChange": 15,
+      "balanceAfter": 15,
+      "unitCost": 4200,
+      "totalValue": 63000,
+      "reference": "OB-FSH-2026",
+      "notes": "Opening Stock Baseline",
+      "performedBy": "System Auditor",
+      "createdAt": "2026-10-20T10:00:00.000Z"
+    }
+  ],
+  "stockAudits": [],
+  "suppliers": [],
+  "purchaseOrders": [],
+  "goodsReceiveNotes": [],
+  "stockTransfers": []
+}

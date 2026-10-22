@@ -1,0 +1,241 @@
+{
+  "tenantId": "aquapure",
+  "subdomain": "aquapure",
+  "dbName": "tenant_aquapure",
+  "createdAt": "2026-10-22T06:59:45.031Z",
+  "businessType": "water_treatment",
+  "archetype": "PHYSICAL_STORE",
+  "settings": {
+    "name": "AquaPure RO Water Technology",
+    "phone": "+880 1813-223344",
+    "email": "care@aquapurebd.com",
+    "address": "Kafrul Main Road, Mirpur 14, Dhaka",
+    "currency": "BDT",
+    "theme": "ocean_blue",
+    "announcementText": "💧 100% Arsenic, Iron & Microplastic Removal: NSF-Certified RO Purifiers with Free Installation!",
+    "themeConfig": {
+      "primaryColor": "#0284c7",
+      "accentColor": "#38bdf8"
+    },
+    "slogan": "💧 100% Arsenic, Iron & Microplastic Removal: NSF-Certified RO Purifiers with Free Installation!",
+    "logo": null,
+    "bannerImage": null
+  },
+  "categories": [
+    {
+      "id": "cat_water_1",
+      "name": "Home RO Water Purifiers",
+      "slug": "home-ro-water-purifiers",
+      "promoSlogan": "6-stage reverse osmosis purifiers for clean sweet water"
+    },
+    {
+      "id": "cat_water_2",
+      "name": "Commercial UV Filtration",
+      "slug": "commercial-uv-filtration",
+      "promoSlogan": "High-capacity systems for offices, schools, and cafes"
+    },
+    {
+      "id": "cat_water_3",
+      "name": "Industrial WTP Plants",
+      "slug": "industrial-wtp-plants",
+      "promoSlogan": "Garment and textile water treatment plants"
+    },
+    {
+      "id": "cat_water_4",
+      "name": "Replacement Filters & Membranes",
+      "slug": "replacement-filters---membranes",
+      "promoSlogan": "Genuine Dow Filmtec 75 GPD & Kemflo sediment cartridges"
+    }
+  ],
+  "brands": [
+    {
+      "id": "brand_water_1",
+      "name": "Aquafresh USA",
+      "slug": "aquafresh"
+    },
+    {
+      "id": "brand_water_2",
+      "name": "Dow Filmtec",
+      "slug": "dow-filmtec"
+    },
+    {
+      "id": "brand_water_3",
+      "name": "Kent RO Systems",
+      "slug": "kent-ro"
+    }
+  ],
+  "items": [
+    {
+      "id": "item_water_1",
+      "title": "Aquafresh 6-Stage RO + Alkaline Water Purifier",
+      "slug": "aquafresh-ro-alkaline-purifier",
+      "shortDescription": "100% arsenic, iron and chlorine elimination with automated TDS controller and 12-liter storage.",
+      "description": "<p>Top-rated drinking water system. Retains beneficial natural minerals while neutralizing acidity. Includes automated booster pump, food-grade antibacterial storage tank, and smart faucet.</p>",
+      "price": 16500,
+      "comparePrice": 19500,
+      "stockQuantity": 25,
+      "itemType": "PHYSICAL_PRODUCT",
+      "images": [
+        "https://images.unsplash.com/photo-1548839140-29a749e1bc4e?auto=format&fit=crop&w=800&q=80"
+      ],
+      "sku": "AQU-RO-6ST-ALK",
+      "barcode": "195949000601",
+      "costPrice": 11500,
+      "safetyStock": 5,
+      "locationId": "loc_main",
+      "bin": "W-01-01"
+    },
+    {
+      "id": "item_water_2",
+      "title": "Dow Filmtec 75 GPD High-Rejection RO Membrane",
+      "slug": "dow-filmtec-75gpd-membrane",
+      "shortDescription": "Original USA polyamide thin-film composite reverse osmosis membrane.",
+      "description": "<p>99% salt and heavy metal rejection rate. Certified by NSF International for drinking water safety standards.</p>",
+      "price": 2800,
+      "comparePrice": 3200,
+      "stockQuantity": 60,
+      "itemType": "PHYSICAL_PRODUCT",
+      "images": [
+        "https://images.unsplash.com/photo-1527613426441-4da17471b66d?auto=format&fit=crop&w=800&q=80"
+      ],
+      "sku": "DOW-MEM-75GPD",
+      "barcode": "195949000602",
+      "costPrice": 1800,
+      "safetyStock": 12,
+      "locationId": "loc_main",
+      "bin": "W-01-02"
+    }
+  ],
+  "orders": [
+    {
+      "id": "ord_water_1",
+      "orderNumber": "ORD-AP-601",
+      "customerName": "Rafiqul Islam",
+      "customerPhone": "+880 1913-889900",
+      "customerEmail": "rafiqul.islam@bankasia.com",
+      "shippingAddress": "House 5, Road 18, Block B, Bashundhara R/A",
+      "city": "Dhaka",
+      "businessCategory": "water_treatment",
+      "orderType": "PHYSICAL_PRODUCT",
+      "items": [
+        {
+          "itemTitle": "Aquafresh 6-Stage RO + Alkaline Water Purifier",
+          "variantTitle": "Default",
+          "quantity": 1,
+          "price": 16500,
+          "subtotal": 16500
+        }
+      ],
+      "deliveryCharge": 0,
+      "totalAmount": 16500,
+      "paymentMethod": "COD",
+      "orderStatus": "PROCESSING",
+      "courier": "Technician Installation Team",
+      "trackingCode": "TECH-AP-1022",
+      "notes": "Installation technician scheduled for 4 PM",
+      "createdAt": "2026-10-21T10:00:00Z"
+    }
+  ],
+  "media": [
+    {
+      "id": "med_aquapure_1",
+      "title": "AquaPure RO Water Technology - Official Showcase & Product Review",
+      "categoryId": "all",
+      "categoryName": "Featured Highlights",
+      "type": "YOUTUBE",
+      "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "embedUrl": "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?rel=0",
+      "thumbnail": "https://images.unsplash.com/photo-1548839140-29a749e1bc4e?auto=format&fit=crop&w=800&q=80",
+      "createdAt": "2026-10-22T06:59:45.031Z"
+    },
+    {
+      "id": "med_aquapure_2",
+      "title": "Customer Unboxing & Live Walkthrough Video",
+      "categoryId": "all",
+      "categoryName": "Customer Reviews",
+      "type": "FACEBOOK",
+      "url": "https://www.facebook.com/facebook/videos/10153231379946729/",
+      "embedUrl": "https://www.facebook.com/plugins/video.php?height=314&href=https%3A%2F%2Fwww.facebook.com%2Ffacebook%2Fvideos%2F10153231379946729%2F&show_text=false&width=560",
+      "thumbnail": "https://images.unsplash.com/photo-1527613426441-4da17471b66d?auto=format&fit=crop&w=800&q=80",
+      "createdAt": "2026-10-22T06:59:45.031Z"
+    }
+  ],
+  "locations": [
+    {
+      "id": "loc_main",
+      "name": "Main Central Warehouse (ঢাকা কেন্দ্রীয় গুদাম)",
+      "code": "WH-MAIN",
+      "address": "Tejgaon Industrial Area, Dhaka",
+      "bins": [
+        "A-01-01",
+        "A-01-02",
+        "B-01-01",
+        "B-01-02",
+        "C-01-01"
+      ],
+      "isDefault": true,
+      "createdAt": "2026-10-22T06:59:45.031Z"
+    },
+    {
+      "id": "loc_showroom",
+      "name": "AquaPure RO Water Technology Showroom & Pickup Point",
+      "code": "SH-MAIN",
+      "address": "Kafrul Main Road, Mirpur 14, Dhaka",
+      "bins": [
+        "SH-FRONT",
+        "SH-BACK",
+        "SH-SHELF-01"
+      ],
+      "isDefault": false,
+      "createdAt": "2026-10-22T06:59:45.031Z"
+    }
+  ],
+  "stockReservations": [],
+  "stockLedger": [
+    {
+      "id": "ldg_init_item_water_1",
+      "itemId": "item_water_1",
+      "sku": "AQU-RO-6ST-ALK",
+      "itemTitle": "Aquafresh 6-Stage RO + Alkaline Water Purifier",
+      "locationId": "loc_main",
+      "locationName": "WH-MAIN (Tejgaon Central)",
+      "bin": "W-01-01",
+      "movementType": "OPENING_BALANCE",
+      "qtyChange": 25,
+      "balanceAfter": 25,
+      "unitCost": 11500,
+      "totalValue": 287500,
+      "reference": "OB-INIT-2026",
+      "notes": "System Baseline Opening Stock",
+      "performedBy": "System Auditor",
+      "createdAt": "2026-10-22T06:59:45.031Z"
+    },
+    {
+      "id": "ldg_init_item_water_2",
+      "itemId": "item_water_2",
+      "sku": "DOW-MEM-75GPD",
+      "itemTitle": "Dow Filmtec 75 GPD High-Rejection RO Membrane",
+      "locationId": "loc_main",
+      "locationName": "WH-MAIN (Tejgaon Central)",
+      "bin": "W-01-02",
+      "movementType": "OPENING_BALANCE",
+      "qtyChange": 60,
+      "balanceAfter": 60,
+      "unitCost": 1800,
+      "totalValue": 108000,
+      "reference": "OB-INIT-2026",
+      "notes": "System Baseline Opening Stock",
+      "performedBy": "System Auditor",
+      "createdAt": "2026-10-22T06:59:45.031Z"
+    }
+  ],
+  "users": [
+    {
+      "id": "usr_aquapure_admin",
+      "name": "AquaPure RO Water Technology Admin",
+      "email": "admin@aquapure.com",
+      "role": "TENANT_ADMIN",
+      "createdAt": "2026-10-22T06:59:45.031Z"
+    }
+  ]
+}

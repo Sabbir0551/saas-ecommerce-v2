@@ -1,0 +1,243 @@
+{
+  "tenantId": "chillibite",
+  "subdomain": "chillibite",
+  "dbName": "tenant_chillibite",
+  "createdAt": "2026-10-22T06:59:45.032Z",
+  "businessType": "restaurant_food",
+  "archetype": "FOOD_MENU",
+  "settings": {
+    "name": "ChilliBite Gourmet Kitchen & Cafe",
+    "phone": "+880 1715-334455",
+    "email": "orders@chillibitecafe.com",
+    "address": "Road 11, Block D, Banani, Dhaka",
+    "currency": "BDT",
+    "theme": "crimson_fire",
+    "announcementText": "🍔 Hot & Fresh 30-Minute Food Delivery Across Banani, Gulshan & Baridhara!",
+    "themeConfig": {
+      "primaryColor": "#e11d48",
+      "accentColor": "#fb7185"
+    },
+    "slogan": "🍔 Hot & Fresh 30-Minute Food Delivery Across Banani, Gulshan & Baridhara!",
+    "logo": null,
+    "bannerImage": null
+  },
+  "categories": [
+    {
+      "id": "cat_food_1",
+      "name": "Signature Gourmet Burgers",
+      "slug": "signature-gourmet-burgers",
+      "promoSlogan": "Charbroiled Australian beef with brioche buns"
+    },
+    {
+      "id": "cat_food_2",
+      "name": "Wood-Fired Neapolitan Pizza",
+      "slug": "wood-fired-neapolitan-pizza",
+      "promoSlogan": "Slow-fermented dough baked at 450°C"
+    },
+    {
+      "id": "cat_food_3",
+      "name": "Artisanal Coffee & Mocktails",
+      "slug": "artisanal-coffee---mocktails",
+      "promoSlogan": "Freshly pulled single-origin espresso and coolers"
+    },
+    {
+      "id": "cat_food_4",
+      "name": "Crispy Appetizers & Wings",
+      "slug": "crispy-appetizers---wings",
+      "promoSlogan": "Smoked buffalo wings with honey mustard"
+    }
+  ],
+  "brands": [
+    {
+      "id": "brand_food_1",
+      "name": "ChilliBite Master Kitchen",
+      "slug": "chillibite-kitchen"
+    },
+    {
+      "id": "brand_food_2",
+      "name": "Segafredo Zanetti",
+      "slug": "segafredo"
+    }
+  ],
+  "items": [
+    {
+      "id": "item_food_1",
+      "title": "Truffle Mushroom Angus Beef Burger & Hand-Cut Fries",
+      "slug": "truffle-mushroom-angus-burger",
+      "shortDescription": "Charbroiled Australian beef patty, melted aged cheddar, sauteed wild mushrooms, and truffle aioli on brioche.",
+      "description": "<p>A masterpiece for gourmet burger lovers. 180g freshly ground Australian Angus beef seared medium-well, layered with imported sharp cheddar, earthy sauteed portobello mushrooms, and white truffle aioli.</p>",
+      "price": 750,
+      "comparePrice": 850,
+      "stockQuantity": 100,
+      "itemType": "PHYSICAL_PRODUCT",
+      "images": [
+        "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=800&q=80"
+      ],
+      "sku": "BUR-ANG-TRF-01",
+      "barcode": "195949000701",
+      "costPrice": 420,
+      "safetyStock": 20,
+      "locationId": "loc_main",
+      "bin": "KITCHEN-HOT"
+    },
+    {
+      "id": "item_food_2",
+      "title": "Wood-Fired Margherita Pizza (Fresh Buffalo Mozzarella)",
+      "slug": "wood-fired-margherita-pizza",
+      "shortDescription": "San Marzano tomato sauce, fresh buffalo mozzarella, fragrant sweet basil, and extra virgin olive oil.",
+      "description": "<p>Traditional Neapolitan crust fermented for 48 hours. Cooked in our Italian refractory stone oven for leopard-spotted crispy perfection.</p>",
+      "price": 950,
+      "comparePrice": 1100,
+      "stockQuantity": 80,
+      "itemType": "PHYSICAL_PRODUCT",
+      "images": [
+        "https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?auto=format&fit=crop&w=800&q=80"
+      ],
+      "sku": "PIZ-MARG-12IN",
+      "barcode": "195949000702",
+      "costPrice": 510,
+      "safetyStock": 15,
+      "locationId": "loc_main",
+      "bin": "KITCHEN-OVEN"
+    }
+  ],
+  "orders": [
+    {
+      "id": "ord_food_1",
+      "orderNumber": "ORD-CB-701",
+      "customerName": "Samir Hossain",
+      "customerPhone": "+880 1818-554433",
+      "customerEmail": "samir.hossain@gmail.com",
+      "shippingAddress": "House 22, Road 17, Banani",
+      "city": "Dhaka",
+      "businessCategory": "restaurant_food",
+      "orderType": "PHYSICAL_PRODUCT",
+      "items": [
+        {
+          "itemTitle": "Truffle Mushroom Angus Beef Burger & Hand-Cut Fries",
+          "variantTitle": "Medium-Well",
+          "quantity": 2,
+          "price": 750,
+          "subtotal": 1500
+        },
+        {
+          "itemTitle": "Wood-Fired Margherita Pizza (Fresh Buffalo Mozzarella)",
+          "variantTitle": "12 Inch",
+          "quantity": 1,
+          "price": 950,
+          "subtotal": 950
+        }
+      ],
+      "deliveryCharge": 60,
+      "totalAmount": 2510,
+      "paymentMethod": "COD",
+      "orderStatus": "PROCESSING",
+      "courier": "ChilliBite Express Rider",
+      "trackingCode": "RIDER-CB-12",
+      "notes": "Extra ketchup sachets please",
+      "createdAt": "2026-10-21T11:45:00Z"
+    }
+  ],
+  "media": [
+    {
+      "id": "med_chillibite_1",
+      "title": "ChilliBite Gourmet Kitchen & Cafe - Official Showcase & Product Review",
+      "categoryId": "all",
+      "categoryName": "Featured Highlights",
+      "type": "YOUTUBE",
+      "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "embedUrl": "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?rel=0",
+      "thumbnail": "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=800&q=80",
+      "createdAt": "2026-10-22T06:59:45.032Z"
+    },
+    {
+      "id": "med_chillibite_2",
+      "title": "Customer Unboxing & Live Walkthrough Video",
+      "categoryId": "all",
+      "categoryName": "Customer Reviews",
+      "type": "FACEBOOK",
+      "url": "https://www.facebook.com/facebook/videos/10153231379946729/",
+      "embedUrl": "https://www.facebook.com/plugins/video.php?height=314&href=https%3A%2F%2Fwww.facebook.com%2Ffacebook%2Fvideos%2F10153231379946729%2F&show_text=false&width=560",
+      "thumbnail": "https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?auto=format&fit=crop&w=800&q=80",
+      "createdAt": "2026-10-22T06:59:45.032Z"
+    }
+  ],
+  "locations": [
+    {
+      "id": "loc_main",
+      "name": "Main Central Warehouse (ঢাকা কেন্দ্রীয় গুদাম)",
+      "code": "WH-MAIN",
+      "address": "Tejgaon Industrial Area, Dhaka",
+      "bins": [
+        "A-01-01",
+        "A-01-02",
+        "B-01-01",
+        "B-01-02",
+        "C-01-01"
+      ],
+      "isDefault": true,
+      "createdAt": "2026-10-22T06:59:45.032Z"
+    },
+    {
+      "id": "loc_showroom",
+      "name": "ChilliBite Gourmet Kitchen & Cafe Showroom & Pickup Point",
+      "code": "SH-MAIN",
+      "address": "Road 11, Block D, Banani, Dhaka",
+      "bins": [
+        "SH-FRONT",
+        "SH-BACK",
+        "SH-SHELF-01"
+      ],
+      "isDefault": false,
+      "createdAt": "2026-10-22T06:59:45.032Z"
+    }
+  ],
+  "stockReservations": [],
+  "stockLedger": [
+    {
+      "id": "ldg_init_item_food_1",
+      "itemId": "item_food_1",
+      "sku": "BUR-ANG-TRF-01",
+      "itemTitle": "Truffle Mushroom Angus Beef Burger & Hand-Cut Fries",
+      "locationId": "loc_main",
+      "locationName": "WH-MAIN (Tejgaon Central)",
+      "bin": "KITCHEN-HOT",
+      "movementType": "OPENING_BALANCE",
+      "qtyChange": 100,
+      "balanceAfter": 100,
+      "unitCost": 420,
+      "totalValue": 42000,
+      "reference": "OB-INIT-2026",
+      "notes": "System Baseline Opening Stock",
+      "performedBy": "System Auditor",
+      "createdAt": "2026-10-22T06:59:45.032Z"
+    },
+    {
+      "id": "ldg_init_item_food_2",
+      "itemId": "item_food_2",
+      "sku": "PIZ-MARG-12IN",
+      "itemTitle": "Wood-Fired Margherita Pizza (Fresh Buffalo Mozzarella)",
+      "locationId": "loc_main",
+      "locationName": "WH-MAIN (Tejgaon Central)",
+      "bin": "KITCHEN-OVEN",
+      "movementType": "OPENING_BALANCE",
+      "qtyChange": 80,
+      "balanceAfter": 80,
+      "unitCost": 510,
+      "totalValue": 40800,
+      "reference": "OB-INIT-2026",
+      "notes": "System Baseline Opening Stock",
+      "performedBy": "System Auditor",
+      "createdAt": "2026-10-22T06:59:45.032Z"
+    }
+  ],
+  "users": [
+    {
+      "id": "usr_chillibite_admin",
+      "name": "ChilliBite Gourmet Kitchen & Cafe Admin",
+      "email": "admin@chillibite.com",
+      "role": "TENANT_ADMIN",
+      "createdAt": "2026-10-22T06:59:45.032Z"
+    }
+  ]
+}

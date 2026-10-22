@@ -1,0 +1,236 @@
+{
+  "tenantId": "aebanproperty",
+  "subdomain": "aebanproperty",
+  "dbName": "tenant_aebanproperty",
+  "createdAt": "2026-10-22T06:59:45.035Z",
+  "businessType": "real_estate",
+  "archetype": "LEAD_GEN_REAL_ESTATE",
+  "settings": {
+    "name": "Arban Property & Developments",
+    "phone": "+880 1711-002233",
+    "email": "sales@arbanproperty.com",
+    "address": "Arban Tower, 102 Bir Uttam C.R. Datta Road, Hatirpool, Dhaka",
+    "currency": "BDT",
+    "theme": "charcoal_estate",
+    "announcementText": "🏢 RAJUK Approved Luxury Residences & High-Yield Commercial Office Floors with 100% Legal Clearances.",
+    "themeConfig": {
+      "primaryColor": "#0f172a",
+      "accentColor": "#0ea5e9"
+    },
+    "slogan": "🏢 RAJUK Approved Luxury Residences & High-Yield Commercial Office Floors with 100% Legal Clearances.",
+    "logo": null,
+    "bannerImage": null
+  },
+  "categories": [
+    {
+      "id": "cat_prop_1",
+      "name": "Luxury Apartments",
+      "slug": "luxury-apartments",
+      "promoSlogan": "Gulshan, Banani, and Dhanmondi 3-4 bedroom condos"
+    },
+    {
+      "id": "cat_prop_2",
+      "name": "Private Country Villas",
+      "slug": "private-country-villas",
+      "promoSlogan": "Manicured vacation estates and gated residences"
+    },
+    {
+      "id": "cat_prop_3",
+      "name": "Commercial Spaces",
+      "slug": "commercial-spaces",
+      "promoSlogan": "Prime retail showrooms and corporate office towers"
+    },
+    {
+      "id": "cat_prop_4",
+      "name": "Residential Plots",
+      "slug": "residential-plots",
+      "promoSlogan": "Purbachal and Bashundhara registered corner plots"
+    }
+  ],
+  "brands": [
+    {
+      "id": "brand_prop_1",
+      "name": "Arban Signature Living",
+      "slug": "arban-signature"
+    },
+    {
+      "id": "brand_prop_2",
+      "name": "Crown Developer Alliance",
+      "slug": "crown-developer"
+    }
+  ],
+  "items": [
+    {
+      "id": "item_prop_1",
+      "title": "Huntleigh Luxury Country Estate & Villa (3 Acres)",
+      "slug": "huntleigh-luxury-country-estate-villa",
+      "shortDescription": "Architecturally designed 10,000 sq ft mansion set across 3 private manicured acres with resort-style pool.",
+      "description": "<p>A trophy residential estate. Features 6 master bedroom suites, indoor temperature-controlled infinity pool, smart home climate integration, and 24/7 dedicated security concierge.</p>",
+      "price": 55000000,
+      "comparePrice": 60000000,
+      "stockQuantity": 1,
+      "itemType": "PHYSICAL_PRODUCT",
+      "images": [
+        "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80"
+      ],
+      "sku": "EST-HUNT-VILLA-01",
+      "barcode": "195949001101",
+      "costPrice": 42000000,
+      "safetyStock": 1,
+      "locationId": "loc_main",
+      "bin": "PORTFOLIO"
+    },
+    {
+      "id": "item_prop_2",
+      "title": "Gulshan Diplomatic Zone Ultra-Luxury 4-Bedroom Apartment",
+      "slug": "gulshan-diplomatic-zone-4br-apartment",
+      "shortDescription": "3,850 sq ft duplex condo with double-height ceiling, Italian marble floors, and 3 reserved car parkings.",
+      "description": "<p>Located on Road 71, Gulshan 2. 100% power backup, rooftop infinity pool, state-of-the-art gym, and smart access control elevators.</p>",
+      "price": 42000000,
+      "comparePrice": 45000000,
+      "stockQuantity": 2,
+      "itemType": "PHYSICAL_PRODUCT",
+      "images": [
+        "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=800&q=80"
+      ],
+      "sku": "APT-GUL-3850-02",
+      "barcode": "195949001102",
+      "costPrice": 32000000,
+      "safetyStock": 1,
+      "locationId": "loc_main",
+      "bin": "PORTFOLIO"
+    }
+  ],
+  "orders": [
+    {
+      "id": "ord_prop_1",
+      "orderNumber": "LEAD-AP-1101",
+      "customerName": "Barrister Nayeem Akhter",
+      "customerPhone": "+880 1711-558899",
+      "customerEmail": "nayeem.law@chambers.com",
+      "shippingAddress": "Gulshan North Club Road, Dhaka",
+      "city": "Dhaka",
+      "businessCategory": "real_estate",
+      "orderType": "PHYSICAL_PRODUCT",
+      "items": [
+        {
+          "itemTitle": "Gulshan Diplomatic Zone Ultra-Luxury 4-Bedroom Apartment",
+          "variantTitle": "Unit 5A (North-East Facing)",
+          "quantity": 1,
+          "price": 42000000,
+          "subtotal": 42000000
+        }
+      ],
+      "deliveryCharge": 0,
+      "totalAmount": 42000000,
+      "paymentMethod": "COD",
+      "orderStatus": "PROCESSING",
+      "courier": "Executive Property Advisor",
+      "trackingCode": "DOC-AP-7788",
+      "notes": "Private site inspection arranged with architect",
+      "createdAt": "2026-10-20T16:30:00Z"
+    }
+  ],
+  "media": [
+    {
+      "id": "med_aebanproperty_1",
+      "title": "Arban Property & Developments - Official Showcase & Product Review",
+      "categoryId": "all",
+      "categoryName": "Featured Highlights",
+      "type": "YOUTUBE",
+      "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "embedUrl": "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?rel=0",
+      "thumbnail": "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80",
+      "createdAt": "2026-10-22T06:59:45.035Z"
+    },
+    {
+      "id": "med_aebanproperty_2",
+      "title": "Customer Unboxing & Live Walkthrough Video",
+      "categoryId": "all",
+      "categoryName": "Customer Reviews",
+      "type": "FACEBOOK",
+      "url": "https://www.facebook.com/facebook/videos/10153231379946729/",
+      "embedUrl": "https://www.facebook.com/plugins/video.php?height=314&href=https%3A%2F%2Fwww.facebook.com%2Ffacebook%2Fvideos%2F10153231379946729%2F&show_text=false&width=560",
+      "thumbnail": "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=800&q=80",
+      "createdAt": "2026-10-22T06:59:45.035Z"
+    }
+  ],
+  "locations": [
+    {
+      "id": "loc_main",
+      "name": "Main Central Warehouse (ঢাকা কেন্দ্রীয় গুদাম)",
+      "code": "WH-MAIN",
+      "address": "Tejgaon Industrial Area, Dhaka",
+      "bins": [
+        "A-01-01",
+        "A-01-02",
+        "B-01-01",
+        "B-01-02",
+        "C-01-01"
+      ],
+      "isDefault": true,
+      "createdAt": "2026-10-22T06:59:45.035Z"
+    },
+    {
+      "id": "loc_showroom",
+      "name": "Arban Property & Developments Showroom & Pickup Point",
+      "code": "SH-MAIN",
+      "address": "Arban Tower, 102 Bir Uttam C.R. Datta Road, Hatirpool, Dhaka",
+      "bins": [
+        "SH-FRONT",
+        "SH-BACK",
+        "SH-SHELF-01"
+      ],
+      "isDefault": false,
+      "createdAt": "2026-10-22T06:59:45.035Z"
+    }
+  ],
+  "stockReservations": [],
+  "stockLedger": [
+    {
+      "id": "ldg_init_item_prop_1",
+      "itemId": "item_prop_1",
+      "sku": "EST-HUNT-VILLA-01",
+      "itemTitle": "Huntleigh Luxury Country Estate & Villa (3 Acres)",
+      "locationId": "loc_main",
+      "locationName": "WH-MAIN (Tejgaon Central)",
+      "bin": "PORTFOLIO",
+      "movementType": "OPENING_BALANCE",
+      "qtyChange": 1,
+      "balanceAfter": 1,
+      "unitCost": 42000000,
+      "totalValue": 42000000,
+      "reference": "OB-INIT-2026",
+      "notes": "System Baseline Opening Stock",
+      "performedBy": "System Auditor",
+      "createdAt": "2026-10-22T06:59:45.035Z"
+    },
+    {
+      "id": "ldg_init_item_prop_2",
+      "itemId": "item_prop_2",
+      "sku": "APT-GUL-3850-02",
+      "itemTitle": "Gulshan Diplomatic Zone Ultra-Luxury 4-Bedroom Apartment",
+      "locationId": "loc_main",
+      "locationName": "WH-MAIN (Tejgaon Central)",
+      "bin": "PORTFOLIO",
+      "movementType": "OPENING_BALANCE",
+      "qtyChange": 2,
+      "balanceAfter": 2,
+      "unitCost": 32000000,
+      "totalValue": 64000000,
+      "reference": "OB-INIT-2026",
+      "notes": "System Baseline Opening Stock",
+      "performedBy": "System Auditor",
+      "createdAt": "2026-10-22T06:59:45.035Z"
+    }
+  ],
+  "users": [
+    {
+      "id": "usr_aebanproperty_admin",
+      "name": "Arban Property & Developments Admin",
+      "email": "admin@aebanproperty.com",
+      "role": "TENANT_ADMIN",
+      "createdAt": "2026-10-22T06:59:45.035Z"
+    }
+  ]
+}

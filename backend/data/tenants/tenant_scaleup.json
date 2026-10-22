@@ -1,0 +1,236 @@
+{
+  "tenantId": "scaleup",
+  "subdomain": "scaleup",
+  "dbName": "tenant_scaleup",
+  "createdAt": "2026-10-22T06:59:45.037Z",
+  "businessType": "marketing_agency",
+  "archetype": "PORTFOLIO",
+  "settings": {
+    "name": "ScaleUp Performance Digital Agency",
+    "phone": "+880 1716-445566",
+    "email": "hello@scaleupagency.com",
+    "address": "Navana Zohura Square, Level 9, 28 Kazi Nazrul Islam Ave, Dhaka",
+    "currency": "BDT",
+    "theme": "violet_agency",
+    "announcementText": "🚀 Data-Driven Revenue Growth: 3.8x Average Return on Ad Spend for E-Commerce & SaaS Brands!",
+    "themeConfig": {
+      "primaryColor": "#7c3aed",
+      "accentColor": "#a855f7"
+    },
+    "slogan": "🚀 Data-Driven Revenue Growth: 3.8x Average Return on Ad Spend for E-Commerce & SaaS Brands!",
+    "logo": null,
+    "bannerImage": null
+  },
+  "categories": [
+    {
+      "id": "cat_mkt_1",
+      "name": "SEO Growth Engine",
+      "slug": "seo-growth-engine",
+      "promoSlogan": "Technical SEO, keyword domination, and quality backlinks"
+    },
+    {
+      "id": "cat_mkt_2",
+      "name": "Performance Meta & Google Ads",
+      "slug": "performance-meta---google-ads",
+      "promoSlogan": "High-converting video ads, dynamic remarketing, and ROAS scaling"
+    },
+    {
+      "id": "cat_mkt_3",
+      "name": "Web Application Development",
+      "slug": "web-application-development",
+      "promoSlogan": "Modern Next.js 15, headless e-commerce, and fast web portals"
+    },
+    {
+      "id": "cat_mkt_4",
+      "name": "Brand Creative & Video Production",
+      "slug": "brand-creative---video-production",
+      "promoSlogan": "Commercial video ads and 3D product animations"
+    }
+  ],
+  "brands": [
+    {
+      "id": "brand_mkt_1",
+      "name": "ScaleUp Growth Labs",
+      "slug": "scaleup-growth-labs"
+    },
+    {
+      "id": "brand_mkt_2",
+      "name": "Google Premier Partner",
+      "slug": "google-premier-partner"
+    }
+  ],
+  "items": [
+    {
+      "id": "item_mkt_1",
+      "title": "Complete 90-Day Omnichannel Growth Sprint",
+      "slug": "omnichannel-growth-sprint",
+      "shortDescription": "High-ROI ad creative production, automated retention emails, technical SEO overhaul, and daily analytics reporting.",
+      "description": "<p>A dedicated squad of senior performance marketers, copywriters, and media buyers managing your paid media spend to maximize profitability.</p>",
+      "price": 45000,
+      "comparePrice": 60000,
+      "stockQuantity": 10,
+      "itemType": "SERVICE_APPOINTMENT",
+      "images": [
+        "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80"
+      ],
+      "sku": "MKT-SPRINT-90D",
+      "barcode": "195949001401",
+      "costPrice": 20000,
+      "safetyStock": 2,
+      "locationId": "loc_main",
+      "bin": "AGENCY-RETAINER"
+    },
+    {
+      "id": "item_mkt_2",
+      "title": "High-Impact Headless Next.js E-Commerce Store Build",
+      "slug": "headless-nextjs-ecommerce-build",
+      "shortDescription": "Custom high-speed online storefront with sub-second page loads, automated inventory, and payment gateway.",
+      "description": "<p>Includes responsive mobile-first UI, bKash/Nagad/SSLCommerz integration, automated courier tracking, and SEO schema markup.</p>",
+      "price": 85000,
+      "comparePrice": 110000,
+      "stockQuantity": 5,
+      "itemType": "SERVICE_APPOINTMENT",
+      "images": [
+        "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80"
+      ],
+      "sku": "MKT-DEV-NEXTJS-01",
+      "barcode": "195949001402",
+      "costPrice": 35000,
+      "safetyStock": 1,
+      "locationId": "loc_main",
+      "bin": "AGENCY-DEV"
+    }
+  ],
+  "orders": [
+    {
+      "id": "ord_mkt_1",
+      "orderNumber": "ORD-SU-1401",
+      "customerName": "Mahmudur Rahman",
+      "customerPhone": "+880 1819-776655",
+      "customerEmail": "mahmudur@zenithfashion.com",
+      "shippingAddress": "Level 6, Simpletree Anarkali, Gulshan 2",
+      "city": "Dhaka",
+      "businessCategory": "marketing_agency",
+      "orderType": "SERVICE_APPOINTMENT",
+      "items": [
+        {
+          "itemTitle": "Complete 90-Day Omnichannel Growth Sprint",
+          "variantTitle": "Standard Tier",
+          "quantity": 1,
+          "price": 45000,
+          "subtotal": 45000
+        }
+      ],
+      "deliveryCharge": 0,
+      "totalAmount": 45000,
+      "paymentMethod": "COD",
+      "orderStatus": "DELIVERED",
+      "courier": "Digital Onboarding Kit",
+      "trackingCode": "SLA-SU-9901",
+      "notes": "Kickoff call completed via Google Meet",
+      "createdAt": "2026-10-21T08:30:00Z"
+    }
+  ],
+  "media": [
+    {
+      "id": "med_scaleup_1",
+      "title": "ScaleUp Performance Digital Agency - Official Showcase & Product Review",
+      "categoryId": "all",
+      "categoryName": "Featured Highlights",
+      "type": "YOUTUBE",
+      "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "embedUrl": "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?rel=0",
+      "thumbnail": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80",
+      "createdAt": "2026-10-22T06:59:45.037Z"
+    },
+    {
+      "id": "med_scaleup_2",
+      "title": "Customer Unboxing & Live Walkthrough Video",
+      "categoryId": "all",
+      "categoryName": "Customer Reviews",
+      "type": "FACEBOOK",
+      "url": "https://www.facebook.com/facebook/videos/10153231379946729/",
+      "embedUrl": "https://www.facebook.com/plugins/video.php?height=314&href=https%3A%2F%2Fwww.facebook.com%2Ffacebook%2Fvideos%2F10153231379946729%2F&show_text=false&width=560",
+      "thumbnail": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80",
+      "createdAt": "2026-10-22T06:59:45.037Z"
+    }
+  ],
+  "locations": [
+    {
+      "id": "loc_main",
+      "name": "Main Central Warehouse (ঢাকা কেন্দ্রীয় গুদাম)",
+      "code": "WH-MAIN",
+      "address": "Tejgaon Industrial Area, Dhaka",
+      "bins": [
+        "A-01-01",
+        "A-01-02",
+        "B-01-01",
+        "B-01-02",
+        "C-01-01"
+      ],
+      "isDefault": true,
+      "createdAt": "2026-10-22T06:59:45.037Z"
+    },
+    {
+      "id": "loc_showroom",
+      "name": "ScaleUp Performance Digital Agency Showroom & Pickup Point",
+      "code": "SH-MAIN",
+      "address": "Navana Zohura Square, Level 9, 28 Kazi Nazrul Islam Ave, Dhaka",
+      "bins": [
+        "SH-FRONT",
+        "SH-BACK",
+        "SH-SHELF-01"
+      ],
+      "isDefault": false,
+      "createdAt": "2026-10-22T06:59:45.037Z"
+    }
+  ],
+  "stockReservations": [],
+  "stockLedger": [
+    {
+      "id": "ldg_init_item_mkt_1",
+      "itemId": "item_mkt_1",
+      "sku": "MKT-SPRINT-90D",
+      "itemTitle": "Complete 90-Day Omnichannel Growth Sprint",
+      "locationId": "loc_main",
+      "locationName": "WH-MAIN (Tejgaon Central)",
+      "bin": "AGENCY-RETAINER",
+      "movementType": "OPENING_BALANCE",
+      "qtyChange": 10,
+      "balanceAfter": 10,
+      "unitCost": 20000,
+      "totalValue": 200000,
+      "reference": "OB-INIT-2026",
+      "notes": "System Baseline Opening Stock",
+      "performedBy": "System Auditor",
+      "createdAt": "2026-10-22T06:59:45.037Z"
+    },
+    {
+      "id": "ldg_init_item_mkt_2",
+      "itemId": "item_mkt_2",
+      "sku": "MKT-DEV-NEXTJS-01",
+      "itemTitle": "High-Impact Headless Next.js E-Commerce Store Build",
+      "locationId": "loc_main",
+      "locationName": "WH-MAIN (Tejgaon Central)",
+      "bin": "AGENCY-DEV",
+      "movementType": "OPENING_BALANCE",
+      "qtyChange": 5,
+      "balanceAfter": 5,
+      "unitCost": 35000,
+      "totalValue": 175000,
+      "reference": "OB-INIT-2026",
+      "notes": "System Baseline Opening Stock",
+      "performedBy": "System Auditor",
+      "createdAt": "2026-10-22T06:59:45.037Z"
+    }
+  ],
+  "users": [
+    {
+      "id": "usr_scaleup_admin",
+      "name": "ScaleUp Performance Digital Agency Admin",
+      "email": "admin@scaleup.com",
+      "role": "TENANT_ADMIN",
+      "createdAt": "2026-10-22T06:59:45.037Z"
+    }
+  ]
+}

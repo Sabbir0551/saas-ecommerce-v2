@@ -1,0 +1,318 @@
+{
+  "tenantId": "gadgethub",
+  "subdomain": "gadgethub",
+  "dbName": "tenant_gadgethub",
+  "createdAt": "2026-10-22T06:59:45.024Z",
+  "businessType": "mobile_store",
+  "archetype": "PHYSICAL_STORE",
+  "settings": {
+    "name": "Gadget Hub Bangladesh",
+    "phone": "+880 1711-889900",
+    "email": "contact@gadgethub.com",
+    "address": "Level 4, Bashundhara City Mall, Panthapath, Dhaka",
+    "currency": "BDT",
+    "theme": "indigo_tech",
+    "announcementText": "🔥 Official Warranty: iPhone 16 Pro Max & Galaxy S25 Ultra in stock with 0% EMI!",
+    "themeConfig": {
+      "primaryColor": "#4f46e5",
+      "accentColor": "#06b6d4"
+    },
+    "slogan": "🔥 Official Warranty: iPhone 16 Pro Max & Galaxy S25 Ultra in stock with 0% EMI!",
+    "logo": null,
+    "bannerImage": null
+  },
+  "categories": [
+    {
+      "id": "cat_gadget_1",
+      "name": "Flagship Smartphones",
+      "slug": "flagship-smartphones",
+      "promoSlogan": "Latest 2026 flagships with official BTRC approval"
+    },
+    {
+      "id": "cat_gadget_2",
+      "name": "Tablets & iPads",
+      "slug": "tablets---ipads",
+      "promoSlogan": "M4 chip iPads and Galaxy Tab S10 series"
+    },
+    {
+      "id": "cat_gadget_3",
+      "name": "Fast Chargers & Cables",
+      "slug": "fast-chargers---cables",
+      "promoSlogan": "GaN chargers, MagSafe, and braided cables"
+    },
+    {
+      "id": "cat_gadget_4",
+      "name": "TWS & Premium Audio",
+      "slug": "tws---premium-audio",
+      "promoSlogan": "Active Noise Cancelling earbuds and headphones"
+    },
+    {
+      "id": "cat_gadget_5",
+      "name": "Smartwatches & Fitness",
+      "slug": "smartwatches---fitness",
+      "promoSlogan": "Apple Watch Ultra 2 & Galaxy Watch Ultra"
+    }
+  ],
+  "brands": [
+    {
+      "id": "brand_gadget_1",
+      "name": "Apple Inc.",
+      "slug": "apple"
+    },
+    {
+      "id": "brand_gadget_2",
+      "name": "Samsung Electronics",
+      "slug": "samsung"
+    },
+    {
+      "id": "brand_gadget_3",
+      "name": "Anker Innovations",
+      "slug": "anker"
+    },
+    {
+      "id": "brand_gadget_4",
+      "name": "Sony Audio",
+      "slug": "sony"
+    }
+  ],
+  "items": [
+    {
+      "id": "item_gadget_1",
+      "title": "iPhone 16 Pro Max 256GB - Natural Titanium",
+      "slug": "iphone-16-pro-max-256gb",
+      "shortDescription": "A18 Pro bionic chip, Grade 5 titanium enclosure, advanced 48MP fusion camera system.",
+      "description": "<p>Official BTRC approved iPhone 16 Pro Max. Features 6.9-inch Super Retina XDR OLED display, Camera Control button, and titanium grade 5 chassis.</p>",
+      "price": 175000,
+      "comparePrice": 185000,
+      "stockQuantity": 15,
+      "itemType": "PHYSICAL_PRODUCT",
+      "images": [
+        "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=800&q=80"
+      ],
+      "sku": "IPH-16PM-256-NAT",
+      "barcode": "195949000101",
+      "costPrice": 155000,
+      "safetyStock": 3,
+      "locationId": "loc_main",
+      "bin": "A-01-01"
+    },
+    {
+      "id": "item_gadget_2",
+      "title": "Samsung Galaxy S25 Ultra 512GB AI Phone",
+      "slug": "samsung-galaxy-s25-ultra",
+      "shortDescription": "Integrated S-Pen, Snapdragon 8 Elite, 200MP Quad Telephoto Camera with Galaxy AI.",
+      "description": "<p>Titanium Gray Samsung Galaxy S25 Ultra. Built-in S Pen stylus, dynamic AMOLED 2X display, and all-day 5000mAh battery life with 45W charging.</p>",
+      "price": 168000,
+      "comparePrice": 178000,
+      "stockQuantity": 12,
+      "itemType": "PHYSICAL_PRODUCT",
+      "images": [
+        "https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?auto=format&fit=crop&w=800&q=80"
+      ],
+      "sku": "SAM-S25U-512-GRY",
+      "barcode": "195949000102",
+      "costPrice": 148000,
+      "safetyStock": 2,
+      "locationId": "loc_main",
+      "bin": "A-01-02"
+    },
+    {
+      "id": "item_gadget_3",
+      "title": "Anker Prime 100W GaN Wall Charger (3-Port)",
+      "slug": "anker-prime-100w-gan-charger",
+      "shortDescription": "Ultra-compact high-speed multi-device GaN fast charger with PowerIQ 4.0.",
+      "description": "<p>Charge MacBook, iPhone, and Apple Watch simultaneously at full speed with Anker ActiveShield 2.0 temperature protection.</p>",
+      "price": 6800,
+      "comparePrice": 7500,
+      "stockQuantity": 40,
+      "itemType": "PHYSICAL_PRODUCT",
+      "images": [
+        "https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&w=800&q=80"
+      ],
+      "sku": "ANK-PRIME-100W",
+      "barcode": "195949000103",
+      "costPrice": 4800,
+      "safetyStock": 10,
+      "locationId": "loc_main",
+      "bin": "A-02-01"
+    }
+  ],
+  "orders": [
+    {
+      "id": "ord_gadget_1",
+      "orderNumber": "ORD-GH-101",
+      "customerName": "Shakil Rahman",
+      "customerPhone": "+880 1711-234567",
+      "customerEmail": "shakil.rahman@gmail.com",
+      "shippingAddress": "House 12, Road 4, Sector 7, Uttara",
+      "city": "Dhaka",
+      "businessCategory": "mobile_store",
+      "orderType": "PHYSICAL_PRODUCT",
+      "items": [
+        {
+          "itemTitle": "iPhone 16 Pro Max 256GB - Natural Titanium",
+          "variantTitle": "Default",
+          "quantity": 1,
+          "price": 175000,
+          "subtotal": 175000
+        }
+      ],
+      "deliveryCharge": 100,
+      "totalAmount": 175100,
+      "paymentMethod": "COD",
+      "orderStatus": "SHIPPED",
+      "courier": "Steadfast Courier",
+      "trackingCode": "ST-GH-8901",
+      "notes": "Handover only after signature verification",
+      "createdAt": "2026-10-21T08:00:00Z"
+    },
+    {
+      "id": "ord_gadget_2",
+      "orderNumber": "ORD-GH-102",
+      "customerName": "Fahim Morshed",
+      "customerPhone": "+880 1819-876543",
+      "customerEmail": "fahim.morshed@yahoo.com",
+      "shippingAddress": "Flat 4B, Concord Tower, Agrabad",
+      "city": "Chattogram",
+      "businessCategory": "mobile_store",
+      "orderType": "PHYSICAL_PRODUCT",
+      "items": [
+        {
+          "itemTitle": "Anker Prime 100W GaN Wall Charger (3-Port)",
+          "variantTitle": "Default",
+          "quantity": 1,
+          "price": 6800,
+          "subtotal": 6800
+        }
+      ],
+      "deliveryCharge": 120,
+      "totalAmount": 6920,
+      "paymentMethod": "COD",
+      "orderStatus": "PROCESSING",
+      "courier": "Pathao Courier",
+      "trackingCode": "PATH-GH-9921",
+      "notes": "Call 30 mins prior to delivery",
+      "createdAt": "2026-10-21T11:30:00Z"
+    }
+  ],
+  "media": [
+    {
+      "id": "med_gadgethub_1",
+      "title": "Gadget Hub Bangladesh - Official Showcase & Product Review",
+      "categoryId": "all",
+      "categoryName": "Featured Highlights",
+      "type": "YOUTUBE",
+      "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "embedUrl": "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?rel=0",
+      "thumbnail": "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=800&q=80",
+      "createdAt": "2026-10-22T06:59:45.024Z"
+    },
+    {
+      "id": "med_gadgethub_2",
+      "title": "Customer Unboxing & Live Walkthrough Video",
+      "categoryId": "all",
+      "categoryName": "Customer Reviews",
+      "type": "FACEBOOK",
+      "url": "https://www.facebook.com/facebook/videos/10153231379946729/",
+      "embedUrl": "https://www.facebook.com/plugins/video.php?height=314&href=https%3A%2F%2Fwww.facebook.com%2Ffacebook%2Fvideos%2F10153231379946729%2F&show_text=false&width=560",
+      "thumbnail": "https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?auto=format&fit=crop&w=800&q=80",
+      "createdAt": "2026-10-22T06:59:45.024Z"
+    }
+  ],
+  "locations": [
+    {
+      "id": "loc_main",
+      "name": "Main Central Warehouse (ঢাকা কেন্দ্রীয় গুদাম)",
+      "code": "WH-MAIN",
+      "address": "Tejgaon Industrial Area, Dhaka",
+      "bins": [
+        "A-01-01",
+        "A-01-02",
+        "B-01-01",
+        "B-01-02",
+        "C-01-01"
+      ],
+      "isDefault": true,
+      "createdAt": "2026-10-22T06:59:45.024Z"
+    },
+    {
+      "id": "loc_showroom",
+      "name": "Gadget Hub Bangladesh Showroom & Pickup Point",
+      "code": "SH-MAIN",
+      "address": "Level 4, Bashundhara City Mall, Panthapath, Dhaka",
+      "bins": [
+        "SH-FRONT",
+        "SH-BACK",
+        "SH-SHELF-01"
+      ],
+      "isDefault": false,
+      "createdAt": "2026-10-22T06:59:45.024Z"
+    }
+  ],
+  "stockReservations": [],
+  "stockLedger": [
+    {
+      "id": "ldg_init_item_gadget_1",
+      "itemId": "item_gadget_1",
+      "sku": "IPH-16PM-256-NAT",
+      "itemTitle": "iPhone 16 Pro Max 256GB - Natural Titanium",
+      "locationId": "loc_main",
+      "locationName": "WH-MAIN (Tejgaon Central)",
+      "bin": "A-01-01",
+      "movementType": "OPENING_BALANCE",
+      "qtyChange": 15,
+      "balanceAfter": 15,
+      "unitCost": 155000,
+      "totalValue": 2325000,
+      "reference": "OB-INIT-2026",
+      "notes": "System Baseline Opening Stock",
+      "performedBy": "System Auditor",
+      "createdAt": "2026-10-22T06:59:45.024Z"
+    },
+    {
+      "id": "ldg_init_item_gadget_2",
+      "itemId": "item_gadget_2",
+      "sku": "SAM-S25U-512-GRY",
+      "itemTitle": "Samsung Galaxy S25 Ultra 512GB AI Phone",
+      "locationId": "loc_main",
+      "locationName": "WH-MAIN (Tejgaon Central)",
+      "bin": "A-01-02",
+      "movementType": "OPENING_BALANCE",
+      "qtyChange": 12,
+      "balanceAfter": 12,
+      "unitCost": 148000,
+      "totalValue": 1776000,
+      "reference": "OB-INIT-2026",
+      "notes": "System Baseline Opening Stock",
+      "performedBy": "System Auditor",
+      "createdAt": "2026-10-22T06:59:45.024Z"
+    },
+    {
+      "id": "ldg_init_item_gadget_3",
+      "itemId": "item_gadget_3",
+      "sku": "ANK-PRIME-100W",
+      "itemTitle": "Anker Prime 100W GaN Wall Charger (3-Port)",
+      "locationId": "loc_main",
+      "locationName": "WH-MAIN (Tejgaon Central)",
+      "bin": "A-02-01",
+      "movementType": "OPENING_BALANCE",
+      "qtyChange": 40,
+      "balanceAfter": 40,
+      "unitCost": 4800,
+      "totalValue": 192000,
+      "reference": "OB-INIT-2026",
+      "notes": "System Baseline Opening Stock",
+      "performedBy": "System Auditor",
+      "createdAt": "2026-10-22T06:59:45.024Z"
+    }
+  ],
+  "users": [
+    {
+      "id": "usr_gadgethub_admin",
+      "name": "Gadget Hub Bangladesh Admin",
+      "email": "admin@gadgethub.com",
+      "role": "TENANT_ADMIN",
+      "createdAt": "2026-10-22T06:59:45.024Z"
+    }
+  ]
+}

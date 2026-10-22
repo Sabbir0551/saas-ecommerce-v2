@@ -1,0 +1,241 @@
+{
+  "tenantId": "pharmaexpress",
+  "subdomain": "pharmaexpress",
+  "dbName": "tenant_pharmaexpress",
+  "createdAt": "2026-10-22T06:59:45.039Z",
+  "businessType": "pharmacy_medicine",
+  "archetype": "PHYSICAL_STORE",
+  "settings": {
+    "name": "PharmaExpress Digital Pharmacy",
+    "phone": "+880 1819-112233",
+    "email": "help@pharmaexpressbd.com",
+    "address": "Labaid Hospital Road, Dhanmondi 27, Dhaka",
+    "currency": "BDT",
+    "theme": "teal_pharma",
+    "announcementText": "💊 DGDA-Approved Authentic Prescription Medicines, Diagnostic Devices & Baby Care with Express 2-Hour Delivery!",
+    "themeConfig": {
+      "primaryColor": "#0d9488",
+      "accentColor": "#14b8a6"
+    },
+    "slogan": "💊 DGDA-Approved Authentic Prescription Medicines, Diagnostic Devices & Baby Care with Express 2-Hour Delivery!",
+    "logo": null,
+    "bannerImage": null
+  },
+  "categories": [
+    {
+      "id": "cat_pharma_1",
+      "name": "Prescription Pharmaceuticals",
+      "slug": "prescription-pharmaceuticals",
+      "promoSlogan": "DGDA registered medicines stored in temperature-controlled cold chains"
+    },
+    {
+      "id": "cat_pharma_2",
+      "name": "Diagnostic Monitoring Devices",
+      "slug": "diagnostic-monitoring-devices",
+      "promoSlogan": "Digital BP monitors, glucometers, and pulse oximeters"
+    },
+    {
+      "id": "cat_pharma_3",
+      "name": "Vitamins & Dietary Supplements",
+      "slug": "vitamins---dietary-supplements",
+      "promoSlogan": "Multivitamins, omega-3 fish oil, and immunity boosters"
+    },
+    {
+      "id": "cat_pharma_4",
+      "name": "Mother & Baby Healthcare",
+      "slug": "mother---baby-healthcare",
+      "promoSlogan": "Diapers, hypoallergenic lotions, and pediatric formula"
+    }
+  ],
+  "brands": [
+    {
+      "id": "brand_pharma_1",
+      "name": "Square Pharmaceuticals",
+      "slug": "square-pharma"
+    },
+    {
+      "id": "brand_pharma_2",
+      "name": "Omron Healthcare",
+      "slug": "omron"
+    },
+    {
+      "id": "brand_pharma_3",
+      "name": "Beximco Pharmaceuticals",
+      "slug": "beximco"
+    }
+  ],
+  "items": [
+    {
+      "id": "item_pharma_1",
+      "title": "Omron Digital Blood Pressure Monitor HEM-7120",
+      "slug": "omron-digital-bp-monitor",
+      "shortDescription": "Clinically validated accuracy with Intellisense technology and irregular heartbeat detector.",
+      "description": "<p>One-touch easy operation with cuff wrapping guide and memory for previous readings. Backed by 3 years official replacement warranty.</p>",
+      "price": 3600,
+      "comparePrice": 4200,
+      "stockQuantity": 35,
+      "itemType": "PHYSICAL_PRODUCT",
+      "images": [
+        "https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=800&q=80"
+      ],
+      "sku": "PHM-OMR-BP7120",
+      "barcode": "195949001801",
+      "costPrice": 2800,
+      "safetyStock": 8,
+      "locationId": "loc_main",
+      "bin": "MED-SHELF-01"
+    },
+    {
+      "id": "item_pharma_2",
+      "title": "Centrum Multivitamin & Minerals for Adults (100 Tablets)",
+      "slug": "centrum-multivitamin-adults-100",
+      "shortDescription": "Complete daily nutritional support with 24 essential micronutrients for energy and immunity.",
+      "description": "<p>Imported USA manufactured formula. Supports bone strength, cellular immunity, and natural metabolism.</p>",
+      "price": 2400,
+      "comparePrice": 2800,
+      "stockQuantity": 40,
+      "itemType": "PHYSICAL_PRODUCT",
+      "images": [
+        "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=800&q=80"
+      ],
+      "sku": "PHM-CEN-MULTI-100",
+      "barcode": "195949001802",
+      "costPrice": 1750,
+      "safetyStock": 10,
+      "locationId": "loc_main",
+      "bin": "MED-SHELF-02"
+    }
+  ],
+  "orders": [
+    {
+      "id": "ord_pharma_1",
+      "orderNumber": "ORD-PX-1801",
+      "customerName": "Shamsul Alam",
+      "customerPhone": "+880 1711-665544",
+      "customerEmail": "shamsul.alam@gmail.com",
+      "shippingAddress": "House 8, Road 15, Dhanmondi R/A",
+      "city": "Dhaka",
+      "businessCategory": "pharmacy_medicine",
+      "orderType": "PHYSICAL_PRODUCT",
+      "items": [
+        {
+          "itemTitle": "Omron Digital Blood Pressure Monitor HEM-7120",
+          "variantTitle": "Standard Cuff",
+          "quantity": 1,
+          "price": 3600,
+          "subtotal": 3600
+        }
+      ],
+      "deliveryCharge": 60,
+      "totalAmount": 3660,
+      "paymentMethod": "COD",
+      "orderStatus": "DELIVERED",
+      "courier": "PharmaExpress 2-Hour Rider",
+      "trackingCode": "MED-PX-9921",
+      "notes": "Elderly patient delivery",
+      "createdAt": "2026-10-21T09:00:00Z"
+    }
+  ],
+  "media": [
+    {
+      "id": "med_pharmaexpress_1",
+      "title": "PharmaExpress Digital Pharmacy - Official Showcase & Product Review",
+      "categoryId": "all",
+      "categoryName": "Featured Highlights",
+      "type": "YOUTUBE",
+      "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "embedUrl": "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?rel=0",
+      "thumbnail": "https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=800&q=80",
+      "createdAt": "2026-10-22T06:59:45.039Z"
+    },
+    {
+      "id": "med_pharmaexpress_2",
+      "title": "Customer Unboxing & Live Walkthrough Video",
+      "categoryId": "all",
+      "categoryName": "Customer Reviews",
+      "type": "FACEBOOK",
+      "url": "https://www.facebook.com/facebook/videos/10153231379946729/",
+      "embedUrl": "https://www.facebook.com/plugins/video.php?height=314&href=https%3A%2F%2Fwww.facebook.com%2Ffacebook%2Fvideos%2F10153231379946729%2F&show_text=false&width=560",
+      "thumbnail": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=800&q=80",
+      "createdAt": "2026-10-22T06:59:45.039Z"
+    }
+  ],
+  "locations": [
+    {
+      "id": "loc_main",
+      "name": "Main Central Warehouse (ঢাকা কেন্দ্রীয় গুদাম)",
+      "code": "WH-MAIN",
+      "address": "Tejgaon Industrial Area, Dhaka",
+      "bins": [
+        "A-01-01",
+        "A-01-02",
+        "B-01-01",
+        "B-01-02",
+        "C-01-01"
+      ],
+      "isDefault": true,
+      "createdAt": "2026-10-22T06:59:45.039Z"
+    },
+    {
+      "id": "loc_showroom",
+      "name": "PharmaExpress Digital Pharmacy Showroom & Pickup Point",
+      "code": "SH-MAIN",
+      "address": "Labaid Hospital Road, Dhanmondi 27, Dhaka",
+      "bins": [
+        "SH-FRONT",
+        "SH-BACK",
+        "SH-SHELF-01"
+      ],
+      "isDefault": false,
+      "createdAt": "2026-10-22T06:59:45.039Z"
+    }
+  ],
+  "stockReservations": [],
+  "stockLedger": [
+    {
+      "id": "ldg_init_item_pharma_1",
+      "itemId": "item_pharma_1",
+      "sku": "PHM-OMR-BP7120",
+      "itemTitle": "Omron Digital Blood Pressure Monitor HEM-7120",
+      "locationId": "loc_main",
+      "locationName": "WH-MAIN (Tejgaon Central)",
+      "bin": "MED-SHELF-01",
+      "movementType": "OPENING_BALANCE",
+      "qtyChange": 35,
+      "balanceAfter": 35,
+      "unitCost": 2800,
+      "totalValue": 98000,
+      "reference": "OB-INIT-2026",
+      "notes": "System Baseline Opening Stock",
+      "performedBy": "System Auditor",
+      "createdAt": "2026-10-22T06:59:45.039Z"
+    },
+    {
+      "id": "ldg_init_item_pharma_2",
+      "itemId": "item_pharma_2",
+      "sku": "PHM-CEN-MULTI-100",
+      "itemTitle": "Centrum Multivitamin & Minerals for Adults (100 Tablets)",
+      "locationId": "loc_main",
+      "locationName": "WH-MAIN (Tejgaon Central)",
+      "bin": "MED-SHELF-02",
+      "movementType": "OPENING_BALANCE",
+      "qtyChange": 40,
+      "balanceAfter": 40,
+      "unitCost": 1750,
+      "totalValue": 70000,
+      "reference": "OB-INIT-2026",
+      "notes": "System Baseline Opening Stock",
+      "performedBy": "System Auditor",
+      "createdAt": "2026-10-22T06:59:45.039Z"
+    }
+  ],
+  "users": [
+    {
+      "id": "usr_pharmaexpress_admin",
+      "name": "PharmaExpress Digital Pharmacy Admin",
+      "email": "admin@pharmaexpress.com",
+      "role": "TENANT_ADMIN",
+      "createdAt": "2026-10-22T06:59:45.039Z"
+    }
+  ]
+}

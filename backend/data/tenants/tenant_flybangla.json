@@ -1,0 +1,241 @@
+{
+  "tenantId": "flybangla",
+  "subdomain": "flybangla",
+  "dbName": "tenant_flybangla",
+  "createdAt": "2026-10-22T06:59:45.030Z",
+  "businessType": "travel_agency",
+  "archetype": "APPOINTMENT_BOOKING",
+  "settings": {
+    "name": "FlyBangla Tours & Travel",
+    "phone": "+880 1714-556677",
+    "email": "tours@flybangla.com",
+    "address": "Sena Kalyan Bhaban, Suite 1102, Motijheel, Dhaka",
+    "currency": "BDT",
+    "theme": "sky_cyan",
+    "announcementText": "✈️ Winter Holiday Deals: All-Inclusive Maldives & Dubai Luxury Packages with Guaranteed Visa Assistance!",
+    "themeConfig": {
+      "primaryColor": "#0284c7",
+      "accentColor": "#0ea5e9"
+    },
+    "slogan": "✈️ Winter Holiday Deals: All-Inclusive Maldives & Dubai Luxury Packages with Guaranteed Visa Assistance!",
+    "logo": null,
+    "bannerImage": null
+  },
+  "categories": [
+    {
+      "id": "cat_travel_1",
+      "name": "International Holiday Tours",
+      "slug": "international-holiday-tours",
+      "promoSlogan": "Maldives, Thailand, Dubai & Turkey all-inclusive packages"
+    },
+    {
+      "id": "cat_travel_2",
+      "name": "Domestic Coastal Getaways",
+      "slug": "domestic-coastal-getaways",
+      "promoSlogan": "Cox’s Bazar 5-star beachfront resorts and Sajek valley"
+    },
+    {
+      "id": "cat_travel_3",
+      "name": "VIP Umrah & Hajj Packages",
+      "slug": "vip-umrah---hajj-packages",
+      "promoSlogan": "5-Star Clock Tower hotel with personalized transport"
+    },
+    {
+      "id": "cat_travel_4",
+      "name": "Express Visa & Air Ticketing",
+      "slug": "express-visa---air-ticketing",
+      "promoSlogan": "Schengen, UK, USA and Southeast Asia visa consultation"
+    }
+  ],
+  "brands": [
+    {
+      "id": "brand_travel_1",
+      "name": "FlyBangla Premium",
+      "slug": "flybangla-premium"
+    },
+    {
+      "id": "brand_travel_2",
+      "name": "Emirates Partner Tours",
+      "slug": "emirates-tours"
+    },
+    {
+      "id": "brand_travel_3",
+      "name": "Centara Grand Resorts",
+      "slug": "centara-resorts"
+    }
+  ],
+  "items": [
+    {
+      "id": "item_travel_1",
+      "title": "5 Days 4 Nights Luxury Maldives Island Escape",
+      "slug": "maldives-luxury-island-escape",
+      "shortDescription": "Speedboat transfers, water villa stay, full-board gourmet meals, and complimentary snorkeling tour.",
+      "description": "<p>Experience paradise at a private 5-star island resort. Includes private overwater bungalow accommodation, return airport speedboat transfers, breakfast, lunch, and candlelit dinners.</p>",
+      "price": 125000,
+      "comparePrice": 145000,
+      "stockQuantity": 20,
+      "itemType": "SERVICE_APPOINTMENT",
+      "images": [
+        "https://images.unsplash.com/photo-1514282401047-d79a71a590e8?auto=format&fit=crop&w=800&q=80"
+      ],
+      "sku": "TRV-MLD-5D4N",
+      "barcode": "195949000501",
+      "costPrice": 95000,
+      "safetyStock": 5,
+      "locationId": "loc_main",
+      "bin": "BOOKING-ONLINE"
+    },
+    {
+      "id": "item_travel_2",
+      "title": "Premium 14-Day VIP Umrah Package (5-Star Clock Tower)",
+      "slug": "premium-vip-umrah-package",
+      "shortDescription": "Makkah Clock Tower stay directly facing Haram with private GMC Yukon transfers.",
+      "description": "<p>Comprehensive spiritual journey with full visa issuance, dedicated experienced guide, luxury buffet dining, and direct flights on Saudia Airlines.</p>",
+      "price": 265000,
+      "comparePrice": 285000,
+      "stockQuantity": 15,
+      "itemType": "SERVICE_APPOINTMENT",
+      "images": [
+        "https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?auto=format&fit=crop&w=800&q=80"
+      ],
+      "sku": "TRV-UMR-14D-VIP",
+      "barcode": "195949000502",
+      "costPrice": 215000,
+      "safetyStock": 4,
+      "locationId": "loc_main",
+      "bin": "BOOKING-ONLINE"
+    }
+  ],
+  "orders": [
+    {
+      "id": "ord_travel_1",
+      "orderNumber": "ORD-FB-501",
+      "customerName": "Tariq Manzoor",
+      "customerPhone": "+880 1711-447788",
+      "customerEmail": "tariq.manzoor@orbit.com",
+      "shippingAddress": "House 14, Road 11, Dhanmondi",
+      "city": "Dhaka",
+      "businessCategory": "travel_agency",
+      "orderType": "SERVICE_APPOINTMENT",
+      "items": [
+        {
+          "itemTitle": "5 Days 4 Nights Luxury Maldives Island Escape",
+          "variantTitle": "2 Adults Twin Sharing",
+          "quantity": 2,
+          "price": 125000,
+          "subtotal": 250000
+        }
+      ],
+      "deliveryCharge": 0,
+      "totalAmount": 250000,
+      "paymentMethod": "COD",
+      "orderStatus": "PROCESSING",
+      "courier": "Digital Ticket Dispatch",
+      "trackingCode": "VCH-FB-5521",
+      "notes": "Passport copies verified",
+      "createdAt": "2026-10-21T07:30:00Z"
+    }
+  ],
+  "media": [
+    {
+      "id": "med_flybangla_1",
+      "title": "FlyBangla Tours & Travel - Official Showcase & Product Review",
+      "categoryId": "all",
+      "categoryName": "Featured Highlights",
+      "type": "YOUTUBE",
+      "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "embedUrl": "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?rel=0",
+      "thumbnail": "https://images.unsplash.com/photo-1514282401047-d79a71a590e8?auto=format&fit=crop&w=800&q=80",
+      "createdAt": "2026-10-22T06:59:45.030Z"
+    },
+    {
+      "id": "med_flybangla_2",
+      "title": "Customer Unboxing & Live Walkthrough Video",
+      "categoryId": "all",
+      "categoryName": "Customer Reviews",
+      "type": "FACEBOOK",
+      "url": "https://www.facebook.com/facebook/videos/10153231379946729/",
+      "embedUrl": "https://www.facebook.com/plugins/video.php?height=314&href=https%3A%2F%2Fwww.facebook.com%2Ffacebook%2Fvideos%2F10153231379946729%2F&show_text=false&width=560",
+      "thumbnail": "https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?auto=format&fit=crop&w=800&q=80",
+      "createdAt": "2026-10-22T06:59:45.030Z"
+    }
+  ],
+  "locations": [
+    {
+      "id": "loc_main",
+      "name": "Main Central Warehouse (ঢাকা কেন্দ্রীয় গুদাম)",
+      "code": "WH-MAIN",
+      "address": "Tejgaon Industrial Area, Dhaka",
+      "bins": [
+        "A-01-01",
+        "A-01-02",
+        "B-01-01",
+        "B-01-02",
+        "C-01-01"
+      ],
+      "isDefault": true,
+      "createdAt": "2026-10-22T06:59:45.030Z"
+    },
+    {
+      "id": "loc_showroom",
+      "name": "FlyBangla Tours & Travel Showroom & Pickup Point",
+      "code": "SH-MAIN",
+      "address": "Sena Kalyan Bhaban, Suite 1102, Motijheel, Dhaka",
+      "bins": [
+        "SH-FRONT",
+        "SH-BACK",
+        "SH-SHELF-01"
+      ],
+      "isDefault": false,
+      "createdAt": "2026-10-22T06:59:45.030Z"
+    }
+  ],
+  "stockReservations": [],
+  "stockLedger": [
+    {
+      "id": "ldg_init_item_travel_1",
+      "itemId": "item_travel_1",
+      "sku": "TRV-MLD-5D4N",
+      "itemTitle": "5 Days 4 Nights Luxury Maldives Island Escape",
+      "locationId": "loc_main",
+      "locationName": "WH-MAIN (Tejgaon Central)",
+      "bin": "BOOKING-ONLINE",
+      "movementType": "OPENING_BALANCE",
+      "qtyChange": 20,
+      "balanceAfter": 20,
+      "unitCost": 95000,
+      "totalValue": 1900000,
+      "reference": "OB-INIT-2026",
+      "notes": "System Baseline Opening Stock",
+      "performedBy": "System Auditor",
+      "createdAt": "2026-10-22T06:59:45.030Z"
+    },
+    {
+      "id": "ldg_init_item_travel_2",
+      "itemId": "item_travel_2",
+      "sku": "TRV-UMR-14D-VIP",
+      "itemTitle": "Premium 14-Day VIP Umrah Package (5-Star Clock Tower)",
+      "locationId": "loc_main",
+      "locationName": "WH-MAIN (Tejgaon Central)",
+      "bin": "BOOKING-ONLINE",
+      "movementType": "OPENING_BALANCE",
+      "qtyChange": 15,
+      "balanceAfter": 15,
+      "unitCost": 215000,
+      "totalValue": 3225000,
+      "reference": "OB-INIT-2026",
+      "notes": "System Baseline Opening Stock",
+      "performedBy": "System Auditor",
+      "createdAt": "2026-10-22T06:59:45.030Z"
+    }
+  ],
+  "users": [
+    {
+      "id": "usr_flybangla_admin",
+      "name": "FlyBangla Tours & Travel Admin",
+      "email": "admin@flybangla.com",
+      "role": "TENANT_ADMIN",
+      "createdAt": "2026-10-22T06:59:45.030Z"
+    }
+  ]
+}

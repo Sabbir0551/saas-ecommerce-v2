@@ -1,0 +1,236 @@
+{
+  "tenantId": "advisorypro",
+  "subdomain": "advisorypro",
+  "dbName": "tenant_advisorypro",
+  "createdAt": "2026-10-22T06:59:45.039Z",
+  "businessType": "consultant_portfolio",
+  "archetype": "PORTFOLIO",
+  "settings": {
+    "name": "AdvisoryPro Corporate Legal & Tax Counsel",
+    "phone": "+880 1711-337799",
+    "email": "counsel@advisoryprobd.com",
+    "address": "World Trade Centre Dhaka, Level 7, DIT Avenue, Motijheel",
+    "currency": "BDT",
+    "theme": "navy_executive",
+    "announcementText": "⚖️ Supreme Court Advocates & Chartered Tax Advisors: Corporate Governance, M&A & NBR Compliance.",
+    "themeConfig": {
+      "primaryColor": "#1e3a8a",
+      "accentColor": "#3b82f6"
+    },
+    "slogan": "⚖️ Supreme Court Advocates & Chartered Tax Advisors: Corporate Governance, M&A & NBR Compliance.",
+    "logo": null,
+    "bannerImage": null
+  },
+  "categories": [
+    {
+      "id": "cat_adv_1",
+      "name": "Corporate Law Advisory",
+      "slug": "corporate-law-advisory",
+      "promoSlogan": "Company incorporation, FDI clearance, and board advisory"
+    },
+    {
+      "id": "cat_adv_2",
+      "name": "Tax & VAT Audit Compliance",
+      "slug": "tax---vat-audit-compliance",
+      "promoSlogan": "NBR appeal hearings, advance tax rulings, and transfer pricing"
+    },
+    {
+      "id": "cat_adv_3",
+      "name": "M&A Valuation & Due Diligence",
+      "slug": "ma-valuation---due-diligence",
+      "promoSlogan": "Cross-border joint ventures and financial risk audits"
+    },
+    {
+      "id": "cat_adv_4",
+      "name": "Intellectual Property Protection",
+      "slug": "intellectual-property-protection",
+      "promoSlogan": "Trademark registration, copyright, and patent defense"
+    }
+  ],
+  "brands": [
+    {
+      "id": "brand_adv_1",
+      "name": "AdvisoryPro Chambers",
+      "slug": "advisorypro-chambers"
+    },
+    {
+      "id": "brand_adv_2",
+      "name": "International Bar Association Member",
+      "slug": "iba-member"
+    }
+  ],
+  "items": [
+    {
+      "id": "item_adv_1",
+      "title": "1-Hour Confidential Strategic Consultation",
+      "slug": "confidential-strategic-consultation",
+      "shortDescription": "In-depth review of corporate governance, cross-border tax compliance, and business restructuring roadmap.",
+      "description": "<p>Direct confidential session with a Senior Supreme Court Advocate and Chartered Tax Practitioner. Includes detailed written legal opinion.</p>",
+      "price": 10000,
+      "comparePrice": 15000,
+      "stockQuantity": 20,
+      "itemType": "SERVICE_APPOINTMENT",
+      "images": [
+        "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=800&q=80"
+      ],
+      "sku": "ADV-CONS-1HR",
+      "barcode": "195949001701",
+      "costPrice": 3000,
+      "safetyStock": 3,
+      "locationId": "loc_main",
+      "bin": "CHAMBERS-CONF"
+    },
+    {
+      "id": "item_adv_2",
+      "title": "Comprehensive Startup M&A & Legal Due Diligence Audit",
+      "slug": "startup-ma-due-diligence-audit",
+      "shortDescription": "Complete audit of cap-table, IP ownership, regulatory filings, and debt covenants before fundraising.",
+      "description": "<p>Essential due diligence preparation for Series A/B funding rounds. Uncovers legal liabilities, validates capitalization tables, and drafts clean disclosure schedules.</p>",
+      "price": 75000,
+      "comparePrice": 95000,
+      "stockQuantity": 10,
+      "itemType": "SERVICE_APPOINTMENT",
+      "images": [
+        "https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=800&q=80"
+      ],
+      "sku": "ADV-AUDIT-MA-01",
+      "barcode": "195949001702",
+      "costPrice": 25000,
+      "safetyStock": 2,
+      "locationId": "loc_main",
+      "bin": "CHAMBERS-CONF"
+    }
+  ],
+  "orders": [
+    {
+      "id": "ord_adv_1",
+      "orderNumber": "ORD-AP-1701",
+      "customerName": "Tanvir Chowdhury",
+      "customerPhone": "+880 1715-221100",
+      "customerEmail": "tanvir@vortexventures.com",
+      "shippingAddress": "Chambers Conference Room, Motijheel",
+      "city": "Dhaka",
+      "businessCategory": "consultant_portfolio",
+      "orderType": "SERVICE_APPOINTMENT",
+      "items": [
+        {
+          "itemTitle": "1-Hour Confidential Strategic Consultation",
+          "variantTitle": "Corporate Governance Slot",
+          "quantity": 1,
+          "price": 10000,
+          "subtotal": 10000
+        }
+      ],
+      "deliveryCharge": 0,
+      "totalAmount": 10000,
+      "paymentMethod": "COD",
+      "orderStatus": "DELIVERED",
+      "courier": "Executive Calendar Invitation",
+      "trackingCode": "CONF-AP-9912",
+      "notes": "NDA signed and counter-signed",
+      "createdAt": "2026-10-21T07:00:00Z"
+    }
+  ],
+  "media": [
+    {
+      "id": "med_advisorypro_1",
+      "title": "AdvisoryPro Corporate Legal & Tax Counsel - Official Showcase & Product Review",
+      "categoryId": "all",
+      "categoryName": "Featured Highlights",
+      "type": "YOUTUBE",
+      "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "embedUrl": "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?rel=0",
+      "thumbnail": "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=800&q=80",
+      "createdAt": "2026-10-22T06:59:45.039Z"
+    },
+    {
+      "id": "med_advisorypro_2",
+      "title": "Customer Unboxing & Live Walkthrough Video",
+      "categoryId": "all",
+      "categoryName": "Customer Reviews",
+      "type": "FACEBOOK",
+      "url": "https://www.facebook.com/facebook/videos/10153231379946729/",
+      "embedUrl": "https://www.facebook.com/plugins/video.php?height=314&href=https%3A%2F%2Fwww.facebook.com%2Ffacebook%2Fvideos%2F10153231379946729%2F&show_text=false&width=560",
+      "thumbnail": "https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=800&q=80",
+      "createdAt": "2026-10-22T06:59:45.039Z"
+    }
+  ],
+  "locations": [
+    {
+      "id": "loc_main",
+      "name": "Main Central Warehouse (ঢাকা কেন্দ্রীয় গুদাম)",
+      "code": "WH-MAIN",
+      "address": "Tejgaon Industrial Area, Dhaka",
+      "bins": [
+        "A-01-01",
+        "A-01-02",
+        "B-01-01",
+        "B-01-02",
+        "C-01-01"
+      ],
+      "isDefault": true,
+      "createdAt": "2026-10-22T06:59:45.039Z"
+    },
+    {
+      "id": "loc_showroom",
+      "name": "AdvisoryPro Corporate Legal & Tax Counsel Showroom & Pickup Point",
+      "code": "SH-MAIN",
+      "address": "World Trade Centre Dhaka, Level 7, DIT Avenue, Motijheel",
+      "bins": [
+        "SH-FRONT",
+        "SH-BACK",
+        "SH-SHELF-01"
+      ],
+      "isDefault": false,
+      "createdAt": "2026-10-22T06:59:45.039Z"
+    }
+  ],
+  "stockReservations": [],
+  "stockLedger": [
+    {
+      "id": "ldg_init_item_adv_1",
+      "itemId": "item_adv_1",
+      "sku": "ADV-CONS-1HR",
+      "itemTitle": "1-Hour Confidential Strategic Consultation",
+      "locationId": "loc_main",
+      "locationName": "WH-MAIN (Tejgaon Central)",
+      "bin": "CHAMBERS-CONF",
+      "movementType": "OPENING_BALANCE",
+      "qtyChange": 20,
+      "balanceAfter": 20,
+      "unitCost": 3000,
+      "totalValue": 60000,
+      "reference": "OB-INIT-2026",
+      "notes": "System Baseline Opening Stock",
+      "performedBy": "System Auditor",
+      "createdAt": "2026-10-22T06:59:45.039Z"
+    },
+    {
+      "id": "ldg_init_item_adv_2",
+      "itemId": "item_adv_2",
+      "sku": "ADV-AUDIT-MA-01",
+      "itemTitle": "Comprehensive Startup M&A & Legal Due Diligence Audit",
+      "locationId": "loc_main",
+      "locationName": "WH-MAIN (Tejgaon Central)",
+      "bin": "CHAMBERS-CONF",
+      "movementType": "OPENING_BALANCE",
+      "qtyChange": 10,
+      "balanceAfter": 10,
+      "unitCost": 25000,
+      "totalValue": 250000,
+      "reference": "OB-INIT-2026",
+      "notes": "System Baseline Opening Stock",
+      "performedBy": "System Auditor",
+      "createdAt": "2026-10-22T06:59:45.039Z"
+    }
+  ],
+  "users": [
+    {
+      "id": "usr_advisorypro_admin",
+      "name": "AdvisoryPro Corporate Legal & Tax Counsel Admin",
+      "email": "admin@advisorypro.com",
+      "role": "TENANT_ADMIN",
+      "createdAt": "2026-10-22T06:59:45.039Z"
+    }
+  ]
+}

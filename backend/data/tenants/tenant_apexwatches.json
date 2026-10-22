@@ -1,0 +1,358 @@
+{
+  "tenantId": "apexwatches",
+  "subdomain": "apexwatches",
+  "dbName": "tenant_apexwatches",
+  "createdAt": "2026-10-20T10:22:30.671Z",
+  "businessType": "luxury_watches",
+  "archetype": "PHYSICAL_STORE",
+  "categories": [
+    {
+      "id": "cat_1",
+      "name": "Automatic Chronographs",
+      "slug": "automatic-chronographs"
+    },
+    {
+      "id": "cat_2",
+      "name": "Swiss Luxury Timepieces",
+      "slug": "swiss-luxury-timepieces"
+    },
+    {
+      "id": "cat_3",
+      "name": "Diver & Sports Watches",
+      "slug": "diver-sports-watches"
+    },
+    {
+      "id": "cat_4",
+      "name": "Classic Dress Watches",
+      "slug": "classic-dress-watches"
+    },
+    {
+      "id": "cat_5",
+      "name": "Straps & Horology Accessories",
+      "slug": "straps-horology-accessories"
+    }
+  ],
+  "brands": [
+    {
+      "id": "brand_1",
+      "name": "Rolex",
+      "slug": "rolex",
+      "logo": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=120&q=80"
+    },
+    {
+      "id": "brand_2",
+      "name": "Omega",
+      "slug": "omega",
+      "logo": "https://images.unsplash.com/photo-1547996160-71dfa63582d8?auto=format&fit=crop&w=120&q=80"
+    },
+    {
+      "id": "brand_3",
+      "name": "Patek Philippe",
+      "slug": "patek-philippe",
+      "logo": null
+    },
+    {
+      "id": "brand_4",
+      "name": "Audemars Piguet",
+      "slug": "audemars-piguet",
+      "logo": null
+    },
+    {
+      "id": "brand_5",
+      "name": "TAG Heuer",
+      "slug": "tag-heuer",
+      "logo": null
+    }
+  ],
+  "items": [
+    {
+      "id": "item_apexwatches_1792499520913",
+      "tenantId": "apexwatches",
+      "categoryId": "cat_1",
+      "category": {
+        "id": "cat_1",
+        "name": "Automatic Chronographs",
+        "slug": "automatic-chronographs"
+      },
+      "brandId": "brand_1",
+      "brand": {
+        "id": "brand_1",
+        "name": "Rolex",
+        "slug": "rolex",
+        "logo": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=120&q=80"
+      },
+      "title": "Rolex Submariner Oystersteel Date 41mm",
+      "slug": "rolex-submariner-oystersteel-date-41mm-vr74",
+      "shortDescription": "Ceramic Cerachrom bezel with black dial and Oyster bracelet.",
+      "description": "<p>Ceramic Cerachrom bezel with black dial and Oyster bracelet.</p>",
+      "price": 1850000,
+      "comparePrice": 2100000,
+      "stockQuantity": 20,
+      "itemType": "PHYSICAL_PRODUCT",
+      "images": [
+        "https://images.unsplash.com/photo-1547996160-71dfabb1a7b1?w=800&auto=format&fit=crop&q=80"
+      ],
+      "isFeatured": false,
+      "isActive": true,
+      "sku": "SKU-2NDEU9",
+      "specifications": null,
+      "customAttributes": {
+        "movement": "Swiss Automatic Mechanical",
+        "case_material": "904L Oystersteel",
+        "case_size_mm": 41,
+        "strap_material": "Stainless Steel Oyster Link Bracelet",
+        "dial_glass": "Scratch-Proof Sapphire Crystal with Anti-Reflective Coating",
+        "water_resistance": "200m+ (20 ATM - Diver)",
+        "warranty_years": 5
+      },
+      "createdAt": "2026-10-20T12:32:00.913Z"
+    },
+    {
+      "id": "item_apexwatches_1",
+      "title": "Rolex Cosmograph Daytona - Oystersteel & Cerachrom",
+      "slug": "rolex-cosmograph-daytona-oystersteel",
+      "shortDescription": "Calibre 4131 automatic chronograph movement with high-performance Paraflex shock absorbers and black Cerachrom tachymetric bezel.",
+      "description": "<p>Calibre 4131 automatic chronograph movement with high-performance Paraflex shock absorbers and black Cerachrom tachymetric bezel.</p>",
+      "price": 2495000,
+      "comparePrice": 2700000,
+      "stockQuantity": 20,
+      "itemType": "PHYSICAL_PRODUCT",
+      "images": [
+        "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80"
+      ],
+      "customAttributes": {
+        "movement": "Swiss Automatic Mechanical",
+        "case_material": "904L Oystersteel",
+        "case_size_mm": 40,
+        "strap_material": "Stainless Steel Oyster Link Bracelet",
+        "dial_glass": "Scratch-Proof Sapphire Crystal with Anti-Reflective Coating",
+        "water_resistance": "100m (10 ATM - Swimming)",
+        "warranty_years": 5
+      },
+      "badge": "FLAGSHIP MASTER 2026",
+      "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "updatedAt": "2026-10-21T07:35:10.451Z",
+      "isFeatured": false
+    },
+    {
+      "id": "item_apexwatches_2",
+      "title": "Omega Speedmaster Professional Moonwatch Co-Axial",
+      "slug": "omega-speedmaster-professional-moonwatch",
+      "shortDescription": "Master Chronometer certified manual-wind Calibre 3861 with hesalite crystal and iconic step dial.",
+      "description": "<p>Master Chronometer certified manual-wind Calibre 3861 with hesalite crystal and iconic step dial.</p>",
+      "price": 890000,
+      "comparePrice": 940000,
+      "stockQuantity": 15,
+      "itemType": "PHYSICAL_PRODUCT",
+      "images": [
+        "https://images.unsplash.com/photo-1547996160-71dfa63582d8?auto=format&fit=crop&w=800&q=80"
+      ],
+      "customAttributes": {
+        "movement": "Manual Hand-Wind",
+        "case_material": "316L Stainless Steel",
+        "case_size_mm": 42,
+        "strap_material": "Stainless Steel Oyster Link Bracelet",
+        "dial_glass": "Hesalite Acrylic Crystal",
+        "water_resistance": "50m (5 ATM - Rain)",
+        "warranty_years": 5
+      }
+    },
+    {
+      "id": "item_apexwatches_3",
+      "title": "Patek Philippe Calatrava Clous de Paris Ref. 6119R",
+      "slug": "patek-philippe-calatrava-6119r",
+      "shortDescription": "18K rose gold with guilloched hobnail bezel and hand-wound calibre 30-255 PS mechanical movement.",
+      "description": "<p>18K rose gold with guilloched hobnail bezel and hand-wound calibre 30-255 PS mechanical movement.</p>",
+      "price": 4200000,
+      "comparePrice": 4500000,
+      "stockQuantity": 5,
+      "itemType": "PHYSICAL_PRODUCT",
+      "images": [
+        "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=800&q=80"
+      ],
+      "customAttributes": {
+        "movement": "Manual Hand-Wind",
+        "case_material": "18K Rose Gold Plated",
+        "case_size_mm": 39,
+        "strap_material": "Full-Grain Italian Leather",
+        "dial_glass": "Scratch-Proof Sapphire Crystal with Anti-Reflective Coating",
+        "water_resistance": "30m (3 ATM - Splash)",
+        "warranty_years": 3
+      }
+    }
+  ],
+  "orders": [
+    {
+      "id": "ord_1792562469568_606",
+      "orderNumber": "ORD-462524-4766",
+      "customerName": "Rahim Chowdhury",
+      "customerPhone": "01711998877",
+      "customerEmail": "",
+      "shippingAddress": "Tejgaon I/A, Dhaka",
+      "city": "Dhaka",
+      "businessCategory": "luxury_watches",
+      "orderType": "QUOTATION",
+      "customAttributes": {
+        "target_quantity": 5000,
+        "company_name": "Chowdhury Apparels Ltd",
+        "rfq_target_price": 420
+      },
+      "items": [
+        {
+          "itemId": "item_1740000000001",
+          "variantId": null,
+          "itemTitle": "B2B Bulk Garments Production Order",
+          "variantTitle": null,
+          "price": 450000,
+          "quantity": 1,
+          "subtotal": 450000,
+          "customAttributes": {
+            "customization_oem": true,
+            "moq": 1000,
+            "product_category": "গার্মেন্টস ও পোশাক উৎপাদন (RMG)",
+            "production_capacity": "50000 pcs/month"
+          }
+        }
+      ],
+      "subtotal": 450000,
+      "deliveryCharge": 60,
+      "totalAmount": 450060,
+      "paymentMethod": "COD",
+      "orderStatus": "CONFIRMED",
+      "courier": "Pathao Express",
+      "trackingCode": "PTH-998877",
+      "appointmentDate": null,
+      "appointmentTime": null,
+      "serviceTitle": null,
+      "notes": "Urgent export order: Deliver to Chittagong Port gate 2",
+      "createdAt": "2026-10-21T06:01:09.569Z",
+      "notesHistory": [
+        {
+          "id": "note_1792563381284",
+          "note": "Buyer verified via phone call. Advance received via bank.",
+          "author": "Admin",
+          "visibility": "internal",
+          "createdAt": "2026-10-21T06:16:21.284Z"
+        }
+      ],
+      "updatedAt": "2026-10-21T06:17:16.325Z"
+    },
+    {
+      "id": "ord_1792503988994_1",
+      "orderNumber": "ORD-892110",
+      "customerName": "Tanvir Ahmed",
+      "customerPhone": "+880 1711-554433",
+      "customerEmail": "tanvir.ahmed@gmail.com",
+      "shippingAddress": "House 34, Road 11, Banani",
+      "city": "Dhaka",
+      "businessCategory": "fashion_clothing",
+      "orderType": "PHYSICAL_PRODUCT",
+      "items": [
+        {
+          "itemTitle": "Handcrafted Royal Dhakai Jamdani Saree",
+          "variantTitle": "Gold Zari Cream",
+          "quantity": 1,
+          "price": 6500,
+          "subtotal": 6500
+        }
+      ],
+      "deliveryCharge": 60,
+      "totalAmount": 6560,
+      "paymentMethod": "COD",
+      "orderStatus": "SHIPPED",
+      "courier": "Steadfast Courier",
+      "trackingCode": "STEAD-892110-BD",
+      "notes": "Please deliver after 2:00 PM",
+      "createdAt": "2026-10-20T09:46:28.994Z"
+    },
+    {
+      "id": "ord_1792503988994_2",
+      "orderNumber": "ORD-892111",
+      "customerName": "Nusrat Jahan",
+      "customerPhone": "+880 1819-332211",
+      "customerEmail": "nusrat.jahan@hotmail.com",
+      "shippingAddress": "East Nasirabad, GEC Circle",
+      "city": "Chattogram",
+      "businessCategory": "fashion_clothing",
+      "orderType": "PHYSICAL_PRODUCT",
+      "items": [
+        {
+          "itemTitle": "Platinum Cotton Exclusive Semi-Long Panjabi",
+          "variantTitle": "Navy Blue (Size 42)",
+          "quantity": 1,
+          "price": 2850,
+          "subtotal": 2850
+        }
+      ],
+      "deliveryCharge": 120,
+      "totalAmount": 2970,
+      "paymentMethod": "COD",
+      "orderStatus": "PROCESSING",
+      "courier": "Pathao Courier",
+      "trackingCode": "PATH-441098-CTG",
+      "notes": "Call before dispatching",
+      "createdAt": "2026-10-20T12:46:28.994Z"
+    },
+    {
+      "id": "ord_1792503988994_3",
+      "orderNumber": "ORD-892112",
+      "customerName": "Mahmudul Hasan",
+      "customerPhone": "+880 1912-778899",
+      "customerEmail": "mahmud.h@gmail.com",
+      "shippingAddress": "Sector 4, Uttara Model Town",
+      "city": "Dhaka",
+      "businessCategory": "fashion_clothing",
+      "orderType": "PHYSICAL_PRODUCT",
+      "items": [
+        {
+          "itemTitle": "Handcrafted Royal Dhakai Jamdani Saree",
+          "variantTitle": "Deep Crimson",
+          "quantity": 1,
+          "price": 6500,
+          "subtotal": 6500
+        }
+      ],
+      "deliveryCharge": 60,
+      "totalAmount": 6560,
+      "paymentMethod": "COD",
+      "orderStatus": "PENDING",
+      "courier": "Pending Assignment",
+      "trackingCode": "",
+      "notes": "Urgent delivery requested",
+      "createdAt": "2026-10-20T13:46:28.994Z"
+    }
+  ],
+  "settings": {
+    "name": "Apex Luxury Watches",
+    "phone": "+8801700998877",
+    "email": "admin@apexwatches.com",
+    "address": "Gulshan Avenue, Block E, Dhaka 1212",
+    "announcementText": "Official Swiss Horology Partner | Authenticity Guaranteed with Global Warranty",
+    "currency": "BDT",
+    "theme": "modern_slate"
+  },
+  "media": [
+    {
+      "id": "med_1792503989002_1",
+      "title": "Swiss Luxury Automatic Movement & Precision Assembly",
+      "categoryId": "all",
+      "categoryName": "Featured Collection",
+      "type": "YOUTUBE",
+      "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "embedUrl": "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?rel=0",
+      "thumbnail": "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=800&q=80",
+      "createdAt": "2026-10-20T13:46:29.002Z"
+    },
+    {
+      "id": "med_1792503989002_2",
+      "title": "Customer Unboxing & Genuine Quality Review Live Video",
+      "categoryId": "all",
+      "categoryName": "General Highlights",
+      "type": "FACEBOOK",
+      "url": "https://www.facebook.com/facebook/videos/10153231379946729/",
+      "embedUrl": "https://www.facebook.com/plugins/video.php?height=314&href=https%3A%2F%2Fwww.facebook.com%2Ffacebook%2Fvideos%2F10153231379946729%2F&show_text=false&width=560",
+      "thumbnail": "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=800&q=80",
+      "createdAt": "2026-10-20T13:46:29.002Z"
+    }
+  ]
+}
