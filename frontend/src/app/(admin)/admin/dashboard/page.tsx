@@ -27,6 +27,10 @@ import {
   ShieldAlert,
   AlertCircle,
   Award,
+  Laptop,
+  Ban,
+  ShieldCheck,
+  Eye,
   Database,
   Save,
   Globe,
@@ -279,8 +283,15 @@ function DashboardContent() {
   const [manualApptDate, setManualApptDate] = useState(todayStr);
   const [manualApptTime, setManualApptTime] = useState('11:00 AM');
   const [manualPropertyBudget, setManualPropertyBudget] = useState('BDT 45,000,000');
-  const [creatingManualOrder, setCreatingManualOrder] = useState(false);
   const [invoiceOrder, setInvoiceOrder] = useState<any | null>(null);
+  // Fraud Prevention, Device, Geolocation & Blacklist States
+  const [mapModalOrder, setMapModalOrder] = useState<any | null>(null);
+  const [blockModalOrder, setBlockModalOrder] = useState<any | null>(null);
+  const [blockReason, setBlockReason] = useState('ভুয়া অর্ডার / বারবার পার্সেল বাতিল ও রিটার্ন');
+  const [isBlocking, setIsBlocking] = useState(false);
+  const [fraudFilterTab, setFraudFilterTab] = useState<'all' | 'high_risk' | 'blocked' | 'trusted'>('all');
+  const [customerHistoryModal, setCustomerHistoryModal] = useState<any | null>(null);
+  const [customerHistoryLoading, setCustomerHistoryLoading] = useState(false);
 
   // Media & Video Gallery state
   const [mediaItems, setMediaItems] = useState<any[]>([]);
@@ -835,6 +846,95 @@ function DashboardContent() {
       }
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const handleBlockCustomer = async (order: any, customReason?: string) => {
+    setIsBlocking(true);
+    try {
+      const targetPhone = order.customerPhone || order.phone;
+      const targetEmail = order.customerEmail || order.email;
+      const targetIp = order.ipAddress || order.clientIp || order.ip;
+      const targetName = order.customerName || order.name;
+
+      const res = await api.blockCustomer(
+        {
+          phone: targetPhone,
+          email: targetEmail,
+          ip: targetIp,
+          customerName: targetName,
+          reason: customReason || blockReason,
+        },
+        tenantSlug
+      );
+
+      if (res?.success) {
+        // Refresh orders list
+        const updatedOrdersRes = await api.getOrders({}, tenantSlug);
+        if (updatedOrdersRes?.success && Array.isArray(updatedOrdersRes.data)) {
+          setOrders(updatedOrdersRes.data);
+        }
+        setBlockModalOrder(null);
+        setOrderNotice(`কাস্টমার "${targetName || targetPhone}" কে ব্লক করা হয়েছে।`);
+        setTimeout(() => setOrderNotice(null), 3500);
+      } else {
+        alert(res?.message || 'কাস্টমার ব্লক করতে ব্যর্থ হয়েছে');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('সার্ভার এরর');
+    } finally {
+      setIsBlocking(false);
+    }
+  };
+
+  const handleUnblockCustomer = async (target: any) => {
+    const targetPhone = typeof target === 'string' ? target : (target?.customerPhone || target?.phone || '');
+    const targetEmail = typeof target === 'object' ? (target?.customerEmail || target?.email) : undefined;
+    const targetIp = typeof target === 'object' ? (target?.ipAddress || target?.clientIp || target?.ip) : undefined;
+    const displayName = typeof target === 'string' ? target : (target?.customerName || target?.customerPhone || 'কাস্টমার');
+
+    try {
+      const res = await api.unblockCustomer(
+        {
+          phone: targetPhone,
+          email: targetEmail,
+          ip: targetIp,
+        },
+        tenantSlug
+      );
+
+      if (res?.success) {
+        const updatedOrdersRes = await api.getOrders({}, tenantSlug);
+        if (updatedOrdersRes?.success && Array.isArray(updatedOrdersRes.data)) {
+          setOrders(updatedOrdersRes.data);
+        }
+        setOrderNotice(`কাস্টমার "${displayName}" আনব্লক করা হয়েছে।`);
+        setTimeout(() => setOrderNotice(null), 3500);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleViewCustomerHistory = async (phone: string, customerName: string) => {
+    setCustomerHistoryLoading(true);
+    setCustomerHistoryModal({ phone, customerName, loading: true });
+    try {
+      const res = await api.getCustomerHistory(phone, tenantSlug);
+      if (res?.success && res.data) {
+        setCustomerHistoryModal({
+          phone,
+          customerName,
+          loading: false,
+          ...res.data,
+        });
+      }
+    } catch (err) {
+      console.error(err);
+      setCustomerHistoryModal({ phone, customerName, loading: false, orders: [] });
+    } finally {
+      setCustomerHistoryLoading(false);
     }
   };
 
@@ -2143,6 +2243,32 @@ function DashboardContent() {
               </div>
             </div>
 
+            {/* Customer Security & Fraud Intelligence Filter Tabs */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-1">
+              <span className="text-xs font-bold text-slate-500 whitespace-nowrap flex items-center gap-1">
+                <ShieldCheck className="w-3.5 h-3.5 text-indigo-600" />
+                <span>সিকিউরিটি ফিল্টার:</span>
+              </span>
+              {[
+                { id: 'all', label: 'সব অর্ডার (All)' },
+                { id: 'high_risk', label: '🚨 ভুয়া অর্ডার ঝুঁকি (High Risk)', color: 'text-rose-700 bg-rose-50 border-rose-300' },
+                { id: 'blocked', label: '🚫 ব্লক করা কাস্টমার (Blocked)', color: 'text-red-700 bg-red-50 border-red-300' },
+                { id: 'trusted', label: '💎 বিশ্বস্ত কাস্টমার (Trusted)', color: 'text-emerald-700 bg-emerald-50 border-emerald-300' },
+              ].map((f) => (
+                <button
+                  key={f.id}
+                  onClick={() => setFraudFilterTab(f.id as any)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap border ${
+                    fraudFilterTab === f.id
+                      ? 'bg-indigo-900 text-white border-indigo-900 shadow-sm'
+                      : f.color || 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'
+                  }`}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+
             {/* Orders Cards List */}
             {(() => {
               const filteredOrders = orders.filter((ord) => {
@@ -2158,8 +2284,19 @@ function DashboardContent() {
                   !orderSearchQuery.trim() ||
                   ord.customerName?.toLowerCase().includes(orderSearchQuery.toLowerCase()) ||
                   ord.customerPhone?.toLowerCase().includes(orderSearchQuery.toLowerCase()) ||
-                  ord.orderNumber?.toLowerCase().includes(orderSearchQuery.toLowerCase());
-                return matchCat && matchStatus && matchSearch;
+                  ord.orderNumber?.toLowerCase().includes(orderSearchQuery.toLowerCase()) ||
+                  (ord.clientIp && ord.clientIp.toLowerCase().includes(orderSearchQuery.toLowerCase()));
+                
+                let matchFraud = true;
+                if (fraudFilterTab === 'high_risk') {
+                  matchFraud = ord.customerHistory?.trustScore === 'RISK' || (ord.customerHistory?.deliverySuccessRate != null && ord.customerHistory.deliverySuccessRate < 50) || ord.addressDiscrepancy === true;
+                } else if (fraudFilterTab === 'blocked') {
+                  matchFraud = ord.isBlockedCustomer === true;
+                } else if (fraudFilterTab === 'trusted') {
+                  matchFraud = ord.customerHistory?.trustScore === 'EXCELLENT' || ord.customerHistory?.trustScore === 'GOOD';
+                }
+
+                return matchCat && matchStatus && matchSearch && matchFraud;
               });
 
               if (filteredOrders.length === 0) {
@@ -2242,27 +2379,136 @@ function DashboardContent() {
 
                         {/* Customer & Category-Specific Grid */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                          {/* Customer Details */}
-                          <div className="space-y-1.5">
-                            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">
-                              Customer Contact
-                            </span>
+                          {/* Customer Details & Fraud Intelligence */}
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between gap-1 flex-wrap">
+                              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                                Customer Contact
+                              </span>
+                              {/* Trust Score Badge */}
+                              {ord.isBlockedCustomer ? (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-red-100 text-red-800 border border-red-300">
+                                  <Ban className="w-3 h-3 text-red-600" />
+                                  🚫 ব্লক করা কাস্টমার
+                                </span>
+                              ) : ord.addressDiscrepancy ? (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-100 text-rose-800 border border-rose-300 animate-pulse">
+                                  <AlertCircle className="w-3 h-3 text-rose-600" />
+                                  🚨 ভুয়া অর্ডার ঝুঁকি (IP অমিল)
+                                </span>
+                              ) : ord.customerHistory?.trustScore === 'EXCELLENT' ? (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                  <Award className="w-3 h-3 text-emerald-600" />
+                                  💎 অত্যন্ত বিশ্বস্ত ({ord.customerHistory?.deliverySuccessRate}%)
+                                </span>
+                              ) : ord.customerHistory?.trustScore === 'GOOD' ? (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-blue-100 text-blue-800 border border-blue-300">
+                                  <CheckCircle className="w-3 h-3 text-blue-600" />
+                                  ✓ বিশ্বস্ত ({ord.customerHistory?.deliverySuccessRate}%)
+                                </span>
+                              ) : ord.customerHistory?.trustScore === 'RISK' ? (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-100 text-rose-800 border border-rose-300">
+                                  <AlertCircle className="w-3 h-3 text-rose-600" />
+                                  ⚠️ সন্দেহজনক কাস্টমার ({ord.customerHistory?.deliverySuccessRate}%)
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700">
+                                  ✨ নতুন কাস্টমার
+                                </span>
+                              )}
+                            </div>
+
                             <div className="flex items-center gap-2 text-sm font-bold text-slate-900">
                               <User className="w-3.5 h-3.5 text-slate-400" />
                               <span>{ord.customerName}</span>
                             </div>
-                            <div className="flex items-center gap-2 text-xs text-slate-600">
-                              <Phone className="w-3.5 h-3.5 text-slate-400" />
-                              <a href={`tel:${ord.customerPhone}`} className="hover:text-rose-600 font-medium">
-                                {ord.customerPhone}
-                              </a>
+
+                            <div className="flex items-center justify-between text-xs text-slate-600">
+                              <div className="flex items-center gap-1.5">
+                                <Phone className="w-3.5 h-3.5 text-slate-400" />
+                                <a href={`tel:${ord.customerPhone}`} className="hover:text-rose-600 font-mono font-bold">
+                                  {ord.customerPhone}
+                                </a>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => handleViewCustomerHistory(ord.customerPhone, ord.customerName)}
+                                className="inline-flex items-center gap-1 text-[11px] font-bold text-indigo-600 hover:text-indigo-800 underline bg-indigo-50 px-2 py-0.5 rounded-lg border border-indigo-100 transition hover:bg-indigo-100"
+                                title="কাস্টমারের আগের সব অর্ডার হিস্ট্রি দেখুন"
+                              >
+                                <Eye className="w-3 h-3" />
+                                <span>হিস্ট্রি</span>
+                              </button>
                             </div>
-                            <div className="flex items-start gap-2 text-xs text-slate-500">
+
+                            {/* Customer Lifetime Delivery Stats Pill */}
+                            {ord.customerHistory && (
+                              <div className="p-2 rounded-xl bg-slate-50 border border-slate-200 text-[11px] space-y-1">
+                                <div className="flex items-center justify-between text-slate-600 font-semibold text-[10px]">
+                                  <span>লাইফটাইম অর্ডার রেকর্ড:</span>
+                                  <span className="font-mono font-bold text-slate-900">মোট {ord.customerHistory.totalOrders} টি</span>
+                                </div>
+                                <div className="grid grid-cols-3 gap-1 text-center font-mono text-[10px]">
+                                  <div className="bg-emerald-50 text-emerald-800 rounded p-1 border border-emerald-200">
+                                    <span className="block font-bold">✓ {ord.customerHistory.deliveredOrders}</span>
+                                    <span className="text-[9px] text-emerald-600 font-sans">সফল</span>
+                                  </div>
+                                  <div className="bg-rose-50 text-rose-800 rounded p-1 border border-rose-200">
+                                    <span className="block font-bold">✕ {ord.customerHistory.cancelledOrders}</span>
+                                    <span className="text-[9px] text-rose-600 font-sans">বাতিল</span>
+                                  </div>
+                                  <div className="bg-indigo-50 text-indigo-800 rounded p-1 border border-indigo-200">
+                                    <span className="block font-bold">{ord.customerHistory.deliverySuccessRate}%</span>
+                                    <span className="text-[9px] text-indigo-600 font-sans">সফলতার হার</span>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Shipping Delivery Address */}
+                            <div className="flex items-start gap-2 text-xs text-slate-600">
                               <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
                               <span>
-                                {ord.shippingAddress}, {ord.city}
+                                {ord.shippingAddress}, <strong>{ord.city}</strong>
                               </span>
                             </div>
+
+                            {/* Device & Client IP Geolocation Card */}
+                            <div className="p-2.5 rounded-xl bg-slate-900 text-slate-200 text-[11px] space-y-1.5 border border-slate-800 shadow-inner">
+                              <div className="flex items-center justify-between text-[10px] text-slate-400">
+                                <span className="flex items-center gap-1 font-mono uppercase tracking-wider">
+                                  <Laptop className="w-3 h-3 text-cyan-400" />
+                                  <span>{ord.deviceType || 'Device'} • {ord.os || 'OS'} ({ord.browser || 'Browser'})</span>
+                                </span>
+                              </div>
+                              <div className="flex items-center justify-between font-mono text-xs">
+                                <span className="text-cyan-300 font-bold">{ord.clientIp || '103.205.71.42'}</span>
+                                <span className="text-slate-300 text-[10px] bg-slate-800 px-2 py-0.5 rounded-full border border-slate-700">
+                                  📍 IP: {ord.ipCity || 'Dhaka'}
+                                </span>
+                              </div>
+
+                              {/* Address Discrepancy Alert */}
+                              {ord.addressDiscrepancy && (
+                                <div className="p-1.5 rounded-lg bg-rose-500/20 border border-rose-500/40 text-rose-200 text-[10px] flex items-center gap-1.5">
+                                  <AlertCircle className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+                                  <span>
+                                    <strong>সতর্কতা:</strong> IP সিটি ({ord.ipCity}) ও ডেলিভারি সিটি ({ord.city}) আলাদা!
+                                  </span>
+                                </div>
+                              )}
+
+                              {/* Google Maps Button */}
+                              <button
+                                type="button"
+                                onClick={() => setMapModalOrder(ord)}
+                                className="w-full mt-1 py-1 px-2 rounded-lg bg-cyan-600/20 hover:bg-cyan-600/40 text-cyan-300 border border-cyan-500/30 font-bold text-[10px] transition flex items-center justify-center gap-1.5"
+                              >
+                                <Globe className="w-3 h-3 text-cyan-400" />
+                                <span>গুগল ম্যাপে IP লোকেশন পিন দেখুন</span>
+                              </button>
+                            </div>
+
                             {ord.notes && (
                               <p className="text-[11px] text-slate-500 italic bg-slate-50 p-2 rounded-xl border border-slate-100 mt-2">
                                 Note: {ord.notes}
@@ -2439,6 +2685,27 @@ function DashboardContent() {
                           </div>
 
                           <div className="flex items-center gap-2">
+                            {/* Block / Unblock Customer Button */}
+                            {ord.isBlockedCustomer ? (
+                              <button
+                                onClick={() => handleUnblockCustomer(ord.customerPhone)}
+                                className="px-3 py-1.5 rounded-xl text-xs font-bold bg-red-100 hover:bg-red-200 text-red-800 border border-red-300 transition flex items-center gap-1 shadow-sm active:scale-95"
+                                title="কাস্টমার আনব্লক করুন"
+                              >
+                                <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
+                                <span>আনব্লক করুন</span>
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => setBlockModalOrder(ord)}
+                                className="px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 transition flex items-center gap-1 shadow-sm active:scale-95"
+                                title="ভুয়া কাস্টমার ব্লক করুন"
+                              >
+                                <Ban className="w-3.5 h-3.5 text-rose-600" />
+                                <span>কাস্টমার ব্লক</span>
+                              </button>
+                            )}
+
                             <button
                               onClick={() => {
                                 handleUpdateOrderStatus(ord.id, 'DELIVERED');
@@ -2789,6 +3056,366 @@ function DashboardContent() {
                     <p className="text-[10px] text-slate-400">Date: ____ / ____ / 2026</p>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ============================================================== */}
+        {/* MODAL 1: GOOGLE MAPS IP GEOLOCATION PIN */}
+        {/* ============================================================== */}
+        {mapModalOrder && (
+          <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-5 shadow-2xl relative max-h-[92vh] overflow-y-auto text-slate-900 border border-slate-200">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
+                    <Globe className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-extrabold text-slate-900">
+                      অর্ডার ডিভাইস ও IP রিয়েল-টাইম লোকেশন
+                    </h3>
+                    <p className="text-xs text-slate-500 font-mono">
+                      Order #{mapModalOrder.orderNumber} • IP: {mapModalOrder.clientIp || '103.205.71.42'}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setMapModalOrder(null)}
+                  className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-sm transition"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Network, Device & City Summary Card */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
+                <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200">
+                  <span className="text-[10px] text-slate-400 block font-bold uppercase">কাস্টমার</span>
+                  <span className="font-extrabold text-slate-900 truncate block">{mapModalOrder.customerName}</span>
+                  <span className="font-mono text-[11px] text-slate-600">{mapModalOrder.customerPhone}</span>
+                </div>
+                <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200">
+                  <span className="text-[10px] text-slate-400 block font-bold uppercase">ডিভাইস ও ব্রাউজার</span>
+                  <span className="font-extrabold text-slate-900 truncate block">{mapModalOrder.deviceType || 'Mobile'} ({mapModalOrder.os || 'Android'})</span>
+                  <span className="text-[11px] text-slate-600">{mapModalOrder.browser || 'Chrome'}</span>
+                </div>
+                <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200">
+                  <span className="text-[10px] text-slate-400 block font-bold uppercase">IP লোকেশন</span>
+                  <span className="font-extrabold text-indigo-700 truncate block">{mapModalOrder.ipCity || 'Dhaka'}, {mapModalOrder.ipCountry || 'Bangladesh'}</span>
+                  <span className="font-mono text-[10px] text-slate-500">{mapModalOrder.ipLatitude || 23.8103}, {mapModalOrder.ipLongitude || 90.4125}</span>
+                </div>
+                <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200">
+                  <span className="text-[10px] text-slate-400 block font-bold uppercase">ডেলিভারি ঠিকানা</span>
+                  <span className="font-extrabold text-slate-900 truncate block">{mapModalOrder.city || 'Dhaka'}</span>
+                  <span className="text-[11px] text-slate-600 truncate block">{mapModalOrder.shippingAddress}</span>
+                </div>
+              </div>
+
+              {/* Address Discrepancy Warning Notice */}
+              {mapModalOrder.addressDiscrepancy ? (
+                <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-3">
+                  <AlertCircle className="w-5 h-5 text-rose-600 shrink-0" />
+                  <div>
+                    <strong className="block font-black text-rose-900">🚨 সতর্কবার্তা: লোকেশন অমিল পাওয়া গেছে!</strong>
+                    <span>
+                      কাস্টমার যে ডিভাইস থেকে অর্ডার করেছেন তার IP লোকেশন <strong>{mapModalOrder.ipCity}</strong>, কিন্তু পার্সেল পাঠানোর ডেলিভারি ঠিকানা দিয়েছেন <strong>{mapModalOrder.city}</strong>। ডেলিভারি নিশ্চিত করার পূর্বে গ্রাহককে ফোনে কল করুন।
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>
+                    <strong>লোকেশন ম্যাচ করেছে:</strong> অর্ডারের IP লোকেশন ({mapModalOrder.ipCity}) এবং ডেলিভারি ঠিকানা স্বাভাবিক ও বিশ্বস্ত।
+                  </span>
+                </div>
+              )}
+
+              {/* Embedded Google Maps Pin Iframe */}
+              <div className="rounded-2xl overflow-hidden border border-slate-300 shadow-inner h-80 bg-slate-100">
+                <iframe
+                  title="Customer Geolocation Map"
+                  width="100%"
+                  height="100%"
+                  frameBorder="0"
+                  scrolling="no"
+                  marginHeight={0}
+                  marginWidth={0}
+                  src={`https://maps.google.com/maps?q=${mapModalOrder.ipLatitude || 23.8103},${mapModalOrder.ipLongitude || 90.4125}&z=13&output=embed`}
+                  className="w-full h-full"
+                />
+              </div>
+
+              <div className="flex items-center justify-between pt-2">
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${mapModalOrder.ipLatitude || 23.8103},${mapModalOrder.ipLongitude || 90.4125}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1.5"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span>গুগল ম্যাপস অ্যাপে ওপেন করুন</span>
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setMapModalOrder(null)}
+                  className="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow transition"
+                >
+                  বন্ধ করুন
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ============================================================== */}
+        {/* MODAL 2: BLOCK / BLACKLIST FAKE CUSTOMER */}
+        {/* ============================================================== */}
+        {blockModalOrder && (
+          <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-5 shadow-2xl relative text-slate-900 border border-slate-200">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600">
+                    <Ban className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-extrabold text-slate-900">
+                      কাস্টমার ব্লক / কালো তালিকাভুক্ত করুন
+                    </h3>
+                    <p className="text-xs text-slate-500">ভুয়া অর্ডার ও রিটার্ন প্রতিরোধ করুন</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setBlockModalOrder(null)}
+                  className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-sm transition"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5 text-xs">
+                <div className="flex justify-between">
+                  <span className="text-slate-500 font-semibold">গ্রাহকের নাম:</span>
+                  <strong className="text-slate-900">{blockModalOrder.customerName}</strong>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500 font-semibold">ফোন নম্বর:</span>
+                  <strong className="text-rose-700 font-mono font-bold">{blockModalOrder.customerPhone}</strong>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500 font-semibold">ডিভাইস IP:</span>
+                  <span className="font-mono text-slate-700">{blockModalOrder.clientIp || '103.205.71.42'}</span>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-slate-700">ব্লক করার কারণ নির্বাচন করুন:</label>
+                <select
+                  value={blockReason}
+                  onChange={(e) => setBlockReason(e.target.value)}
+                  className="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-rose-500"
+                >
+                  <option value="ভুয়া অর্ডার / বারবার পার্সেল বাতিল ও রিটার্ন">ভুয়া অর্ডার / বারবার পার্সেল বাতিল ও রিটার্ন</option>
+                  <option value="অকার্যকর বা অন্য কারও ফোন নম্বর প্রদান">অকার্যকর বা অন্য কারও ফোন নম্বর প্রদান</option>
+                  <option value="ডেলিভারি রাইডারকে হয়রানি বা অপব্যবহার">ডেলিভারি রাইডারকে হয়রানি বা অপব্যবহার</option>
+                  <option value="স্প্যাম বা ক্ষতিকর বট অ্যাক্টিভিটি">স্প্যাম বা ক্ষতিকর বট অ্যাক্টিভিটি</option>
+                  <option value="কাস্টমারের অনুরোধে ব্লক করা হয়েছে">কাস্টমারের অনুরোধে ব্লক করা হয়েছে</option>
+                </select>
+              </div>
+
+              <div className="p-3 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 text-[11px] leading-relaxed">
+                ⚠️ <strong>মনোযোগ দিন:</strong> ব্লক করার পর এই ফোন নম্বর বা IP ব্যবহার করে এই স্টোর বা আপনার যেকোনো স্টোরে চেকআউট করার চেষ্টা করলে সরাসরি <strong>HTTP 403 (অর্ডার প্রত্যাখ্যাত)</strong> বার্তা প্রদর্শিত হবে।
+              </div>
+
+              <div className="flex items-center justify-end gap-2.5 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setBlockModalOrder(null)}
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition"
+                >
+                  বাতিল
+                </button>
+                <button
+                  type="button"
+                  disabled={isBlocking}
+                  onClick={() => handleBlockCustomer(blockModalOrder)}
+                  className="px-5 py-2 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white shadow-md transition disabled:opacity-50 flex items-center gap-1.5"
+                >
+                  <Ban className="w-3.5 h-3.5" />
+                  <span>{isBlocking ? 'ব্লক করা হচ্ছে...' : 'নিশ্চিত ব্লক করুন'}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ============================================================== */}
+        {/* MODAL 3: CUSTOMER LIFETIME ORDER HISTORY & FRAUD STATS */}
+        {/* ============================================================== */}
+        {customerHistoryModal && (
+          <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-5 shadow-2xl relative max-h-[92vh] overflow-y-auto text-slate-900 border border-slate-200">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
+                    <User className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-extrabold text-slate-900">
+                      গ্রাহকের সম্পূর্ণ লাইফটাইম অর্ডার হিস্ট্রি
+                    </h3>
+                    <p className="text-xs text-slate-500 font-mono">
+                      {customerHistoryModal.customerName} • {customerHistoryModal.phone}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setCustomerHistoryModal(null)}
+                  className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-sm transition"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Lifetime Metrics Dashboard */}
+              <div className="grid grid-cols-4 gap-2.5 text-center">
+                <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200">
+                  <span className="text-[10px] text-slate-400 block font-bold uppercase">মোট অর্ডার</span>
+                  <span className="text-lg font-black text-slate-900 font-mono">
+                    {customerHistoryModal.stats?.totalOrders ?? customerHistoryModal.totalOrders ?? 0}
+                  </span>
+                </div>
+                <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200">
+                  <span className="text-[10px] text-emerald-600 block font-bold uppercase">সফল ডেলিভারি</span>
+                  <span className="text-lg font-black text-emerald-700 font-mono">
+                    {customerHistoryModal.stats?.deliveredOrders ?? customerHistoryModal.deliveredOrders ?? 0}
+                  </span>
+                </div>
+                <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200">
+                  <span className="text-[10px] text-rose-600 block font-bold uppercase">বাতিল / রিটার্ন</span>
+                  <span className="text-lg font-black text-rose-700 font-mono">
+                    {customerHistoryModal.stats?.cancelledOrders ?? customerHistoryModal.cancelledOrders ?? 0}
+                  </span>
+                </div>
+                <div className="p-3 rounded-2xl bg-indigo-50 border border-indigo-200">
+                  <span className="text-[10px] text-indigo-600 block font-bold uppercase">ডেলিভারি রেট</span>
+                  <span className="text-lg font-black text-indigo-700 font-mono">
+                    {customerHistoryModal.stats?.deliverySuccessRate ?? customerHistoryModal.deliverySuccessRate ?? 0}%
+                  </span>
+                </div>
+              </div>
+
+              {/* Status Alert */}
+              {customerHistoryModal.isBlocked ? (
+                <div className="p-3 rounded-2xl bg-red-100 border border-red-300 text-red-900 text-xs flex items-center gap-2">
+                  <Ban className="w-4 h-4 text-red-600 shrink-0" />
+                  <span>
+                    <strong>এই গ্রাহক বর্তমানে কালো তালিকাভুক্ত (Blocked):</strong> কারণ: {customerHistoryModal.blockReason || 'নিয়মিত পার্সেল বাতিল ও ভুয়া অর্ডার'}
+                  </span>
+                </div>
+              ) : customerHistoryModal.stats?.deliverySuccessRate < 50 && customerHistoryModal.stats?.totalOrders > 1 ? (
+                <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                  <span>
+                    <strong>উচ্চ ভুয়া অর্ডার ঝুঁকি (High Risk):</strong> এই গ্রাহক পূর্বে ৫০% এর বেশি অর্ডার বাতিল করেছেন। পার্সেল পাঠানোর পূর্বে অবশ্যই অগ্রিম কুরিয়ার চার্জ গ্রহণ করুন।
+                  </span>
+                </div>
+              ) : (
+                <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>
+                    <strong>বিশ্বস্ত গ্রাহক:</strong> সফল ডেলিভারির অনুপাত সন্তোষজনক ({customerHistoryModal.stats?.deliverySuccessRate || 100}%)।
+                  </span>
+                </div>
+              )}
+
+              {/* Past Orders Table */}
+              <div className="space-y-2">
+                <span className="text-xs font-bold text-slate-700 block">অর্ডারের তালিকা:</span>
+                <div className="border border-slate-200 rounded-2xl overflow-hidden max-h-60 overflow-y-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-slate-50 text-slate-600 font-bold border-b border-slate-200 sticky top-0">
+                      <tr>
+                        <th className="py-2 px-3">অর্ডার #</th>
+                        <th className="py-2 px-3">তারিখ</th>
+                        <th className="py-2 px-3">পণ্য</th>
+                        <th className="py-2 px-3 text-right">টাকা</th>
+                        <th className="py-2 px-3 text-center">স্ট্যাটাস</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {(customerHistoryModal.orders || []).map((pastOrd: any, idx: number) => (
+                        <tr key={idx} className="hover:bg-slate-50/70">
+                          <td className="py-2.5 px-3 font-mono font-bold text-slate-800">{pastOrd.orderNumber}</td>
+                          <td className="py-2.5 px-3 text-slate-500">
+                            {new Date(pastOrd.createdAt).toLocaleDateString()}
+                          </td>
+                          <td className="py-2.5 px-3 text-slate-700 truncate max-w-[150px]">
+                            {pastOrd.items?.[0]?.itemTitle || pastOrd.items?.[0]?.title || 'পণ্য'}
+                          </td>
+                          <td className="py-2.5 px-3 text-right font-mono font-bold text-slate-900">
+                            BDT {pastOrd.totalAmount?.toLocaleString()}
+                          </td>
+                          <td className="py-2.5 px-3 text-center">
+                            <span
+                              className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                pastOrd.orderStatus === 'DELIVERED' || pastOrd.orderStatus === 'CONFIRMED'
+                                  ? 'bg-emerald-100 text-emerald-800'
+                                  : pastOrd.orderStatus === 'CANCELLED'
+                                  ? 'bg-rose-100 text-rose-800'
+                                  : 'bg-amber-100 text-amber-800'
+                              }`}
+                            >
+                              {pastOrd.orderStatus}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+                {customerHistoryModal.isBlocked ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleUnblockCustomer(customerHistoryModal.phone);
+                      setCustomerHistoryModal(null);
+                    }}
+                    className="px-4 py-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold border border-red-200 transition flex items-center gap-1.5"
+                  >
+                    <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>কাস্টমার আনব্লক করুন</span>
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setBlockModalOrder({
+                        customerPhone: customerHistoryModal.phone,
+                        customerName: customerHistoryModal.customerName,
+                        clientIp: customerHistoryModal.orders?.[0]?.clientIp,
+                      });
+                      setCustomerHistoryModal(null);
+                    }}
+                    className="px-4 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold border border-rose-200 transition flex items-center gap-1.5"
+                  >
+                    <Ban className="w-3.5 h-3.5 text-rose-600" />
+                    <span>এই কাস্টমারকে ব্লক করুন</span>
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setCustomerHistoryModal(null)}
+                  className="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow transition"
+                >
+                  বন্ধ করুন
+                </button>
               </div>
             </div>
           </div>

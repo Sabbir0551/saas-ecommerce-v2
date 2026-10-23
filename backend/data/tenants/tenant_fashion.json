@@ -91,7 +91,11 @@
         "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80",
         "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=800&q=80"
       ],
-      "variants": ["Crimson Red", "Royal Navy", "Emerald Green"],
+      "variants": [
+        "Crimson Red",
+        "Royal Navy",
+        "Emerald Green"
+      ],
       "isActive": true,
       "customAttributes": {
         "fabric": "84-Count Combed Cotton",
@@ -122,7 +126,12 @@
       "images": [
         "https://images.unsplash.com/photo-1597983073493-88cd35cf93b0?auto=format&fit=crop&w=800&q=80"
       ],
-      "variants": ["Size 38 (M)", "Size 40 (L)", "Size 42 (XL)", "Size 44 (XXL)"],
+      "variants": [
+        "Size 38 (M)",
+        "Size 40 (L)",
+        "Size 42 (XL)",
+        "Size 44 (XXL)"
+      ],
       "isActive": true,
       "customAttributes": {
         "fabric": "Art Raw Silk",
@@ -153,7 +162,11 @@
       "images": [
         "https://images.unsplash.com/photo-1601924994987-69e26d50dc26?auto=format&fit=crop&w=800&q=80"
       ],
-      "variants": ["Gold Mustard", "Rose Quartz Pink", "Midnight Teal"],
+      "variants": [
+        "Gold Mustard",
+        "Rose Quartz Pink",
+        "Midnight Teal"
+      ],
       "isActive": true,
       "customAttributes": {
         "material": "100% Pure Mulberry Silk",
@@ -163,6 +176,74 @@
     }
   ],
   "orders": [
+    {
+      "id": "ord_1792762228259_307",
+      "orderNumber": "ORD-224221-6454",
+      "customerName": "Unblocked Kamal",
+      "customerPhone": "+880 1715-998877",
+      "customerEmail": "",
+      "shippingAddress": "Mirpur",
+      "city": "Dhaka",
+      "businessCategory": "fashion_clothing",
+      "orderType": "STANDARD",
+      "customAttributes": {},
+      "items": [],
+      "subtotal": 0,
+      "deliveryCharge": 60,
+      "totalAmount": 60,
+      "paymentMethod": "COD",
+      "orderStatus": "PENDING",
+      "courier": "Pending Assignment",
+      "trackingCode": "",
+      "ipAddress": "103.205.71.42",
+      "deviceType": "Desktop",
+      "browserName": "Chrome",
+      "osName": "Windows",
+      "ipCity": "Dhaka",
+      "ipCountry": "Bangladesh",
+      "ipLatitude": 23.8103,
+      "ipLongitude": 90.4125,
+      "addressDiscrepancy": false,
+      "appointmentDate": null,
+      "appointmentTime": null,
+      "serviceTitle": null,
+      "notes": "",
+      "createdAt": "2026-10-23T13:30:28.260Z"
+    },
+    {
+      "id": "ord_1792762190723_698",
+      "orderNumber": "ORD-187017-5430",
+      "customerName": "Blocked Customer Test",
+      "customerPhone": "+880 1715-998877",
+      "customerEmail": "",
+      "shippingAddress": "Mirpur, Dhaka",
+      "city": "Dhaka",
+      "businessCategory": "fashion_clothing",
+      "orderType": "STANDARD",
+      "customAttributes": {},
+      "items": [],
+      "subtotal": 0,
+      "deliveryCharge": 60,
+      "totalAmount": 60,
+      "paymentMethod": "COD",
+      "orderStatus": "PENDING",
+      "courier": "Pending Assignment",
+      "trackingCode": "",
+      "ipAddress": "103.205.71.42",
+      "deviceType": "Desktop",
+      "browserName": "Chrome",
+      "osName": "Windows",
+      "ipCity": "Dhaka",
+      "ipCountry": "Bangladesh",
+      "ipLatitude": 23.8103,
+      "ipLongitude": 90.4125,
+      "addressDiscrepancy": false,
+      "appointmentDate": null,
+      "appointmentTime": null,
+      "serviceTitle": null,
+      "notes": "",
+      "createdAt": "2026-10-23T13:29:50.724Z"
+    },
     {
       "id": "ord_fsh_1",
       "orderNumber": "FSH-261001",
@@ -239,7 +320,11 @@
       "name": "Gulshan Central Boutique Showroom",
       "code": "WH-GLS",
       "address": "Road 11, Block D, Gulshan 1, Dhaka",
-      "bins": ["A-01-01", "A-01-02", "B-02-01"],
+      "bins": [
+        "A-01-01",
+        "A-01-02",
+        "B-02-01"
+      ],
       "isDefault": true,
       "createdAt": "2026-10-20T10:00:00.000Z"
     }
@@ -269,5 +354,6 @@
   "suppliers": [],
   "purchaseOrders": [],
   "goodsReceiveNotes": [],
-  "stockTransfers": []
+  "stockTransfers": [],
+  "blacklist": []
 }

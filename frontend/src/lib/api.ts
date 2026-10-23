@@ -109,6 +109,15 @@ export const api = {
     fetchWithTenant(`/orders/${orderId}/status`, { method: 'PATCH', body: JSON.stringify(data) }, slug),
   createManualOrder: (data: any, slug = 'fashion') => 
     fetchWithTenant('/orders/manual', { method: 'POST', body: JSON.stringify(data) }, slug),
+  // Fraud Prevention & Customer Intelligence System
+  getBlacklist: (slug = 'fashion') => 
+    fetchWithTenant('/orders/blacklist', {}, slug),
+  blockCustomer: (data: { phone?: string; email?: string; ip?: string; reason?: string; customerName?: string }, slug = 'fashion') => 
+    fetchWithTenant('/orders/blacklist/block', { method: 'POST', body: JSON.stringify(data) }, slug),
+  unblockCustomer: (data: { phone?: string; email?: string; ip?: string }, slug = 'fashion') => 
+    fetchWithTenant('/orders/blacklist/unblock', { method: 'POST', body: JSON.stringify(data) }, slug),
+  getCustomerHistory: (phone: string, slug = 'fashion') => 
+    fetchWithTenant(`/orders/customer-history/${encodeURIComponent(phone)}`, {}, slug),
   // Inventory Management System (Phase 1)
   getInventorySummary: (slug = 'fashion') => 
     fetchWithTenant('/inventory/summary', {}, slug),

@@ -131,7 +131,7 @@ function StorefrontContent({ tenantSlug }: { tenantSlug: string }) {
 
   const isMedical = tenant?.businessType === 'healthcare_service' || tenantSlug === 'medicare' || tenantSlug === 'meradenralcare' || matchedCategory?.archetype === 'APPOINTMENT_BOOKING';
   const isRealEstate = tenant?.businessType === 'real_estate' || tenantSlug === 'aebanproperty' || matchedCategory?.archetype === 'LEAD_GEN_REAL_ESTATE';
-  const isElectronics = tenant?.businessType === 'electronics' || tenantSlug === 'bestlaptop' || tenantSlug === 'gadgethub' || tenant?.businessType === 'laptop_computer';
+  const isElectronics = tenant?.businessType === 'electronics' || tenantSlug === 'bestlaptop' || tenantSlug === 'gadgethub' || tenant?.businessType === 'laptop_computer' || tenantSlug === 'smartvolt';
   const isPet = tenantSlug === 'petshopbd' || tenant?.businessType === 'pet_food';
 
   const getStoreBadge = () => {

@@ -677,5 +677,6 @@
       "role": "TENANT_ADMIN",
       "createdAt": "2026-10-22T06:59:45.028Z"
     }
-  ]
+  ],
+  "blacklist": []
 }

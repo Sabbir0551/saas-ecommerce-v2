@@ -58,7 +58,7 @@ function getMigratedJsonFilePath(): string {
 export async function tenantMiddleware(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const host = req.headers.host || '';
-    const xTenantHeader = req.headers['x-tenant-slug'] as string | undefined;
+    const xTenantHeader = (req.headers['x-tenant-slug'] || req.headers['x-tenant-id']) as string | undefined;
     const queryTenant = req.query.tenant as string | undefined;
 
     let tenantIdentifier = xTenantHeader || queryTenant;

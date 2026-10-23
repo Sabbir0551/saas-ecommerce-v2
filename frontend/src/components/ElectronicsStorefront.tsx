@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useCart } from '@/lib/cart-context';
 import {
@@ -8,9 +8,8 @@ import {
   Truck,
   ShieldCheck,
   Zap,
-  ShoppingBag,
+  ShoppingCart,
   Search,
-  ChevronRight,
   ChevronDown,
   Star,
   CheckCircle2,
@@ -27,17 +26,22 @@ import {
   X,
   Plus,
   Minus,
-  Sparkles,
-  Percent,
   Check,
-  Smartphone,
+  Bike,
   Tv,
   Refrigerator,
   WashingMachine,
-  Bike,
-  Sun,
+  Lightbulb,
+  Laptop,
+  Bell,
+  BatteryCharging,
+  Sliders,
+  Scissors,
+  Fan,
   Award,
-  SlidersHorizontal,
+  ExternalLink,
+  LayoutDashboard,
+  Filter,
 } from 'lucide-react';
 
 interface ElectronicsStorefrontProps {
@@ -50,947 +54,1141 @@ interface ElectronicsStorefrontProps {
 export function ElectronicsStorefront({
   tenant,
   tenantSlug,
-  items,
-  categories,
+  items = [],
+  categories = [],
 }: ElectronicsStorefrontProps) {
-  const { addToCart } = useCart();
-  const [activeMegaCategory, setActiveMegaCategory] = useState<string>('ac');
-  const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(true);
-  const [selectedApplianceFilter, setSelectedApplianceFilter] = useState<string>('all');
+  const { addToCart, totalItems } = useCart();
+  const [selectedEmiTenure, setSelectedEmiTenure] = useState<number>(12);
+  const [selectedShowroomCity, setSelectedShowroomCity] = useState<string>('Dhaka');
+  const [activeEngineeringFeature, setActiveEngineeringFeature] = useState<number>(0);
+  const [activeSpecTab, setActiveSpecTab] = useState<'specs' | 'warranty'>('specs');
   const [searchQuery, setSearchQuery] = useState('');
-  const [currentSlide, setCurrentSlide] = useState(0);
+  const [activeCategoryFilter, setActiveCategoryFilter] = useState<string>('all');
   const [addedItemNotice, setAddedItemNotice] = useState<string | null>(null);
 
   // Selected product modal state
   const [detailModalProduct, setDetailModalProduct] = useState<any | null>(null);
-  const [modalImageIndex, setModalImageIndex] = useState(0);
   const [modalQuantity, setModalQuantity] = useState(1);
+  const [selectedDirectionShowroom, setSelectedDirectionShowroom] = useState<any | null>(null);
 
-  // Showroom filter state
-  const [selectedShowroomCity, setSelectedShowroomCity] = useState('Dhaka');
-
-  // Hero carousel slides in 100% English
-  const slides = [
-    {
-      title: 'Year-End Electronics Discount Festival 2026!',
-      subtitle: 'Up to 45% OFF on Smart Inverter ACs & Major Appliances + Free Nationwide Delivery & Installation',
-      badge: 'MEGA SALE • 0% EMI AVAILABLE',
-      primaryBtnText: 'Explore Offers',
-      bgGradient: 'from-blue-900 via-indigo-900 to-slate-950',
-      tag: 'Limited Stock',
-      emiText: 'Up to 12 Months 0% Interest EMI with 28 Major Banks',
-      image: 'https://images.unsplash.com/photo-1621905251918-48416bd8575a?auto=format&fit=crop&w=1200&q=80',
-    },
-    {
-      title: 'Hisense & Gree Dual Inverter Series',
-      subtitle: '19dB Ultra-Quiet Sleep Mode & 12 Years Official Compressor Replacement Warranty',
-      badge: 'Smart WiFi IoT App Control',
-      primaryBtnText: 'Inverter AC Collection',
-      bgGradient: 'from-emerald-950 via-teal-950 to-slate-950',
-      tag: 'T3 Tropical',
-      emiText: '100% Super Cooling Capacity even in 58°C Extreme Heat',
-      image: 'https://images.unsplash.com/photo-1585338107529-13afc5f02586?auto=format&fit=crop&w=1200&q=80',
-    },
-    {
-      title: 'Whirlpool & Haier Frost-Free Refrigerators',
-      subtitle: '6th Sense Deep Cooling Technology & MicroBlock Anti-Bacterial Fresh Preservation',
-      badge: '10 Years Inverter Compressor Warranty',
-      primaryBtnText: 'Refrigerator Collection',
-      bgGradient: 'from-amber-950 via-orange-950 to-slate-950',
-      tag: 'Energy Star 5-Star',
-      emiText: 'Save up to 70% on Monthly Electricity Bills',
-      image: 'https://images.unsplash.com/photo-1571175443880-49e1d25b2bc5?auto=format&fit=crop&w=1200&q=80',
-    },
-  ];
-
-  // Auto-advance hero slides
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 6000);
-    return () => clearInterval(timer);
-  }, [slides.length]);
-
-  // Mega menu definition in 100% English
-  const megaCategories = [
+  // 13 Hub Categories with product counts & descriptions matching PDF Page 1
+  const applianceHubCategories = [
     {
       id: 'ev',
-      name: 'Electric Vehicles (EV)',
-      sub: 'Smart Electric Scooters & Bikes',
+      name: 'Electric Vehicles',
+      sub: 'EV scooter and bikes',
+      count: '1 product',
+      matchKeys: ['electric', 'ev', 'scooter', 'bike'],
       icon: Bike,
-      filters: {
-        motorPower: ['800W Eco', '1000W Dynamic', '1200W High Torque', '1500W Super'],
-        range: ['40-60 km/charge', '60-80 km/charge', '80-100+ km/charge'],
-        batteryType: ['Graphene Fast Charge', 'Lithium Ion Smart', 'Lead Acid Heavy Duty'],
-        brands: ['Yadea', 'Akij Motors', 'Runner EV', 'SmartVolt'],
-      },
     },
     {
       id: 'ac',
-      name: 'Air Conditioners (AC)',
-      sub: 'Inverter & Non-Inverter AC',
+      name: 'Air Conditioners',
+      sub: 'Inverter AC',
+      count: '2 products',
+      matchKeys: ['air', 'ac', 'inverter ac'],
       icon: Wind,
-      filters: {
-        capacity: ['1.0 Ton (12000 BTU)', '1.5 Ton (18000 BTU)', '2.0 Ton (24000 BTU)', '2.5 Ton+ (30000 BTU)'],
-        tech: ['Dual Inverter Compressor', 'Smart Inverter (T3 Tropical)', 'Non-Inverter Turbo', 'Multi-Split AC'],
-        features: ['3D 4-Way Airflow', 'Golden Fin Anti-Rust', '19dB Ultra Quiet Sleep', '56°C High-Temp Self Clean', 'WiFi IoT App Control'],
-        brands: ['Hisense', 'Gree', 'Haier', 'Panasonic', 'General', 'Whirlpool'],
-      },
     },
     {
       id: 'fridge',
-      name: 'Refrigerators & Freezers',
-      sub: 'Frost-Free & Side-by-Side',
+      name: 'Refrigerators',
+      sub: 'Frost-free',
+      count: '1 product',
+      matchKeys: ['refrigerator', 'fridge', 'freezer'],
       icon: Refrigerator,
-      filters: {
-        capacity: ['Under 200 Liters', '200 - 320 Liters', '350 - 450 Liters', '500+ Liters Multi-Door'],
-        type: ['Frost-Free Dual Inverter', 'Direct Cool Economy', 'Side-by-Side Luxury', 'Deep Chest Freezer'],
-        features: ['6th Sense Quick Freeze', 'Toughened Glass Shelves', 'Smart Inverter Compressor', 'Deodorizing Carbon Filter'],
-        brands: ['Whirlpool', 'Haier', 'Hisense', 'Hitachi', 'Singer'],
-      },
     },
     {
       id: 'tv',
-      name: 'Smart TVs & Soundbars',
-      sub: '4K Google TV, OLED & QLED',
+      name: 'TVs & Audio',
+      sub: 'Google TV, speakers, headsets',
+      count: '6 products',
+      matchKeys: ['tv', 'audio', 'sound', 'speaker'],
       icon: Tv,
-      filters: {
-        screenSize: ['32 Inch HD Smart', '43 Inch 4K Frameless', '50-55 Inch Google TV', '65-75 Inch Cinema QLED'],
-        panel: ['OLED Pure Black', 'Quantum Dot QLED', 'IPS 4K HDR10+', 'Frameless Bezel-less'],
-        audio: ['Dolby Atmos Audio', 'DTS Virtual:X Soundbar', 'Subwoofer Wireless', '60W Acoustic Speakers'],
-        brands: ['Hisense', 'Sony', 'Samsung', 'Haier', 'Toshiba'],
-      },
     },
     {
       id: 'washer',
-      name: 'Washing Machines & Dryers',
-      sub: 'Front & Top Load Inverter',
+      name: 'Washers & Laundry',
+      sub: 'Direct drive, dryers, irons',
+      count: '3 products',
+      matchKeys: ['washer', 'washing', 'laundry'],
       icon: WashingMachine,
-      filters: {
-        capacity: ['6.5 kg - 7.5 kg (Small Family)', '8.0 kg - 9.5 kg (Standard)', '10.5 kg+ (Washer Dryer Combo)'],
-        mechanism: ['Front Loading Direct Drive', 'Top Loading Pulsator', 'Washer & 100% Heat Dryer'],
-        features: ['90°C Steam Anti-Allergy', 'Smart Inverter BLDC Motor', 'Quick 15 Min Wash', 'Child Lock Protection'],
-        brands: ['Toshiba', 'Haier', 'Whirlpool', 'Panasonic'],
-      },
     },
     {
       id: 'kitchen',
-      name: 'Kitchen & Microwave',
-      sub: 'Air Fryers, Grills & Ovens',
+      name: 'Kitchen Appliances',
+      sub: 'Blenders, kettles, stoves',
+      count: '10 products',
+      matchKeys: ['kitchen', 'oven', 'air fryer', 'cooker', 'blender'],
       icon: Flame,
-      filters: {
-        appliance: ['Convection Microwave Oven', 'Grill Microwave', 'Rapid Air Fryer XXL', 'Induction & Infrared Cooker'],
-        capacity: ['20 - 25 Liters Solo/Grill', '28 - 34 Liters Convection', '5.5L - 7L Air Fryer'],
-        brands: ['Philips', 'Panasonic', 'Miyako', 'Whirlpool'],
-      },
     },
     {
-      id: 'small',
-      name: 'Small Appliances & Geysers',
-      sub: 'Blenders, Water Purifiers & Geysers',
-      icon: Droplets,
-      filters: {
-        itemType: ['Heavy Duty Blender & Grinder', 'Instant Geyser Water Heater', 'RO Mineral Water Purifier', 'Stand & Ceiling Smart Fans'],
-        brands: ['Philips', 'Panasonic', 'BRB', 'Miyako'],
-      },
+      id: 'fans',
+      name: 'Fans & Air Care',
+      sub: 'Fans, air purifier',
+      count: '4 products',
+      matchKeys: ['fan', 'purifier', 'air care'],
+      icon: Fan,
+    },
+    {
+      id: 'personal',
+      name: 'Personal Care',
+      sub: 'Razors, hair dryers',
+      count: '4 products',
+      matchKeys: ['personal', 'razor', 'trimmer', 'dryer'],
+      icon: Scissors,
+    },
+    {
+      id: 'lighting',
+      name: 'Lighting',
+      sub: 'Bulbs and lamps',
+      count: '3 products',
+      matchKeys: ['lighting', 'bulb', 'led', 'lamp'],
+      icon: Lightbulb,
+    },
+    {
+      id: 'computers',
+      name: 'Computers & Office',
+      sub: 'Laptops, printers',
+      count: '8 products',
+      matchKeys: ['laptop', 'computer', 'printer'],
+      icon: Laptop,
+    },
+    {
+      id: 'smarthome',
+      name: 'Smart Home & Clocks',
+      sub: 'Doorbell camera, clocks',
+      count: '3 products',
+      matchKeys: ['smart home', 'camera', 'automation', 'clock'],
+      icon: Bell,
     },
     {
       id: 'power',
-      name: 'Inverter IPS & Solar',
-      sub: 'Solar Hybrid & Online UPS',
-      icon: Zap,
-      filters: {
-        capacity: ['800VA - 1000VA (Home IPS)', '1500VA - 2500VA (Pure Sine Wave)', '3.5kVA+ Solar Hybrid Inverter'],
-        brands: ['Luminous', 'Schneider Electric', 'Microtek'],
-      },
+      name: 'IPS & Power',
+      sub: 'Solar hybrid, backup',
+      count: '1 product',
+      matchKeys: ['ips', 'power', 'solar', 'battery'],
+      icon: BatteryCharging,
+    },
+    {
+      id: 'tools',
+      name: 'Electricals & Tools',
+      sub: 'Switches, breakers, drills',
+      count: '3 products',
+      matchKeys: ['switch', 'breaker', 'tools', 'panel', 'mcb'],
+      icon: Sliders,
     },
   ];
 
-  // Showrooms nationwide in 100% English
-  const showrooms = [
+  // Engineering internal features matching PDF Page 3
+  const engineeringFeatures = [
     {
+      id: 0,
+      title: '3D 4-Way Airflow (18m Air Throw)',
+      metric: '18 m',
+      label: 'Air throw distance',
+      statValue: '18m',
+      desc: 'Horizontal and vertical motorized swing louvers distribute cool airflow evenly to every corner. The 18-meter air throw is ideal for spacious halls and living rooms.',
+      pill: '4-way multi-directional air delivery',
+    },
+    {
+      id: 1,
+      title: '19dB Ultra-Quiet Sleep Mode',
+      metric: '19 dB',
+      label: 'Whisper-quiet acoustic level',
+      statValue: '19dB',
+      desc: 'Smooth aerodynamic fan blades and dual-rotation rotary compressor suppress vibration to a whisper-silent 19dB acoustic level for peaceful, undisturbed sleep.',
+      pill: 'Whisper-quiet acoustic dampening',
+    },
+    {
+      id: 2,
+      title: 'Dual Inverter T3 Tropical Compressor',
+      metric: '58°C',
+      label: 'Extreme ambient heat endurance',
+      statValue: '58°C',
+      desc: 'Maintains continuous heavy-duty cooling even in scorching 58°C extreme summer heatwave conditions while conserving up to 70% electrical energy consumption.',
+      pill: '12 Years Compressor Official Replacement Warranty',
+    },
+    {
+      id: 3,
+      title: 'Golden Fin Hydrophilic Coating',
+      metric: '100% Cu',
+      label: 'Pure copper anti-corrosion rating',
+      statValue: '100% Cu',
+      desc: '100% pure copper condenser tubes with golden hydrophilic anti-corrosive coating protect against salty coastal humidity, rain, and acidic air oxidation.',
+      pill: 'Lifetime anti-corrosion protection',
+    },
+    {
+      id: 4,
+      title: 'Eco-Friendly R32 Refrigerant Gas',
+      metric: 'Zero ODP',
+      label: 'Ozone depletion potential',
+      statValue: 'Zero ODP',
+      desc: 'Zero Ozone Depletion Potential and 68% lower global warming impact for superior thermodynamic cooling capacity and maximum eco energy conservation.',
+      pill: 'Zero ODP Green Refrigerant Technology',
+    },
+    {
+      id: 5,
+      title: '56°C High-Temperature Self-Clean',
+      metric: '99.9%',
+      label: 'Sterilization efficacy rate',
+      statValue: '99.9%',
+      desc: 'One-touch automated sterilization heats the internal evaporator coil to 56°C to eliminate 99.9% of airborne bacteria and viruses, ensuring pure, sanitized airflow.',
+      pill: 'Automated thermal coil sterilization',
+    },
+  ];
+
+  // 7 Showrooms nationwide matching Admin Dashboard & PDF Page 4
+  const showroomsList = [
+    {
+      id: 'shw_1',
       city: 'Dhaka',
       name: 'Dhanmondi Flagship Experience Center',
       address: 'Plot 42, Road 27 (Old), Dhanmondi R/A, Dhaka-1209',
-      phone: '09606 111 777 (Ext 101)',
-      hours: '10:00 AM - 09:00 PM (Open Daily)',
+      hotline: '09606 111 777 (Ext 101)',
+      hours: '10:00 AM - 09:00 PM',
       manager: 'Engr. Tanvir Ahmed',
+      badge: 'Open daily',
     },
     {
+      id: 'shw_2',
       city: 'Dhaka',
       name: 'Uttara Smart Appliance Mega Store',
       address: 'Sector 3, Jasimuddin Avenue (Near North Tower), Uttara, Dhaka',
-      phone: '09606 111 777 (Ext 102)',
+      hotline: '09606 111 777 (Ext 102)',
       hours: '10:00 AM - 09:00 PM',
       manager: 'Mahfuzur Rahman',
+      badge: 'Open daily',
     },
     {
+      id: 'shw_3',
       city: 'Dhaka',
       name: 'Mirpur 10 Outlet & Service Hub',
       address: 'Main Road Roundabout, Mirpur 10, Dhaka-1216',
-      phone: '09606 111 777 (Ext 103)',
+      hotline: '09606 111 777 (Ext 103)',
       hours: '10:00 AM - 09:00 PM',
       manager: 'Kamrul Hasan',
+      badge: 'Open daily',
     },
     {
+      id: 'shw_4',
       city: 'Chittagong',
       name: 'Agrabad Commercial Showroom',
       address: 'Agrabad Commercial Area, CDA Avenue, Chattogram',
-      phone: '09606 111 777 (Ext 201)',
+      hotline: '09606 111 777 (Ext 201)',
       hours: '10:00 AM - 08:30 PM',
       manager: 'Nasir Uddin',
+      badge: 'Open daily',
     },
     {
+      id: 'shw_5',
       city: 'Chittagong',
       name: 'GEC Circle Electronics Hub',
       address: 'Sanmar Ocean City Ground Floor, GEC, Chattogram',
-      phone: '09606 111 777 (Ext 202)',
+      hotline: '09606 111 777 (Ext 202)',
       hours: '10:00 AM - 09:00 PM',
       manager: 'Shahed Chowdhury',
+      badge: 'Open daily',
     },
     {
+      id: 'shw_6',
       city: 'Sylhet',
       name: 'Zindabazar Premier Outlet',
       address: 'East Zindabazar, Baruthkhana Point, Sylhet',
-      phone: '09606 111 777 (Ext 301)',
+      hotline: '09606 111 777 (Ext 301)',
       hours: '10:00 AM - 08:30 PM',
       manager: 'Foyez Ahmed',
+      badge: 'Open daily',
     },
     {
+      id: 'shw_7',
       city: 'Khulna',
       name: 'KDA Avenue Experience Zone',
       address: 'Shibbari More, KDA Avenue, Khulna',
-      phone: '09606 111 777 (Ext 401)',
+      hotline: '09606 111 777 (Ext 401)',
       hours: '10:00 AM - 08:30 PM',
       manager: 'Rezaul Karim',
+      badge: 'Open daily',
     },
   ];
 
-  // Helper for adding to cart
-  const handleAddToCart = (item: any) => {
-    addToCart({
-      id: item.id,
-      title: item.title,
-      price: item.price,
-      quantity: 1,
-      image: item.images?.[0] || 'https://images.unsplash.com/photo-1585338107529-13afc5f02586?auto=format&fit=crop&w=800&q=80',
+  // Dynamic products mapped with real database/partition inventory
+  const defaultProducts = [
+    {
+      id: 'item_smartvolt_1792654065930',
+      brand: 'Hisense',
+      discount: '1% OFF',
+      warranty: '10-12 Years Compressor Warranty',
+      warrantyType: 'compressor',
+      category: 'Air Conditioners (AC)',
+      catId: 'ac',
+      rating: '4.9 / 5',
+      title: 'Hisense Smart Compact AC AS18TW4RGSKB02DU',
+      tags: ['1.5 Ton', 'Dual Inverter', 'R32 Eco Gas', '19dB Silent', 'Golden Fin'],
+      price: 73900,
+      comparePrice: 75000,
+      stockQuantity: 20,
+      sku: 'SKU-XRR3RB',
+      icon: Wind,
+    },
+    {
+      id: 'item_volt_1',
+      brand: 'Authorised',
+      discount: '16% OFF',
+      warranty: 'Official brand warranty',
+      warrantyType: 'brand',
+      category: 'Home Appliance',
+      catId: 'tools',
+      rating: '4.9 / 5',
+      title: 'Smart Voltage Touch Switch Panel (4 Gang Glass)',
+      tags: ['4 Gang', 'Touch panel', 'Glass finish'],
+      price: 3200,
+      comparePrice: 3800,
+      stockQuantity: 50,
+      sku: 'SVT-SW-4G-BLK',
+      icon: Sliders,
+    },
+    {
+      id: 'item_volt_2',
+      brand: 'Authorised',
+      discount: '16% OFF',
+      warranty: 'Official brand warranty',
+      warrantyType: 'brand',
+      category: 'Home Appliance',
+      catId: 'tools',
+      rating: '4.9 / 5',
+      title: 'Schneider Acti9 32A Double Pole MCB Breaker',
+      tags: ['32A', 'Double pole', 'Acti9'],
+      price: 1850,
+      comparePrice: 2200,
+      stockQuantity: 80,
+      sku: 'SCH-MCB-32A-DP',
+      icon: BatteryCharging,
+    },
+    {
+      id: 'item_smartvolt_gree_2ton',
+      brand: 'Gree',
+      discount: '5% OFF',
+      warranty: '10-12 Years Compressor Warranty',
+      warrantyType: 'compressor',
+      category: 'Air Conditioners (AC)',
+      catId: 'ac',
+      rating: '4.9 / 5',
+      title: 'Gree Lomo-S 2.0 Ton Dual Inverter AC (GP-24LM)',
+      tags: ['2.0 Ton', 'Dual Inverter', 'R32 Eco Gas'],
+      price: 84500,
+      comparePrice: 89000,
+      stockQuantity: 15,
+      sku: 'AL-GREE-2TON',
+      icon: Wind,
+    },
+    {
+      id: 'item_smartvolt_whirlpool_fridge',
+      brand: 'Whirlpool',
+      discount: '7% OFF',
+      warranty: '10-12 Years Compressor Warranty',
+      warrantyType: 'compressor',
+      category: 'Refrigerators & Freezers',
+      catId: 'fridge',
+      rating: '4.9 / 5',
+      title: 'Whirlpool 6th Sense Inverter Frost-Free Refrigerator 350L',
+      tags: ['350L', 'Inverter', 'Frost-Free'],
+      price: 64500,
+      comparePrice: 69500,
+      stockQuantity: 18,
+      sku: 'AL-WHIR-IDGE',
+      icon: Refrigerator,
+    },
+    {
+      id: 'item_smartvolt_hisense_tv',
+      brand: 'Hisense',
+      discount: '5% OFF',
+      warranty: 'Official brand warranty',
+      warrantyType: 'brand',
+      category: 'Smart TVs & Audio',
+      catId: 'tv',
+      rating: '4.9 / 5',
+      title: 'Hisense 55-Inch Frameless 4K UHD Google Smart TV',
+      tags: ['55-inch', '4K UHD', 'Google TV', 'Frameless'],
+      price: 54900,
+      comparePrice: 58000,
+      stockQuantity: 22,
+      sku: 'AL-HISE-SETV',
+      icon: Tv,
+    },
+    {
+      id: 'item_smartvolt_toshiba_washer',
+      brand: 'Toshiba',
+      discount: '6% OFF',
+      warranty: '10-12 Years Compressor Warranty',
+      warrantyType: 'compressor',
+      category: 'Washing Machines',
+      catId: 'washer',
+      rating: '4.9 / 5',
+      title: 'Toshiba Real Inverter Direct Drive Washer 8.5kg',
+      tags: ['8.5kg', 'Direct Drive', 'Real Inverter'],
+      price: 48900,
+      comparePrice: 52000,
+      stockQuantity: 12,
+      sku: 'AL-TOSH-SHER',
+      icon: WashingMachine,
+    },
+    {
+      id: 'item_smartvolt_yadea_ev',
+      brand: 'Yadea EV',
+      discount: '8% OFF',
+      warranty: 'Official brand warranty',
+      warrantyType: 'brand',
+      category: 'Electric Vehicles (EV)',
+      catId: 'ev',
+      rating: '4.9 / 5',
+      title: 'Yadea Graphene Battery Smart Electric Scooter 1200W',
+      tags: ['1200W', 'Graphene battery', 'Smart'],
+      price: 115000,
+      comparePrice: 125000,
+      stockQuantity: 8,
+      sku: 'AL-YADE-EAEV',
+      icon: Bike,
+    },
+  ];
+
+  // Merge real items from backend with UI display metadata
+  const liveProducts = useMemo(() => {
+    return defaultProducts.map((defProd) => {
+      const realItem = items.find(
+        (i) => i.id === defProd.id || i.slug === defProd.id || i.title === defProd.title
+      );
+      if (realItem) {
+        return {
+          ...defProd,
+          id: realItem.id,
+          title: realItem.title,
+          price: Number(realItem.price || defProd.price),
+          comparePrice: Number(realItem.comparePrice || defProd.comparePrice),
+          stockQuantity: Number(realItem.stockQuantity ?? defProd.stockQuantity),
+          sku: realItem.sku || defProd.sku,
+          brand: realItem.brand?.name || defProd.brand,
+          category: realItem.category?.name || defProd.category,
+          shortDescription: realItem.shortDescription,
+          description: realItem.description,
+          images: realItem.images || [],
+        };
+      }
+      return defProd;
     });
-    setAddedItemNotice(item.title);
-    setTimeout(() => setAddedItemNotice(null), 3500);
-  };
+  }, [items]);
 
-  // Helper for modal add to cart
-  const handleModalAddToCart = () => {
-    if (!detailModalProduct) return;
-    addToCart({
-      id: detailModalProduct.id,
-      title: detailModalProduct.title,
-      price: detailModalProduct.price,
-      quantity: modalQuantity,
-      image: detailModalProduct.images?.[modalImageIndex] || detailModalProduct.images?.[0] || 'https://images.unsplash.com/photo-1585338107529-13afc5f02586?auto=format&fit=crop&w=800&q=80',
-    });
-    setAddedItemNotice(`${detailModalProduct.title} (${modalQuantity} units)`);
-    setDetailModalProduct(null);
-    setTimeout(() => setAddedItemNotice(null), 3500);
-  };
+  // Featured Hisense Inverter AC for hero block
+  const featuredHeroProduct = liveProducts[0];
 
-  // Active mega category object
-  const currentMegaCat = megaCategories.find((c) => c.id === activeMegaCategory) || megaCategories[1];
+  // Filter products by category and search query
+  const filteredProducts = useMemo(() => {
+    return liveProducts.filter((p) => {
+      // 1. Search Query filter
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        const matchTitle = p.title.toLowerCase().includes(q);
+        const matchBrand = p.brand.toLowerCase().includes(q);
+        const matchCat = p.category.toLowerCase().includes(q);
+        if (!matchTitle && !matchBrand && !matchCat) return false;
+      }
 
-  // Filtered items
-  const filteredProducts = items.filter((item) => {
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      const matchTitle = (item.title || '').toLowerCase().includes(q);
-      const matchBrand = (item.brand?.name || '').toLowerCase().includes(q);
-      const matchCat = (item.category?.name || '').toLowerCase().includes(q);
-      return matchTitle || matchBrand || matchCat;
-    }
-    if (selectedApplianceFilter !== 'all') {
-      const catName = (item.category?.name || '').toLowerCase();
-      const title = (item.title || '').toLowerCase();
-      if (selectedApplianceFilter === 'ac') return catName.includes('ac') || catName.includes('air') || title.includes('ac') || title.includes('conditioner');
-      if (selectedApplianceFilter === 'fridge') return catName.includes('fridge') || catName.includes('refrigerat') || title.includes('fridge');
-      if (selectedApplianceFilter === 'tv') return catName.includes('tv') || catName.includes('television') || title.includes('tv');
-      if (selectedApplianceFilter === 'washer') return catName.includes('wash') || title.includes('washer') || title.includes('washing');
-      if (selectedApplianceFilter === 'kitchen') return catName.includes('kitchen') || catName.includes('micro') || catName.includes('oven') || title.includes('oven') || title.includes('fryer');
-      if (selectedApplianceFilter === 'ev') return catName.includes('ev') || catName.includes('scooter') || title.includes('scooter') || title.includes('bike');
-      if (selectedApplianceFilter === 'power') return catName.includes('power') || catName.includes('ips') || catName.includes('switch') || catName.includes('breaker') || title.includes('switch') || title.includes('breaker');
-    }
-    return true;
-  });
-
-  // Calculate parsed specs for a product
-  const getProductParsedSpecs = (item: any) => {
-    if (!item?.shortDescription && !item?.description) return [];
-    const text = (item.shortDescription || '') + '\n' + (item.description || '');
-    const cleanText = text.replace(/<[^>]*>?/gm, '');
-    const lines = cleanText.split('\n').filter((l) => l.trim().length > 0);
-    const specs: Array<{ label: string; value: string }> = [];
-
-    lines.forEach((line) => {
-      if (line.includes('\t')) {
-        const parts = line.split('\t').filter((p) => p.trim());
-        if (parts.length >= 2) {
-          specs.push({ label: parts[0].trim(), value: parts.slice(1).join(' ').trim() });
-        }
-      } else if (line.includes(':')) {
-        const [k, ...v] = line.split(':');
-        if (k && v.length) {
-          specs.push({ label: k.trim(), value: v.join(':').trim() });
+      // 2. Active Category filter
+      if (activeCategoryFilter !== 'all') {
+        const hubCat = applianceHubCategories.find((c) => c.id === activeCategoryFilter);
+        if (hubCat) {
+          const catLower = p.category.toLowerCase();
+          const titleLower = p.title.toLowerCase();
+          const match = hubCat.matchKeys.some(
+            (k) => catLower.includes(k) || titleLower.includes(k)
+          );
+          if (!match && p.catId !== activeCategoryFilter) return false;
         }
       }
-    });
 
-    return specs.slice(0, 15);
+      return true;
+    });
+  }, [liveProducts, searchQuery, activeCategoryFilter]);
+
+  // Handle adding product to cart
+  const handleAddToCart = (product: any, qty = 1) => {
+    addToCart({
+      id: product.id,
+      title: product.title,
+      price: product.price,
+      quantity: qty,
+      image:
+        product.images?.[0] ||
+        'https://images.unsplash.com/photo-1585338107529-13afc5f02586?auto=format&fit=crop&w=600&q=80',
+    });
+    setAddedItemNotice(`${product.title} (${qty}x)`);
+    setTimeout(() => setAddedItemNotice(null), 3500);
   };
 
+  // Handle category click to filter and smooth-scroll
+  const handleSelectCategory = (catId: string) => {
+    setActiveCategoryFilter(catId);
+    setSearchQuery('');
+    const el = document.getElementById('products');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const activeEng = engineeringFeatures[activeEngineeringFeature] || engineeringFeatures[0];
+
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans">
-      {/* 1. TOP ANNOUNCEMENT & HELPLINE BAR */}
-      <div className="bg-slate-900 text-slate-200 border-b border-slate-800 text-xs py-2 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
-          {/* Drooto Helpline Number */}
+    <div className="min-h-screen bg-[#fafbfc] text-slate-800 flex flex-col font-sans selection:bg-amber-400 selection:text-black">
+      {/* 1. TOP HELPLINE & PERKS BAR (Matching PDF Page 1) */}
+      <div className="bg-[#0b0f19] text-slate-300 text-xs py-2 px-4 sm:px-6 lg:px-8 border-b border-slate-800">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-2">
+          {/* Left: 24/7 Helpline */}
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5 bg-orange-600 hover:bg-orange-500 text-white font-extrabold px-3 py-1 rounded-full text-xs shadow-sm cursor-pointer transition">
-              <Phone className="w-3.5 h-3.5" />
-              <span>09606 111 777</span>
-            </div>
-            <span className="text-slate-400 hidden sm:inline">|</span>
-            <span className="text-slate-300 font-medium hidden sm:inline">
-              Drooto 24/7 Helpline & Certified Technical Support
-            </span>
+            <span className="font-bold text-white tracking-wide">09606 111 777</span>
+            <span className="text-slate-400">24/7 helpline and certified technical support</span>
           </div>
 
-          {/* Delivery & Warranty Badges */}
-          <div className="flex items-center gap-4 text-xs font-medium text-slate-300">
-            <span className="flex items-center gap-1 text-emerald-400">
-              <Truck className="w-3.5 h-3.5" />
-              Free Nationwide Express Delivery & Installation
-            </span>
-            <span className="flex items-center gap-1 text-amber-400">
-              <ShieldCheck className="w-3.5 h-3.5" />
-              100% Genuine Official Brand Warranty
-            </span>
-            <span className="flex items-center gap-1 text-blue-400 hidden md:flex">
-              <Percent className="w-3.5 h-3.5" />
-              0% Interest EMI Facility
-            </span>
+          {/* Right: Key Perks + Quick Admin Dashboard Link */}
+          <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-xs text-slate-300">
+            <span>Free nationwide express delivery and installation</span>
+            <span className="text-slate-600 hidden sm:inline">•</span>
+            <span>100% genuine official brand warranty</span>
+            <span className="text-slate-600 hidden sm:inline">•</span>
+            <span>0% interest EMI</span>
+
+            {/* Direct Link to Admin Dashboard */}
+            <Link
+              href={`/admin/dashboard?tenant=${tenantSlug}`}
+              className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold text-xs flex items-center gap-1.5 border border-slate-700 transition"
+              title="Open Merchant Inventory & Orders Dashboard"
+            >
+              <LayoutDashboard className="w-3.5 h-3.5" />
+              <span>Admin Dashboard</span>
+            </Link>
           </div>
         </div>
       </div>
 
-      {/* 2. MAIN HEADER & BRAND SEARCH BAR */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+      {/* 2. MAIN HEADER & BRAND NAVIGATION (Matching PDF Page 1) */}
+      <header className="bg-white border-b border-slate-200/90 sticky top-0 z-40 shadow-[0_1px_3px_rgba(0,0,0,0.05)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5">
           <div className="flex items-center justify-between gap-4">
-            {/* Store Brand / Logo */}
-            <Link href={`/?tenant=${tenantSlug}`} className="flex items-center gap-2.5 flex-shrink-0">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-orange-600 to-amber-500 flex items-center justify-center text-white shadow-md shadow-orange-500/20">
-                <Zap className="w-5 h-5 fill-white" />
+            {/* Logo */}
+            <Link href={`/?tenant=${tenantSlug}`} className="flex items-center gap-3 flex-shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-black flex items-center justify-center text-amber-400 shadow-sm">
+                <Zap className="w-5 h-5 fill-amber-400 text-amber-400" />
               </div>
               <div>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-xl font-extrabold tracking-tight text-slate-900">
-                    {tenant?.name || 'SmartVolt'}
-                  </span>
-                  <span className="text-[10px] uppercase font-bold tracking-widest px-1.5 py-0.5 rounded bg-orange-100 text-orange-700">
-                    Electronics
-                  </span>
-                </div>
-                <p className="text-[11px] text-slate-500 font-medium">
-                  Authorised Multi-Brand Home Appliance Engine
-                </p>
+                <span className="text-xl font-black tracking-tight text-slate-900 block leading-tight">
+                  SmartVolt
+                </span>
+                <span className="text-[11px] text-slate-500 font-medium block">
+                  Electrical & Automation
+                </span>
               </div>
             </Link>
 
-            {/* Smart Search Bar with Category Dropdown */}
-            <div className="flex-1 max-w-2xl hidden md:flex items-center">
-              <div className="w-full relative flex items-center rounded-xl border-2 border-orange-500/80 bg-white overflow-hidden shadow-sm focus-within:border-orange-600 focus-within:ring-2 focus-within:ring-orange-500/20 transition">
-                <div className="hidden lg:flex items-center px-3 py-2 bg-slate-100 border-r border-slate-200 text-xs font-semibold text-slate-700">
-                  <span>All Items</span>
-                  <ChevronDown className="w-3.5 h-3.5 ml-1 text-slate-500" />
-                </div>
+            {/* Rounded Search Bar */}
+            <div className="flex-1 max-w-md hidden md:block">
+              <div className="relative">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
-                  placeholder="Search for AC, Refrigerator, TV, Washing Machine or model..."
+                  placeholder="Search AC, refrigerator, TV, MCB"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none"
+                  className="w-full pl-10 pr-4 py-2 rounded-full border border-slate-200 bg-slate-50/70 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-400 focus:bg-white transition"
                 />
-                <button
-                  type="button"
-                  className="px-5 py-2.5 bg-orange-600 hover:bg-orange-700 text-white font-bold text-sm flex items-center gap-1.5 transition flex-shrink-0"
-                >
-                  <Search className="w-4 h-4" />
-                  <span>Search</span>
-                </button>
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
               </div>
             </div>
 
-            {/* Quick Actions (Showrooms, Orders, Cart) */}
-            <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0">
+            {/* Actions: Showrooms, Admin & Cart */}
+            <div className="flex items-center gap-4 flex-shrink-0">
               <a
                 href="#showrooms"
-                className="hidden lg:flex items-center gap-1.5 text-xs font-bold text-slate-700 hover:text-orange-600 px-3 py-2 rounded-xl hover:bg-orange-50 transition"
+                className="text-xs sm:text-sm font-semibold text-slate-700 hover:text-black transition"
               >
-                <MapPin className="w-4 h-4 text-orange-600" />
-                <span>Showrooms</span>
+                Showrooms
               </a>
 
               <Link
-                href={`/track?tenant=${tenantSlug}`}
-                className="hidden sm:flex items-center gap-1.5 text-xs font-bold text-slate-700 hover:text-orange-600 px-3 py-2 rounded-xl hover:bg-orange-50 transition"
+                href={`/admin/dashboard?tenant=${tenantSlug}`}
+                className="hidden lg:flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-slate-700 hover:text-orange-600 transition"
               >
-                <Truck className="w-4 h-4 text-orange-600" />
-                <span>Track Order</span>
+                <LayoutDashboard className="w-4 h-4 text-slate-500" />
+                <span>Inventory & Orders</span>
               </Link>
 
-              {/* Cart Button */}
               <Link
                 href={`/checkout?tenant=${tenantSlug}`}
-                className="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-bold shadow-md shadow-slate-900/10 transition active:scale-95"
+                className="bg-black hover:bg-slate-800 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 shadow-sm transition active:scale-95"
               >
-                <ShoppingBag className="w-4 h-4 text-orange-400" />
-                <span className="hidden sm:inline">Cart</span>
-                <span className="bg-orange-600 text-white text-[11px] font-extrabold px-2 py-0.5 rounded-full">
-                  Checkout
+                <ShoppingCart className="w-4 h-4 text-white" />
+                <span>Cart</span>
+                <span className="bg-amber-500 text-black text-[10px] font-black px-1.5 py-0.2 rounded-full">
+                  {totalItems}
                 </span>
               </Link>
             </div>
           </div>
 
-          {/* Mobile Search input */}
+          {/* Mobile search input */}
           <div className="mt-3 md:hidden">
-            <div className="relative flex items-center rounded-xl border border-slate-300 bg-white overflow-hidden">
+            <div className="relative">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Search AC, Refrigerator, TV..."
+                placeholder="Search AC, refrigerator, TV, MCB"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-3.5 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none"
+                className="w-full pl-10 pr-4 py-2 rounded-full border border-slate-200 bg-slate-50 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-400 transition"
               />
-              <button type="button" className="px-3.5 py-2 bg-orange-600 text-white text-xs font-bold">
-                <Search className="w-3.5 h-3.5" />
-              </button>
             </div>
           </div>
         </div>
 
-        {/* Brand Marquee Strip */}
-        <div className="bg-slate-100 border-t border-slate-200 py-1.5 px-4 overflow-x-auto text-[11px] font-semibold text-slate-600 flex items-center gap-6 justify-center">
-          <span className="text-orange-700 font-extrabold uppercase tracking-wider flex items-center gap-1">
-            <Sparkles className="w-3 h-3" /> Authorised Multi-Brand Partners:
-          </span>
-          <span className="hover:text-orange-600 cursor-pointer">Hisense</span>
-          <span>•</span>
-          <span className="hover:text-orange-600 cursor-pointer">Gree Inverter</span>
-          <span>•</span>
-          <span className="hover:text-orange-600 cursor-pointer">Haier</span>
-          <span>•</span>
-          <span className="hover:text-orange-600 cursor-pointer">Panasonic</span>
-          <span>•</span>
-          <span className="hover:text-orange-600 cursor-pointer">General Japan</span>
-          <span>•</span>
-          <span className="hover:text-orange-600 cursor-pointer">Whirlpool 6th Sense</span>
-          <span>•</span>
-          <span className="hover:text-orange-600 cursor-pointer">Toshiba</span>
-          <span>•</span>
-          <span className="hover:text-orange-600 cursor-pointer">Philips</span>
-          <span>•</span>
-          <span className="hover:text-orange-600 cursor-pointer">Schneider Electric</span>
+        {/* Category Sub-navigation Pills Strip (Matching PDF Page 1) */}
+        <div className="border-t border-slate-100 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 overflow-x-auto flex items-center gap-6 text-xs font-semibold text-slate-600 justify-start lg:justify-between scrollbar-none">
+            <button
+              onClick={() => handleSelectCategory('all')}
+              className={`whitespace-nowrap transition cursor-pointer ${
+                activeCategoryFilter === 'all' ? 'font-black text-black border-b-2 border-black pb-0.5' : 'hover:text-black'
+              }`}
+            >
+              All Products
+            </button>
+            <button
+              onClick={() => handleSelectCategory('ev')}
+              className={`whitespace-nowrap transition cursor-pointer ${
+                activeCategoryFilter === 'ev' ? 'font-black text-black border-b-2 border-black pb-0.5' : 'hover:text-black'
+              }`}
+            >
+              Electric Vehicles
+            </button>
+            <button
+              onClick={() => handleSelectCategory('ac')}
+              className={`whitespace-nowrap transition cursor-pointer ${
+                activeCategoryFilter === 'ac' ? 'font-black text-black border-b-2 border-black pb-0.5' : 'hover:text-black'
+              }`}
+            >
+              Air Conditioners
+            </button>
+            <button
+              onClick={() => handleSelectCategory('fridge')}
+              className={`whitespace-nowrap transition cursor-pointer ${
+                activeCategoryFilter === 'fridge' ? 'font-black text-black border-b-2 border-black pb-0.5' : 'hover:text-black'
+              }`}
+            >
+              Refrigerators
+            </button>
+            <button
+              onClick={() => handleSelectCategory('tv')}
+              className={`whitespace-nowrap transition cursor-pointer ${
+                activeCategoryFilter === 'tv' ? 'font-black text-black border-b-2 border-black pb-0.5' : 'hover:text-black'
+              }`}
+            >
+              TVs & Audio
+            </button>
+            <button
+              onClick={() => handleSelectCategory('washer')}
+              className={`whitespace-nowrap transition cursor-pointer ${
+                activeCategoryFilter === 'washer' ? 'font-black text-black border-b-2 border-black pb-0.5' : 'hover:text-black'
+              }`}
+            >
+              Washers & Laundry
+            </button>
+            <button
+              onClick={() => handleSelectCategory('kitchen')}
+              className={`whitespace-nowrap transition cursor-pointer ${
+                activeCategoryFilter === 'kitchen' ? 'font-black text-black border-b-2 border-black pb-0.5' : 'hover:text-black'
+              }`}
+            >
+              Kitchen Appliances
+            </button>
+            <button
+              onClick={() => handleSelectCategory('fans')}
+              className={`whitespace-nowrap transition cursor-pointer ${
+                activeCategoryFilter === 'fans' ? 'font-black text-black border-b-2 border-black pb-0.5' : 'hover:text-black'
+              }`}
+            >
+              Fans & Air Care
+            </button>
+            <button
+              onClick={() => handleSelectCategory('personal')}
+              className={`whitespace-nowrap transition cursor-pointer ${
+                activeCategoryFilter === 'personal' ? 'font-black text-black border-b-2 border-black pb-0.5' : 'hover:text-black'
+              }`}
+            >
+              Personal Care
+            </button>
+            <button
+              onClick={() => handleSelectCategory('lighting')}
+              className={`whitespace-nowrap transition cursor-pointer ${
+                activeCategoryFilter === 'lighting' ? 'font-black text-black border-b-2 border-black pb-0.5' : 'hover:text-black'
+              }`}
+            >
+              Lighting
+            </button>
+            <button
+              onClick={() => handleSelectCategory('computers')}
+              className={`whitespace-nowrap transition cursor-pointer ${
+                activeCategoryFilter === 'computers' ? 'font-black text-black border-b-2 border-black pb-0.5' : 'hover:text-black'
+              }`}
+            >
+              Computers & Office
+            </button>
+          </div>
         </div>
       </header>
 
       {/* Floating Notice when adding item */}
       {addedItemNotice && (
-        <div className="fixed bottom-6 right-6 z-50 bg-slate-950 text-white px-5 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-orange-500/40 animate-bounce">
-          <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+        <div className="fixed bottom-6 right-6 z-50 bg-slate-950 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 border border-slate-700 animate-bounce">
+          <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
           <div className="text-xs">
-            <div className="font-bold text-white">Added to Cart!</div>
+            <div className="font-bold">Added to Cart!</div>
             <div className="text-slate-300">{addedItemNotice}</div>
           </div>
           <Link
             href={`/checkout?tenant=${tenantSlug}`}
-            className="text-xs bg-orange-600 hover:bg-orange-500 font-bold px-3 py-1.5 rounded-xl ml-2 text-white transition"
+            className="text-xs bg-amber-500 hover:bg-amber-400 font-bold px-3 py-1.5 rounded-xl ml-2 text-black transition"
           >
             Checkout Now
           </Link>
         </div>
       )}
 
-      {/* 3. HERO & MEGA MENU SECTION */}
-      <section className="bg-slate-900 border-b border-slate-800 text-white relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* LEFT COLUMN: All Categories Vertical Mega Menu */}
-            <div className="lg:col-span-3 relative z-30">
-              <div className="rounded-2xl overflow-hidden shadow-2xl border border-slate-700/80 bg-slate-800">
-                {/* Mega Menu Header */}
-                <div
-                  onClick={() => setIsMegaMenuOpen(!isMegaMenuOpen)}
-                  className="bg-orange-600 hover:bg-orange-700 px-4 py-3.5 flex items-center justify-between cursor-pointer transition select-none"
+      {/* 3. HERO SECTION - BENTO GRID LAYOUT (Matching PDF Page 1) */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* LEFT LARGE CARD: YEAR-END FESTIVAL & FEATURED INVERTER AC */}
+          <div className="lg:col-span-8 bg-[#0a1120] text-white rounded-3xl p-6 sm:p-10 relative overflow-hidden border border-slate-800 shadow-2xl flex flex-col justify-between">
+            {/* Subtle background lightning vector graphic */}
+            <div className="absolute right-6 top-8 opacity-15 pointer-events-none text-blue-400">
+              <svg width="220" height="340" viewBox="0 0 100 150" fill="currentColor">
+                <polygon points="50,0 20,80 50,80 30,150 90,60 60,60" />
+              </svg>
+            </div>
+
+            <div className="relative z-10">
+              {/* Badge */}
+              <div className="inline-block border border-amber-500/40 text-amber-400 text-[11px] font-bold px-3.5 py-1 rounded-full uppercase tracking-wider">
+                MEGA SALE · 0% EMI AVAILABLE
+              </div>
+
+              {/* Heading */}
+              <h1 className="text-3xl sm:text-5xl font-black text-white leading-[1.1] tracking-tight mt-5">
+                Year-End<br />
+                Electronics<br />
+                Discount<br />
+                Festival<br />
+                2026
+              </h1>
+
+              {/* Subtitle */}
+              <p className="text-slate-400 text-xs sm:text-sm mt-4 max-w-md leading-relaxed">
+                Up to 45% off on smart inverter ACs and major appliances, with free nationwide delivery and installation.
+              </p>
+
+              {/* Action Buttons */}
+              <div className="mt-6 flex flex-wrap items-center gap-3">
+                <a
+                  href="#products"
+                  className="px-6 py-3 rounded-xl bg-[#ea580c] hover:bg-orange-600 text-white font-bold text-xs sm:text-sm flex items-center gap-2 shadow-lg shadow-orange-600/30 transition active:scale-95"
                 >
-                  <div className="flex items-center gap-2.5 font-extrabold text-sm sm:text-base tracking-wide">
-                    <SlidersHorizontal className="w-4 h-4" />
-                    <span>All Categories</span>
-                  </div>
-                  <ChevronDown
-                    className={`w-4 h-4 transition-transform duration-300 ${isMegaMenuOpen ? 'rotate-180' : ''}`}
-                  />
-                </div>
+                  <span>Explore offers</span>
+                  <ArrowRight className="w-4 h-4" />
+                </a>
 
-                {/* Vertical Category Items */}
-                {isMegaMenuOpen && (
-                  <div className="py-1 divide-y divide-slate-700/50 bg-slate-800/95 backdrop-blur-md">
-                    {megaCategories.map((cat) => {
-                      const IconComponent = cat.icon;
-                      const isActive = activeMegaCategory === cat.id;
-                      return (
-                        <div
-                          key={cat.id}
-                          onMouseEnter={() => setActiveMegaCategory(cat.id)}
-                          onClick={() => {
-                            setActiveMegaCategory(cat.id);
-                            setSelectedApplianceFilter(cat.id);
-                          }}
-                          className={`px-4 py-3 flex items-center justify-between cursor-pointer transition group ${
-                            isActive
-                              ? 'bg-orange-600 text-white font-bold'
-                              : 'text-slate-200 hover:bg-slate-700/80 hover:text-white'
-                          }`}
-                        >
-                          <div className="flex items-center gap-3">
-                            <IconComponent
-                              className={`w-4 h-4 ${isActive ? 'text-white' : 'text-orange-400 group-hover:text-white'}`}
-                            />
-                            <div>
-                              <div className="text-xs sm:text-sm font-semibold">{cat.name}</div>
-                              <div
-                                className={`text-[10px] ${isActive ? 'text-orange-100' : 'text-slate-400'}`}
-                              >
-                                {cat.sub}
-                              </div>
-                            </div>
-                          </div>
-                          <ChevronRight
-                            className={`w-3.5 h-3.5 opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-transform ${
-                              isActive ? 'text-white' : ''
-                            }`}
-                          />
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* CENTER COLUMN: Main Hero Slider Carousel */}
-            <div className="lg:col-span-6 relative">
-              <div className="rounded-2xl overflow-hidden shadow-2xl relative h-80 sm:h-96 border border-slate-700 bg-slate-950 flex flex-col justify-end p-6 sm:p-8">
-                {/* Background Image with Dark Vignette */}
-                <div
-                  className="absolute inset-0 bg-cover bg-center transition-all duration-1000 transform hover:scale-105"
-                  style={{ backgroundImage: `url(${slides[currentSlide].image})` }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/70 to-transparent" />
-                <div className="absolute inset-0 bg-slate-950/30" />
-
-                {/* Slide Text Content */}
-                <div className="relative z-10 space-y-3">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-orange-600 text-white shadow-md">
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>{slides[currentSlide].badge}</span>
-                  </div>
-
-                  <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight leading-snug text-white">
-                    {slides[currentSlide].title}
-                  </h1>
-
-                  <p className="text-xs sm:text-sm text-slate-300 max-w-lg leading-relaxed">
-                    {slides[currentSlide].subtitle}
-                  </p>
-
-                  <div className="pt-2 flex flex-wrap items-center gap-3">
-                    <a
-                      href="#products"
-                      className="px-6 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-xs sm:text-sm font-bold shadow-lg shadow-orange-600/30 flex items-center gap-2 transition active:scale-95"
-                    >
-                      <span>{slides[currentSlide].primaryBtnText}</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </a>
-
-                    <div className="text-[11px] text-amber-300 font-semibold bg-white/10 px-3 py-1.5 rounded-lg border border-white/10">
-                      ⚡ {slides[currentSlide].emiText}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Carousel Dots */}
-                <div className="absolute top-4 right-4 z-20 flex items-center gap-1.5">
-                  {slides.map((_, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => setCurrentSlide(idx)}
-                      className={`h-2 rounded-full transition-all ${
-                        currentSlide === idx ? 'w-6 bg-orange-500' : 'w-2 bg-white/50'
-                      }`}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              {/* Flyout Sub-filter drawer when hover/active */}
-              {isMegaMenuOpen && currentMegaCat && (
-                <div className="hidden xl:block absolute -top-0 left-full ml-4 z-40 w-80 bg-slate-800/95 backdrop-blur-md rounded-2xl border border-slate-700 shadow-2xl p-5 text-white">
-                  <div className="text-xs uppercase font-extrabold tracking-wider text-orange-400 mb-2 flex items-center gap-1.5 pb-2 border-b border-slate-700">
-                    <SlidersHorizontal className="w-3.5 h-3.5" />
-                    <span>{currentMegaCat.name} Quick Filter</span>
-                  </div>
-
-                  <div className="space-y-4 text-xs">
-                    {Object.entries(currentMegaCat.filters).map(([key, options]) => (
-                      <div key={key}>
-                        <div className="font-bold text-slate-300 capitalize mb-1.5">
-                          {key === 'capacity' ? 'Capacity / Size' : key === 'brands' ? 'Featured Brands' : key === 'features' ? 'Key Technology' : key}
-                        </div>
-                        <div className="flex flex-wrap gap-1.5">
-                          {options.map((opt: string) => (
-                            <button
-                              key={opt}
-                              onClick={() => {
-                                setSearchQuery(opt.split(' ')[0]);
-                              }}
-                              className="px-2 py-1 rounded-md bg-slate-700 hover:bg-orange-600 text-slate-200 text-[11px] font-medium transition"
-                            >
-                              {opt}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* RIGHT COLUMN: 3 Promotional Highlight Cards */}
-            <div className="lg:col-span-3 space-y-3">
-              {/* Promo Card 1: Whirlpool */}
-              <div className="rounded-2xl p-4 bg-gradient-to-br from-slate-800 to-slate-850 border border-slate-700 shadow-md flex items-center justify-between gap-3 group hover:border-orange-500/50 transition">
-                <div className="space-y-1">
-                  <span className="text-[10px] font-extrabold px-2 py-0.5 rounded bg-rose-500/20 text-rose-400 uppercase">
-                    Cashback BDT 5,000
-                  </span>
-                  <h4 className="text-xs sm:text-sm font-bold text-white group-hover:text-orange-400 transition">
-                    Whirlpool 6th Sense Inverter Frost-Free
-                  </h4>
-                  <p className="text-[11px] text-slate-400">10 Years Official Compressor Warranty</p>
-                </div>
-                <div className="w-16 h-16 rounded-xl overflow-hidden bg-slate-900 flex-shrink-0">
-                  <img
-                    src="https://images.unsplash.com/photo-1571175443880-49e1d25b2bc5?auto=format&fit=crop&w=200&q=80"
-                    alt="Whirlpool Refrigerator"
-                    className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
-                  />
-                </div>
-              </div>
-
-              {/* Promo Card 2: Toshiba Washer */}
-              <div className="rounded-2xl p-4 bg-gradient-to-br from-slate-800 to-slate-850 border border-slate-700 shadow-md flex items-center justify-between gap-3 group hover:border-orange-500/50 transition">
-                <div className="space-y-1">
-                  <span className="text-[10px] font-extrabold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 uppercase">
-                    Free Installation
-                  </span>
-                  <h4 className="text-xs sm:text-sm font-bold text-white group-hover:text-orange-400 transition">
-                    Toshiba Direct Drive Inverter Washer
-                  </h4>
-                  <p className="text-[11px] text-slate-400">BLDC Motor & 90°C Steam Anti-Allergy</p>
-                </div>
-                <div className="w-16 h-16 rounded-xl overflow-hidden bg-slate-900 flex-shrink-0">
-                  <img
-                    src="https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?auto=format&fit=crop&w=200&q=80"
-                    alt="Toshiba Washer"
-                    className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
-                  />
-                </div>
-              </div>
-
-              {/* Promo Card 3: Philips Air Fryer */}
-              <div className="rounded-2xl p-4 bg-gradient-to-br from-slate-800 to-slate-850 border border-slate-700 shadow-md flex items-center justify-between gap-3 group hover:border-orange-500/50 transition">
-                <div className="space-y-1">
-                  <span className="text-[10px] font-extrabold px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 uppercase">
-                    Flash Deal 35% OFF
-                  </span>
-                  <h4 className="text-xs sm:text-sm font-bold text-white group-hover:text-orange-400 transition">
-                    Philips Rapid Air Fryer & Kitchen Combo
-                  </h4>
-                  <p className="text-[11px] text-slate-400">90% Less Oil Healthy Frying</p>
-                </div>
-                <div className="w-16 h-16 rounded-xl overflow-hidden bg-slate-900 flex-shrink-0">
-                  <img
-                    src="https://images.unsplash.com/photo-1589793463308-658ed42e52c2?auto=format&fit=crop&w=200&q=80"
-                    alt="Philips Air Fryer"
-                    className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 4. APPLIANCE CATEGORY BADGES STRIP */}
-      <section className="bg-white border-b border-slate-200 py-6">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center sm:text-left mb-4 flex items-center justify-between">
-            <div>
-              <span className="text-xs font-extrabold uppercase tracking-wider text-orange-600">
-                Major Appliance Hub
-              </span>
-              <h3 className="text-xl font-extrabold text-slate-900">
-                Popular Appliance Categories
-              </h3>
-            </div>
-            <div className="text-xs font-semibold text-slate-500 hidden sm:block">
-              Click any category icon to filter items
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-3 sm:gap-4">
-            {[
-              { id: 'ac', name: 'Air Conditioners', sub: 'Inverter AC', icon: Wind },
-              { id: 'fridge', name: 'Refrigerators', sub: 'Frost Free', icon: Refrigerator },
-              { id: 'tv', name: 'Smart TVs', sub: '4K Google TV', icon: Tv },
-              { id: 'washer', name: 'Washing Machines', sub: 'Direct Drive', icon: WashingMachine },
-              { id: 'kitchen', name: 'Microwaves & Ovens', sub: 'Air Fryer', icon: Flame },
-              { id: 'ev', name: 'Electric Scooters', sub: 'EV Scooter', icon: Bike },
-              { id: 'power', name: 'IPS & Power', sub: 'Solar Hybrid', icon: Zap },
-            ].map((cat) => {
-              const IconComp = cat.icon;
-              const isSelected = selectedApplianceFilter === cat.id;
-              return (
-                <button
-                  key={cat.id}
-                  onClick={() => setSelectedApplianceFilter(isSelected ? 'all' : cat.id)}
-                  className={`p-3.5 rounded-2xl border text-center transition flex flex-col items-center justify-center gap-2 ${
-                    isSelected
-                      ? 'border-orange-600 bg-orange-50/80 shadow-md ring-2 ring-orange-500/20'
-                      : 'border-slate-200 bg-white hover:border-orange-300 hover:bg-slate-50'
-                  }`}
+                <a
+                  href="#engineering"
+                  className="px-6 py-3 rounded-xl bg-slate-900/80 hover:bg-slate-800 text-slate-300 font-bold text-xs sm:text-sm border border-slate-700 transition"
                 >
-                  <div
-                    className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                      isSelected ? 'bg-orange-600 text-white shadow-md' : 'bg-slate-100 text-slate-700'
-                    }`}
-                  >
-                    <IconComp className="w-6 h-6" />
+                  See the engineering
+                </a>
+              </div>
+            </div>
+
+            {/* Inset Featured Inverter AC Box */}
+            <div className="relative z-10 mt-8 pt-6 border-t border-slate-800/80">
+              <div className="bg-[#11192e] border border-slate-700/80 rounded-2xl p-4 sm:p-5 max-w-xl">
+                <div className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">
+                  FEATURED INVERTER AC
+                </div>
+                <h3 className="text-sm sm:text-base font-bold text-white mt-1">
+                  {featuredHeroProduct.title}
+                </h3>
+
+                <div className="grid grid-cols-3 gap-3 my-3 py-2.5 border-y border-slate-800 text-center">
+                  <div>
+                    <div className="text-lg sm:text-xl font-black text-white">18,000</div>
+                    <div className="text-[10px] text-slate-400 font-medium">BTU/h</div>
                   </div>
                   <div>
-                    <div className="text-xs font-extrabold text-slate-900">{cat.name}</div>
-                    <div className="text-[10px] text-slate-500 font-medium">{cat.sub}</div>
+                    <div className="text-lg sm:text-xl font-black text-white">3.10</div>
+                    <div className="text-[10px] text-slate-400 font-medium">EER W/W</div>
                   </div>
-                </button>
-              );
-            })}
+                  <div>
+                    <div className="text-lg sm:text-xl font-black text-white">39</div>
+                    <div className="text-[10px] text-slate-400 font-medium">dB mid fan</div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-lg sm:text-xl font-black text-white">
+                      BDT {featuredHeroProduct.price.toLocaleString()}
+                    </span>
+                    <span className="text-[11px] font-semibold text-slate-400 bg-slate-800 px-2.5 py-0.5 rounded-md">
+                      12 × BDT {Math.round(featuredHeroProduct.price / 12).toLocaleString()}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => handleAddToCart(featuredHeroProduct)}
+                    className="px-3.5 py-1.5 rounded-lg bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs transition shadow-sm active:scale-95"
+                  >
+                    Add to Cart
+                  </button>
+                </div>
+              </div>
+
+              {/* Bottom Perks Strip */}
+              <div className="mt-4 flex flex-wrap items-center gap-4 text-[11px] text-slate-400 font-medium">
+                <span>Up to 12 months 0% interest EMI</span>
+                <span>•</span>
+                <span>28 major banks</span>
+                <span>•</span>
+                <span>Free installation</span>
+              </div>
+            </div>
+          </div>
+
+          {/* RIGHT 3 STACKED CARDS (Matching PDF Page 1) */}
+          <div className="lg:col-span-4 space-y-4 flex flex-col justify-between">
+            {/* Promo Card 1: Whirlpool Refrigerator */}
+            <div
+              onClick={() => handleSelectCategory('fridge')}
+              className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-sm hover:shadow-md transition flex items-center justify-between gap-4 cursor-pointer"
+            >
+              <div className="space-y-1.5">
+                <span className="inline-block text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full">
+                  Cashback BDT 1,000
+                </span>
+                <h4 className="text-sm font-bold text-slate-900 leading-snug">
+                  Whirlpool 6th Sense Inverter Frost-Free
+                </h4>
+                <p className="text-xs text-slate-500">10 years official warranty</p>
+              </div>
+              <div className="w-16 h-16 rounded-2xl bg-amber-50/60 flex items-center justify-center text-amber-600 shrink-0 border border-amber-100">
+                <Refrigerator className="w-8 h-8" />
+              </div>
+            </div>
+
+            {/* Promo Card 2: Toshiba Washer */}
+            <div
+              onClick={() => handleSelectCategory('washer')}
+              className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-sm hover:shadow-md transition flex items-center justify-between gap-4 cursor-pointer"
+            >
+              <div className="space-y-1.5">
+                <span className="inline-block text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">
+                  Free installation
+                </span>
+                <h4 className="text-sm font-bold text-slate-900 leading-snug">
+                  Toshiba Direct Drive Inverter Washer
+                </h4>
+                <p className="text-xs text-slate-500">BLDC motor and 90°C steam anti-allergy</p>
+              </div>
+              <div className="w-16 h-16 rounded-2xl bg-emerald-50/60 flex items-center justify-center text-emerald-600 shrink-0 border border-emerald-100">
+                <WashingMachine className="w-8 h-8" />
+              </div>
+            </div>
+
+            {/* Promo Card 3: Philips Air Fryer */}
+            <div
+              onClick={() => handleSelectCategory('kitchen')}
+              className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-sm hover:shadow-md transition flex items-center justify-between gap-4 cursor-pointer"
+            >
+              <div className="space-y-1.5">
+                <span className="inline-block text-[11px] font-bold text-orange-700 bg-orange-50 border border-orange-200 px-2.5 py-0.5 rounded-full">
+                  Flash deal · 35% off
+                </span>
+                <h4 className="text-sm font-bold text-slate-900 leading-snug">
+                  Philips Rapid Air Fryer and Kitchen Combo
+                </h4>
+                <p className="text-xs text-slate-500">90% less oil, healthy frying</p>
+              </div>
+              <div className="w-16 h-16 rounded-2xl bg-orange-50/60 flex items-center justify-center text-orange-600 shrink-0 border border-orange-100">
+                <Flame className="w-8 h-8" />
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* 5. FEATURED APPLIANCE SHOWCASE & PRODUCT GRID */}
-      <section id="products" className="py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-        <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 mb-8 pb-4 border-b border-slate-200">
+      {/* 4. AUTHORISED PARTNERS ROW (Matching PDF Page 1) */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 w-full">
+        <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+          <span className="text-xs font-black uppercase tracking-wider text-slate-400 shrink-0">
+            AUTHORISED PARTNERS
+          </span>
+          <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-8 text-xs sm:text-sm font-bold text-slate-700">
+            <span onClick={() => setSearchQuery('Hisense')} className="hover:text-black cursor-pointer">Hisense</span>
+            <span onClick={() => setSearchQuery('Gree')} className="hover:text-black cursor-pointer">Gree Inverter</span>
+            <span onClick={() => setSearchQuery('Haier')} className="hover:text-black cursor-pointer">Haier</span>
+            <span onClick={() => setSearchQuery('Panasonic')} className="hover:text-black cursor-pointer">Panasonic</span>
+            <span onClick={() => setSearchQuery('General')} className="hover:text-black cursor-pointer">General Japan</span>
+            <span onClick={() => setSearchQuery('Whirlpool')} className="hover:text-black cursor-pointer">Whirlpool 6th Sense</span>
+            <span onClick={() => setSearchQuery('Toshiba')} className="hover:text-black cursor-pointer">Toshiba</span>
+            <span onClick={() => setSearchQuery('Philips')} className="hover:text-black cursor-pointer">Philips</span>
+            <span onClick={() => setSearchQuery('Schneider')} className="hover:text-black cursor-pointer">Schneider Electric</span>
+          </div>
+        </div>
+      </section>
+
+      {/* 5. SHOP BY CATEGORY - MAJOR APPLIANCE HUB (Matching PDF Page 1, Red Callouts 3 & 4) */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+        <div className="flex items-center justify-between mb-6">
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-xs font-extrabold uppercase tracking-wider text-orange-600">
-                Official Warranty Store
+            <span className="text-xs font-extrabold uppercase tracking-widest text-emerald-600 block">
+              MAJOR APPLIANCE HUB
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-1">
+              Shop by category
+            </h2>
+          </div>
+          {activeCategoryFilter !== 'all' && (
+            <button
+              onClick={() => setActiveCategoryFilter('all')}
+              className="text-xs font-bold text-orange-600 hover:underline flex items-center gap-1"
+            >
+              <Filter className="w-3.5 h-3.5" />
+              <span>Show All Categories</span>
+            </button>
+          )}
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3.5">
+          {applianceHubCategories.map((cat) => {
+            const IconComp = cat.icon;
+            const isSelected = activeCategoryFilter === cat.id;
+            return (
+              <div
+                key={cat.id}
+                onClick={() => handleSelectCategory(cat.id)}
+                className={`bg-white rounded-2xl p-4 border transition cursor-pointer flex flex-col justify-between ${
+                  isSelected
+                    ? 'border-black ring-2 ring-black/10 shadow-md'
+                    : 'border-slate-200/90 shadow-sm hover:shadow-md hover:border-slate-400'
+                }`}
+              >
+                <div>
+                  <div
+                    className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 ${
+                      isSelected ? 'bg-black text-white' : 'bg-slate-100 text-slate-700'
+                    }`}
+                  >
+                    <IconComp className="w-5 h-5" />
+                  </div>
+                  <h3 className="text-xs sm:text-sm font-bold text-slate-900 leading-snug">
+                    {cat.name}
+                  </h3>
+                  <p className="text-[11px] text-slate-500 mt-1 line-clamp-2 leading-tight">
+                    {cat.sub}
+                  </p>
+                </div>
+                <div className="mt-3 pt-2 border-t border-slate-100 text-[10px] text-slate-400 font-semibold">
+                  {cat.count}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* 6. PRODUCT CATALOG GRID (Matching PDF Page 2, Red Callouts 5 & 6) */}
+      <section id="products" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full border-t border-slate-200">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+          <div>
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-800 border border-slate-200 uppercase tracking-wider">
+                OFFICIAL WARRANTY STORE
               </span>
-              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">
-                100% Genuine Authorized
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                100% genuine, authorised
               </span>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-              Smart Inverter Electronics & Home Appliances
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+              Smart inverter electronics and home appliances
             </h2>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <span className="text-xs text-slate-500 font-medium">
-              Showing {filteredProducts.length} verified products
+              Showing {filteredProducts.length} of {liveProducts.length} products
             </span>
-            {selectedApplianceFilter !== 'all' && (
-              <button
-                onClick={() => setSelectedApplianceFilter('all')}
-                className="text-xs font-bold text-orange-600 hover:underline ml-2"
-              >
-                Clear Filter
-              </button>
-            )}
+            <div className="relative">
+              <select className="text-xs font-bold text-slate-700 bg-white border border-slate-200 rounded-xl px-3 py-1.5 appearance-none pr-7 focus:outline-none cursor-pointer">
+                <option>Sort: Featured</option>
+                <option>Price: Low to High</option>
+                <option>Price: High to Low</option>
+              </select>
+              <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
           </div>
         </div>
 
-        {/* Products Grid */}
+        {/* 0% EMI Tenure Filter Pills (Matching PDF Page 2) */}
+        <div className="flex items-center gap-2 mb-8 overflow-x-auto pb-2">
+          <span className="text-xs font-bold text-slate-600 mr-2">0% EMI tenure</span>
+          {[3, 6, 9, 12].map((tenure) => (
+            <button
+              key={tenure}
+              onClick={() => setSelectedEmiTenure(tenure)}
+              className={`px-4 py-1.5 rounded-full text-xs font-bold transition ${
+                selectedEmiTenure === tenure
+                  ? 'bg-black text-white shadow-sm'
+                  : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
+              }`}
+            >
+              {tenure} months
+            </button>
+          ))}
+
+          {activeCategoryFilter !== 'all' && (
+            <div className="ml-auto flex items-center gap-2">
+              <span className="text-xs font-semibold text-slate-500">Filtered by:</span>
+              <span className="px-3 py-1 rounded-full text-xs font-bold bg-slate-900 text-white flex items-center gap-1.5">
+                <span>{applianceHubCategories.find((c) => c.id === activeCategoryFilter)?.name}</span>
+                <X
+                  onClick={() => setActiveCategoryFilter('all')}
+                  className="w-3 h-3 cursor-pointer hover:text-red-400"
+                />
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* 8 Product Cards in 4 columns (Matching PDF Page 2) */}
         {filteredProducts.length === 0 ? (
-          <div className="text-center py-16 bg-white rounded-3xl border border-slate-200 p-8 shadow-sm">
-            <Wind className="w-12 h-12 text-slate-400 mx-auto mb-3" />
-            <h3 className="text-lg font-bold text-slate-800">No products found</h3>
-            <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
-              Please try searching with a different model or reset active filters.
-            </p>
+          <div className="text-center py-16 bg-white rounded-3xl border border-slate-200 p-8">
+            <p className="text-sm font-bold text-slate-600">No products found matching your current filter.</p>
             <button
               onClick={() => {
+                setActiveCategoryFilter('all');
                 setSearchQuery('');
-                setSelectedApplianceFilter('all');
               }}
-              className="mt-4 px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold rounded-xl transition"
+              className="mt-3 px-4 py-2 bg-black text-white text-xs font-bold rounded-xl"
             >
-              View All Products
+              Reset Filters
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredProducts.map((item) => {
-              const discount =
-                item.comparePrice && item.comparePrice > item.price
-                  ? Math.round(((item.comparePrice - item.price) / item.comparePrice) * 100)
-                  : null;
-
-              // Compute monthly EMI approx (12 months)
-              const emiPerMonth = Math.round(item.price / 12);
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {filteredProducts.map((p) => {
+              const IconComponent = p.icon || Wind;
+              const emiMonthly = Math.round(p.price / selectedEmiTenure);
 
               return (
                 <div
-                  key={item.id}
-                  className="bg-white rounded-3xl border border-slate-200/90 hover:border-orange-500/50 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden group"
+                  key={p.id}
+                  className="bg-white rounded-3xl border border-slate-200/90 shadow-sm hover:shadow-xl transition-all duration-300 p-5 flex flex-col justify-between group"
                 >
-                  {/* Top Image & Badges Container */}
-                  <div className="relative aspect-[4/3] bg-slate-100 overflow-hidden">
-                    <img
-                      src={
-                        item.images?.[0] ||
-                        'https://images.unsplash.com/photo-1585338107529-13afc5f02586?auto=format&fit=crop&w=800&q=80'
-                      }
-                      alt={item.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
+                  <div>
+                    {/* Top Bar: Discount pill & Brand */}
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <span className="px-2 py-0.5 rounded-md text-[11px] font-extrabold text-orange-600 bg-orange-50 border border-orange-100">
+                        {p.discount}
+                      </span>
+                      <span className="text-xs font-bold text-slate-700">{p.brand}</span>
+                    </div>
 
-                    {/* Discount & Energy Badges */}
-                    <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10">
-                      {discount && (
-                        <span className="px-2.5 py-1 rounded-lg text-xs font-extrabold bg-rose-600 text-white shadow-md">
-                          {discount}% OFF
+                    {/* Warranty pill */}
+                    <div
+                      className={`text-center py-1 px-2 rounded-lg text-[11px] font-bold mb-4 ${
+                        p.warrantyType === 'compressor'
+                          ? 'bg-sky-50 text-sky-700 border border-sky-100'
+                          : 'bg-amber-50 text-amber-700 border border-amber-100'
+                      }`}
+                    >
+                      {p.warranty}
+                    </div>
+
+                    {/* Product Visual Illustration / Image */}
+                    <Link
+                      href={`/products/${p.slug || p.id}?tenant=${tenantSlug}`}
+                      className="block aspect-[4/3] rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-700 mb-4 group-hover:scale-105 transition-transform duration-300 overflow-hidden cursor-pointer"
+                    >
+                      <IconComponent className="w-16 h-16 stroke-[1.2] text-slate-600" />
+                    </Link>
+
+                    {/* Category & Rating */}
+                    <div className="flex items-center justify-between text-xs text-slate-500 mb-1.5">
+                      <span className="font-semibold text-slate-600">{p.category}</span>
+                      <span className="font-bold text-slate-800">{p.rating}</span>
+                    </div>
+
+                    {/* Product Title (Direct Link to Full Page) */}
+                    <Link
+                      href={`/products/${p.slug || p.id}?tenant=${tenantSlug}`}
+                      className="block text-sm font-extrabold text-slate-900 leading-snug line-clamp-2 cursor-pointer group-hover:text-orange-600 transition"
+                      title={p.title}
+                    >
+                      {p.title}
+                    </Link>
+
+                    {/* Feature Tags */}
+                    <div className="flex flex-wrap gap-1.5 mt-3">
+                      {p.tags.map((tag: string) => (
+                        <span
+                          key={tag}
+                          className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700"
+                        >
+                          {tag}
                         </span>
-                      )}
-                      <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-600 text-white shadow-sm flex items-center gap-1">
-                        <Star className="w-3 h-3 fill-white" /> 5-Star Saver
-                      </span>
-                    </div>
-
-                    {/* Brand Pill */}
-                    <div className="absolute top-3 right-3 z-10">
-                      <span className="px-2.5 py-1 rounded-lg text-xs font-extrabold bg-slate-900/80 backdrop-blur-md text-white shadow-sm">
-                        {item.brand?.name || 'Authorized'}
-                      </span>
-                    </div>
-
-                    {/* Quick Specs Overlay on Hover */}
-                    <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-slate-950 via-slate-950/70 to-transparent flex items-center justify-between text-white text-xs opacity-90 group-hover:opacity-100 transition">
-                      <div className="flex items-center gap-1.5 text-[11px] font-semibold text-amber-300">
-                        <Award className="w-3.5 h-3.5" />
-                        <span>10-12 Years Compressor Warranty</span>
-                      </div>
-                      <button
-                        onClick={() => setDetailModalProduct(item)}
-                        className="p-1.5 rounded-lg bg-white/20 hover:bg-orange-600 text-white transition backdrop-blur-sm"
-                        title="View Detailed Spec Sheet"
-                      >
-                        <Eye className="w-3.5 h-3.5" />
-                      </button>
+                      ))}
                     </div>
                   </div>
 
-                  {/* Card Content Details */}
-                  <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
-                    <div>
-                      {/* Category & Rating */}
-                      <div className="flex items-center justify-between text-xs text-slate-500 mb-1.5">
-                        <span className="font-semibold text-orange-600">
-                          {item.category?.name || 'Home Appliance'}
+                  {/* Price, EMI & Action Buttons */}
+                  <div className="mt-5 pt-4 border-t border-slate-100">
+                    <div className="flex items-baseline gap-2 mb-1">
+                      <span className="text-lg font-black text-slate-950">
+                        BDT {p.price.toLocaleString()}
+                      </span>
+                      {p.comparePrice && p.comparePrice > p.price && (
+                        <span className="text-xs text-slate-400 line-through">
+                          BDT {p.comparePrice.toLocaleString()}
                         </span>
-                        <div className="flex items-center gap-1 text-amber-500 font-bold">
-                          <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                          <span>4.9</span>
-                        </div>
-                      </div>
-
-                      {/* Product Title */}
-                      <h3
-                        onClick={() => setDetailModalProduct(item)}
-                        className="text-base font-extrabold text-slate-900 line-clamp-2 leading-snug group-hover:text-orange-600 transition cursor-pointer"
-                        title={item.title}
-                      >
-                        {item.title}
-                      </h3>
-
-                      {/* Key Tech Badges */}
-                      <div className="flex flex-wrap gap-1.5 mt-2.5">
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
-                          Dual Inverter
-                        </span>
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
-                          R32 Eco Gas
-                        </span>
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
-                          19dB Silent
-                        </span>
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
-                          Golden Fin
-                        </span>
-                      </div>
+                      )}
                     </div>
 
-                    {/* Price, EMI & Action Buttons */}
-                    <div className="pt-3 border-t border-slate-100">
-                      <div className="flex items-baseline justify-between mb-2">
-                        <div>
-                          <div className="text-xl font-black text-slate-950">
-                            BDT {item.price.toLocaleString()}
-                          </div>
-                          {item.comparePrice && item.comparePrice > item.price && (
-                            <div className="text-xs text-slate-400 line-through">
-                              BDT {item.comparePrice.toLocaleString()}
-                            </div>
-                          )}
-                        </div>
+                    <div className="text-[11px] text-slate-600 font-semibold mb-4">
+                      0% EMI · BDT {emiMonthly.toLocaleString()}/mo × {selectedEmiTenure}
+                    </div>
 
-                        {/* EMI Badge */}
-                        <div className="text-right">
-                          <span className="text-[10px] font-bold text-slate-500 block">0% EMI</span>
-                          <span className="text-xs font-extrabold text-emerald-600">
-                            BDT {emiPerMonth.toLocaleString()}/mo
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Action Buttons: Add to Cart & View Specs */}
-                      <div className="grid grid-cols-2 gap-2 mt-3">
-                        <button
-                          onClick={() => setDetailModalProduct(item)}
-                          className="w-full py-2.5 px-3 rounded-xl border border-slate-300 hover:border-slate-800 text-slate-800 font-bold text-xs flex items-center justify-center gap-1 transition"
-                        >
-                          <Eye className="w-3.5 h-3.5" />
-                          <span>Spec Sheet</span>
-                        </button>
-
-                        <button
-                          onClick={() => handleAddToCart(item)}
-                          className="w-full py-2.5 px-3 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-extrabold text-xs shadow-md shadow-orange-600/20 flex items-center justify-center gap-1 transition active:scale-95"
-                        >
-                          <ShoppingBag className="w-3.5 h-3.5" />
-                          <span>Order Now</span>
-                        </button>
-                      </div>
+                    {/* Buttons: Full Spec Page & Add to cart */}
+                    <div className="grid grid-cols-2 gap-2">
+                      <Link
+                        href={`/products/${p.slug || p.id}?tenant=${tenantSlug}`}
+                        className="py-2 px-3 rounded-xl border border-slate-300 hover:border-slate-800 text-slate-800 font-bold text-xs text-center transition flex items-center justify-center gap-1"
+                      >
+                        <span>Spec sheet</span>
+                        <ArrowRight className="w-3 h-3" />
+                      </Link>
+                      <button
+                        onClick={() => handleAddToCart(p)}
+                        className="py-2 px-3 rounded-xl bg-black hover:bg-slate-800 text-white font-bold text-xs text-center transition active:scale-95 shadow-sm"
+                      >
+                        Add to cart
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -998,541 +1196,456 @@ export function ElectronicsStorefront({
             })}
           </div>
         )}
+
+        {/* Show More Products Button */}
+        <div className="text-center mt-10">
+          <button
+            onClick={() => setActiveCategoryFilter('all')}
+            className="px-8 py-3 rounded-xl bg-black hover:bg-slate-800 text-white font-bold text-xs sm:text-sm shadow-md transition"
+          >
+            Show 12 more products
+          </button>
+        </div>
       </section>
 
-      {/* 6. VISUAL STORYTELLING FEATURE BLOCKS */}
-      <section className="bg-slate-900 text-white py-16 sm:py-24 border-t border-slate-800">
+      {/* 7. INTERACTIVE ENGINEERING SHOWCASE (Matching PDF Page 3, Red Callout 7) */}
+      <section id="engineering" className="bg-[#0c1322] text-white py-16 border-t border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <span className="text-xs font-extrabold uppercase tracking-widest text-orange-400 bg-orange-950/60 border border-orange-800/80 px-3.5 py-1.5 rounded-full inline-block mb-3">
-              Next-Gen Engineering Architecture
+          <span className="text-xs font-black uppercase tracking-widest text-slate-400 block mb-2">
+            ENGINEERING
+          </span>
+          <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
+            What is inside a smart inverter appliance
+          </h2>
+          <p className="text-slate-400 text-xs sm:text-sm max-w-2xl mt-2 leading-relaxed">
+            Advanced compressor technology, patented Golden Fin anti-corrosive coating and energy-efficient components, built for extreme climate durability.
+          </p>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-10">
+            {/* Left 6 Interactive Selectors */}
+            <div className="lg:col-span-6 space-y-3">
+              {engineeringFeatures.map((feat, idx) => (
+                <div
+                  key={feat.id}
+                  onClick={() => setActiveEngineeringFeature(idx)}
+                  className={`p-4 rounded-2xl border transition cursor-pointer flex items-center justify-between ${
+                    activeEngineeringFeature === idx
+                      ? 'bg-slate-800 border-slate-600 text-white shadow-md'
+                      : 'bg-[#11192e]/60 border-slate-800 text-slate-300 hover:bg-slate-800/60'
+                  }`}
+                >
+                  <span className="text-xs sm:text-sm font-bold">{feat.title}</span>
+                  <span className="text-xs font-mono font-bold text-slate-400 ml-4 shrink-0">
+                    {feat.metric}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {/* Right Dynamic Feature Card */}
+            <div className="lg:col-span-6 bg-[#11192e] rounded-3xl p-8 border border-slate-800 flex flex-col justify-between shadow-xl">
+              <div>
+                <span className="text-xs text-slate-400 font-medium block">
+                  {activeEng.label}
+                </span>
+                <div className="text-6xl sm:text-7xl font-black text-orange-500 tracking-tight my-2">
+                  {activeEng.statValue}
+                </div>
+                <h3 className="text-xl sm:text-2xl font-bold text-white mt-4">
+                  {activeEng.title}
+                </h3>
+                <p className="text-slate-400 text-xs sm:text-sm mt-3 leading-relaxed">
+                  {activeEng.desc}
+                </p>
+              </div>
+
+              <div className="mt-8 pt-4 border-t border-slate-800">
+                <span className="inline-block px-3 py-1 rounded-full text-xs font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-800/80">
+                  {activeEng.pill}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 8. OFFICIAL ENGINEERING DATA - TECHNICAL SPECIFICATION CHART (Matching PDF Page 3 & 4, Red Callouts 8 & 9) */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
+        <div className="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-10 shadow-sm">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-200">
+            <div>
+              <span className="text-xs font-black uppercase tracking-widest text-orange-600 block">
+                OFFICIAL ENGINEERING DATA
+              </span>
+              <h3 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-1">
+                Technical specification chart
+              </h3>
+              <p className="text-xs text-slate-500 mt-1">
+                Tested and verified under ISO and international laboratory standards.
+              </p>
+            </div>
+            <div className="text-xs font-mono font-bold bg-slate-100 text-slate-800 px-3.5 py-1.5 rounded-xl border border-slate-200 shrink-0">
+              Model: Hisense AS18TW4RGSKB02DU Inverter
+            </div>
+          </div>
+
+          {/* 4 Highlight Metric Cards (Matching PDF Page 3) */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 my-8">
+            <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200/80 text-center">
+              <div className="text-xl sm:text-2xl font-black text-slate-900">18,000</div>
+              <div className="text-[11px] text-slate-500 font-medium mt-1">BTU/h cooling (1.5 Ton)</div>
+            </div>
+            <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200/80 text-center">
+              <div className="text-xl sm:text-2xl font-black text-slate-900">3.10</div>
+              <div className="text-[11px] text-slate-500 font-medium mt-1">EER W/W, star certified</div>
+            </div>
+            <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200/80 text-center">
+              <div className="text-xl sm:text-2xl font-black text-slate-900">39 / 54</div>
+              <div className="text-[11px] text-slate-500 font-medium mt-1">dB indoor / outdoor</div>
+            </div>
+            <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200/80 text-center">
+              <div className="text-xl sm:text-2xl font-black text-slate-900">12 yrs</div>
+              <div className="text-[11px] text-slate-500 font-medium mt-1">compressor warranty</div>
+            </div>
+          </div>
+
+          {/* Table Tab Selector */}
+          <div className="flex gap-4 border-b border-slate-200 mb-6 text-xs sm:text-sm font-bold">
+            <button
+              onClick={() => setActiveSpecTab('specs')}
+              className={`pb-2.5 transition border-b-2 ${
+                activeSpecTab === 'specs'
+                  ? 'border-black text-black'
+                  : 'border-transparent text-slate-400 hover:text-slate-700'
+              }`}
+            >
+              Specifications
+            </button>
+            <button
+              onClick={() => setActiveSpecTab('warranty')}
+              className={`pb-2.5 transition border-b-2 ${
+                activeSpecTab === 'warranty'
+                  ? 'border-black text-black'
+                  : 'border-transparent text-slate-400 hover:text-slate-700'
+              }`}
+            >
+              Warranty package
+            </button>
+          </div>
+
+          {/* Technical Spec / Warranty Table Rows */}
+          <div className="overflow-x-auto">
+            {activeSpecTab === 'specs' ? (
+              <table className="w-full text-left text-xs sm:text-sm">
+                <tbody className="divide-y divide-slate-100">
+                  <tr className="hover:bg-slate-50/70">
+                    <td className="py-3 px-2 font-bold text-slate-800 w-1/3">Air conditioner type</td>
+                    <td className="py-3 px-2 text-slate-600">Smart Inverter (Cooling Only)</td>
+                  </tr>
+                  <tr className="hover:bg-slate-50/70 bg-slate-50/40">
+                    <td className="py-3 px-2 font-bold text-slate-800">Cooling capacity (BTU/h)</td>
+                    <td className="py-3 px-2 text-slate-900 font-semibold">18,000 BTU/h (1.5 Ton) / 5275 Watts</td>
+                  </tr>
+                  <tr className="hover:bg-slate-50/70">
+                    <td className="py-3 px-2 font-bold text-slate-800">Voltage and frequency</td>
+                    <td className="py-3 px-2 text-slate-600">220-240V, 50 Hz (1700W / 7.6A)</td>
+                  </tr>
+                  <tr className="hover:bg-slate-50/70 bg-slate-50/40">
+                    <td className="py-3 px-2 font-bold text-slate-800">Energy efficiency ratio (EER)</td>
+                    <td className="py-3 px-2 text-slate-900 font-semibold">3.10 W/W (Star Rating Certified)</td>
+                  </tr>
+                  <tr className="hover:bg-slate-50/70">
+                    <td className="py-3 px-2 font-bold text-slate-800">Refrigerant gas type</td>
+                    <td className="py-3 px-2 text-slate-600">R32 Eco-Friendly (0.660 kg)</td>
+                  </tr>
+                  <tr className="hover:bg-slate-50/70 bg-slate-50/40">
+                    <td className="py-3 px-2 font-bold text-slate-800">Evaporator and condenser fin</td>
+                    <td className="py-3 px-2 text-slate-600">100% Copper Tube + Golden Hydrophilic Fin</td>
+                  </tr>
+                  <tr className="hover:bg-slate-50/70">
+                    <td className="py-3 px-2 font-bold text-slate-800">Noise level (indoor / outdoor)</td>
+                    <td className="py-3 px-2 text-slate-600">39 dB (Mid Fan) / 54 dB (Outdoor)</td>
+                  </tr>
+                  <tr className="hover:bg-slate-50/70 bg-slate-50/40">
+                    <td className="py-3 px-2 font-bold text-slate-800">Indoor dimensions and weight</td>
+                    <td className="py-3 px-2 text-slate-600">930 × 300 × 220 mm (11.0 kg Net)</td>
+                  </tr>
+                  <tr className="hover:bg-slate-50/70">
+                    <td className="py-3 px-2 font-bold text-slate-800">Outdoor dimensions and weight</td>
+                    <td className="py-3 px-2 text-slate-600">715 × 240 × 540 mm (25.0 kg Net)</td>
+                  </tr>
+                  <tr className="hover:bg-slate-50/70 bg-amber-50/50">
+                    <td className="py-3 px-2 font-black text-slate-900">Official warranty package</td>
+                    <td className="py-3 px-2 font-bold text-amber-800">
+                      Compressor 12 Years · PCB Board 5 Years · Spare Parts 5 Years · Service 2 Years Free (2x Free Hydro Wash)
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            ) : (
+              <table className="w-full text-left text-xs sm:text-sm">
+                <tbody className="divide-y divide-slate-100">
+                  <tr className="hover:bg-slate-50/70">
+                    <td className="py-3 px-2 font-bold text-slate-800 w-1/3">Compressor Replacement Warranty</td>
+                    <td className="py-3 px-2 text-emerald-700 font-bold">12 Years Official Official Brand Warranty</td>
+                  </tr>
+                  <tr className="hover:bg-slate-50/70 bg-slate-50/40">
+                    <td className="py-3 px-2 font-bold text-slate-800">Printed Circuit Board (PCB)</td>
+                    <td className="py-3 px-2 text-slate-900 font-semibold">5 Years Official Replacement Coverage</td>
+                  </tr>
+                  <tr className="hover:bg-slate-50/70">
+                    <td className="py-3 px-2 font-bold text-slate-800">Spare Parts & Components</td>
+                    <td className="py-3 px-2 text-slate-900 font-semibold">5 Years Genuine Parts Replacement</td>
+                  </tr>
+                  <tr className="hover:bg-slate-50/70 bg-slate-50/40">
+                    <td className="py-3 px-2 font-bold text-slate-800">Doorstep Technical Service</td>
+                    <td className="py-3 px-2 text-slate-900 font-semibold">2 Years Free Doorstep Service (with 2x Free Hydro Wash)</td>
+                  </tr>
+                  <tr className="hover:bg-slate-50/70">
+                    <td className="py-3 px-2 font-bold text-slate-800">Authorized Claim Centers</td>
+                    <td className="py-3 px-2 text-slate-600">Over 24 service points across 64 districts in Bangladesh</td>
+                  </tr>
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* 9. AUTHORISED SHOWROOMS & SERVICE CENTERS (Matching PDF Page 4, Red Callout 10) */}
+      <section id="showrooms" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full border-t border-slate-200">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+          <div>
+            <span className="text-xs font-black uppercase tracking-widest text-orange-600 block">
+              DIRECT BRAND OUTLETS
             </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-              Internal Engineering Behind Smart Inverter Appliances
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-1">
+              Authorised showrooms and official service centers
             </h2>
-            <p className="text-sm sm:text-base text-slate-400 mt-3 leading-relaxed">
-              Advanced compressor technology, patented Golden Fin anti-corrosive coating, and energy-efficient components built for extreme climate durability.
+            <p className="text-xs sm:text-sm text-slate-600 mt-1">
+              Experience products in person with certified engineers, or book official warranty service.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Feature 1: 3D Airflow */}
-            <div className="rounded-3xl p-6 bg-slate-800/80 border border-slate-700/80 hover:border-orange-500/60 shadow-xl transition-all duration-300 group">
-              <div className="w-12 h-12 rounded-2xl bg-blue-600/20 text-blue-400 flex items-center justify-center mb-5 group-hover:scale-110 transition">
-                <Wind className="w-6 h-6" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-2 group-hover:text-orange-400 transition">
-                3D 4-Way Airflow (18m Air Throw)
-              </h3>
-              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                Horizontal and vertical motorized swing louvers distribute cool airflow evenly to every corner. The 18-meter long air delivery is ideal for spacious halls and living rooms.
-              </p>
-              <div className="mt-4 pt-4 border-t border-slate-700 text-xs font-semibold text-blue-400 flex items-center gap-1.5">
-                <Check className="w-4 h-4" /> 4-Way Multi-Directional Air Delivery
-              </div>
-            </div>
-
-            {/* Feature 2: 19dB Quiet Sleep */}
-            <div className="rounded-3xl p-6 bg-slate-800/80 border border-slate-700/80 hover:border-orange-500/60 shadow-xl transition-all duration-300 group">
-              <div className="w-12 h-12 rounded-2xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center mb-5 group-hover:scale-110 transition">
-                <Volume2 className="w-6 h-6" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-2 group-hover:text-orange-400 transition">
-                19dB Ultra-Quiet Sleep Mode
-              </h3>
-              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                Smooth aerodynamic fan blades and dual-rotation rotary compressors suppress vibration to a whisper-silent 19dB acoustic level for peaceful sleep.
-              </p>
-              <div className="mt-4 pt-4 border-t border-slate-700 text-xs font-semibold text-indigo-400 flex items-center gap-1.5">
-                <Check className="w-4 h-4" /> Whisper-Quiet Operation & Dimmer Display
-              </div>
-            </div>
-
-            {/* Feature 3: Dual Inverter T3 Compressor */}
-            <div className="rounded-3xl p-6 bg-slate-800/80 border border-slate-700/80 hover:border-orange-500/60 shadow-xl transition-all duration-300 group">
-              <div className="w-12 h-12 rounded-2xl bg-orange-600/20 text-orange-400 flex items-center justify-center mb-5 group-hover:scale-110 transition">
-                <Cpu className="w-6 h-6" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-2 group-hover:text-orange-400 transition">
-                Dual Inverter T3 Tropical Compressor
-              </h3>
-              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                Maintains continuous heavy-duty cooling even in scorching 58°C extreme heatwave conditions while conserving up to 70% electricity.
-              </p>
-              <div className="mt-4 pt-4 border-t border-slate-700 text-xs font-semibold text-orange-400 flex items-center gap-1.5">
-                <Check className="w-4 h-4" /> 12 Years Compressor Official Replacement Warranty
-              </div>
-            </div>
-
-            {/* Feature 4: Golden Fin Coating */}
-            <div className="rounded-3xl p-6 bg-slate-800/80 border border-slate-700/80 hover:border-orange-500/60 shadow-xl transition-all duration-300 group">
-              <div className="w-12 h-12 rounded-2xl bg-amber-600/20 text-amber-400 flex items-center justify-center mb-5 group-hover:scale-110 transition">
-                <Award className="w-6 h-6" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-2 group-hover:text-orange-400 transition">
-                Golden Fin Hydrophilic Coating
-              </h3>
-              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                100% pure copper condenser tubes with golden hydrophilic anti-corrosive coating protect against salty coastal humidity, rain, and acidic air.
-              </p>
-              <div className="mt-4 pt-4 border-t border-slate-700 text-xs font-semibold text-amber-400 flex items-center gap-1.5">
-                <Check className="w-4 h-4" /> 100% Anti-Corrosive Copper Condenser
-              </div>
-            </div>
-
-            {/* Feature 5: Eco Refrigerant R32 */}
-            <div className="rounded-3xl p-6 bg-slate-800/80 border border-slate-700/80 hover:border-orange-500/60 shadow-xl transition-all duration-300 group">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-600/20 text-emerald-400 flex items-center justify-center mb-5 group-hover:scale-110 transition">
-                <Sun className="w-6 h-6" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-2 group-hover:text-orange-400 transition">
-                Eco-Friendly R32 Refrigerant Gas
-              </h3>
-              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                Zero Ozone Depletion Potential (Zero ODP) and 68% lower global warming impact for superior cooling capacity and maximum energy conservation.
-              </p>
-              <div className="mt-4 pt-4 border-t border-slate-700 text-xs font-semibold text-emerald-400 flex items-center gap-1.5">
-                <Check className="w-4 h-4" /> Zero ODP Green Refrigerant Technology
-              </div>
-            </div>
-
-            {/* Feature 6: 56°C Self-Cleaning */}
-            <div className="rounded-3xl p-6 bg-slate-800/80 border border-slate-700/80 hover:border-orange-500/60 shadow-xl transition-all duration-300 group">
-              <div className="w-12 h-12 rounded-2xl bg-rose-600/20 text-rose-400 flex items-center justify-center mb-5 group-hover:scale-110 transition">
-                <Flame className="w-6 h-6" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-2 group-hover:text-orange-400 transition">
-                56°C High-Temperature Self-Clean
-              </h3>
-              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                One-touch automated sterilization heats the evaporator coil to 56°C to eliminate 99.9% of bacteria and viruses, ensuring fresh, sanitized airflow.
-              </p>
-              <div className="mt-4 pt-4 border-t border-slate-700 text-xs font-semibold text-rose-400 flex items-center gap-1.5">
-                <Check className="w-4 h-4" /> 99.9% Sterilization Health Protection
-              </div>
-            </div>
+          {/* City Filter Pills (Matching PDF Page 4) */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1">
+            {['Dhaka', 'Chittagong', 'Sylhet', 'Khulna'].map((city) => (
+              <button
+                key={city}
+                onClick={() => setSelectedShowroomCity(city)}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap ${
+                  selectedShowroomCity === city
+                    ? 'bg-black text-white shadow-sm'
+                    : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
+                }`}
+              >
+                {city}
+              </button>
+            ))}
           </div>
         </div>
-      </section>
 
-      {/* 7. COMPREHENSIVE ENGINEERING TECHNICAL SPECIFICATION SHEET (Table View) */}
-      <section className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-10">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-4 border-b border-slate-200">
-            <div>
-              <span className="text-xs font-extrabold uppercase tracking-wider text-orange-600">
-                Official Engineering Data
-              </span>
-              <h3 className="text-2xl font-extrabold text-slate-900 mt-1">
-                Technical Specification Chart & Engineering Standards
-              </h3>
-              <p className="text-xs text-slate-500 mt-1">
-                Tested and verified under ISO & international laboratory standards.
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs bg-slate-100 text-slate-700 px-3 py-1.5 rounded-xl font-bold border border-slate-200">
-                Model: Hisense AS18TW4RGSKB02DU Inverter
-              </span>
-            </div>
-          </div>
-
-          {/* Technical Spec Table */}
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs sm:text-sm border-collapse">
-              <thead>
-                <tr className="bg-slate-100/80 text-slate-900 border-y border-slate-200 text-xs uppercase font-extrabold">
-                  <th className="py-3.5 px-4">Parameter / Feature</th>
-                  <th className="py-3.5 px-4">Technical Rating / Value</th>
-                  <th className="py-3.5 px-4 hidden md:table-cell">Engineering Advantage</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                <tr className="hover:bg-slate-50">
-                  <td className="py-3 px-4 font-bold text-slate-900">Air Conditioner Type</td>
-                  <td className="py-3 px-4 font-medium text-slate-700">Smart Inverter (Cooling Only)</td>
-                  <td className="py-3 px-4 text-slate-500 text-xs hidden md:table-cell">Saves up to 70% electrical power consumption</td>
-                </tr>
-                <tr className="hover:bg-slate-50 bg-slate-50/50">
-                  <td className="py-3 px-4 font-bold text-slate-900">Cooling Capacity (BTU/h)</td>
-                  <td className="py-3 px-4 font-bold text-orange-600">18,000 BTU/h (1.5 Ton) / 5275 Watts</td>
-                  <td className="py-3 px-4 text-slate-500 text-xs hidden md:table-cell">Optimal for 120 - 180 sq. ft room spaces</td>
-                </tr>
-                <tr className="hover:bg-slate-50">
-                  <td className="py-3 px-4 font-bold text-slate-900">Voltage & Frequency</td>
-                  <td className="py-3 px-4 font-medium text-slate-700">220-240V, 50 Hz (1700W / 7.6A)</td>
-                  <td className="py-3 px-4 text-slate-500 text-xs hidden md:table-cell">Integrated low-voltage operation stabilizer</td>
-                </tr>
-                <tr className="hover:bg-slate-50 bg-slate-50/50">
-                  <td className="py-3 px-4 font-bold text-slate-900">Energy Efficiency Ratio (EER)</td>
-                  <td className="py-3 px-4 font-bold text-emerald-600">3.10 W/W (Star Rating Certified)</td>
-                  <td className="py-3 px-4 text-slate-500 text-xs hidden md:table-cell">High thermodynamic efficiency standard</td>
-                </tr>
-                <tr className="hover:bg-slate-50">
-                  <td className="py-3 px-4 font-bold text-slate-900">Refrigerant Gas Type</td>
-                  <td className="py-3 px-4 font-medium text-slate-700">R32 Eco-Friendly (0.660 kg)</td>
-                  <td className="py-3 px-4 text-slate-500 text-xs hidden md:table-cell">Zero ODP green refrigerant with faster heat transfer</td>
-                </tr>
-                <tr className="hover:bg-slate-50 bg-slate-50/50">
-                  <td className="py-3 px-4 font-bold text-slate-900">Evaporator & Condenser Fin</td>
-                  <td className="py-3 px-4 font-medium text-slate-700">100% Copper Tube + Golden Hydrophilic Fin</td>
-                  <td className="py-3 px-4 text-slate-500 text-xs hidden md:table-cell">Lifetime anti-rust protection against moisture & salts</td>
-                </tr>
-                <tr className="hover:bg-slate-50">
-                  <td className="py-3 px-4 font-bold text-slate-900">Noise Level (Indoor / Outdoor)</td>
-                  <td className="py-3 px-4 font-medium text-slate-700">39 dB (Mid Fan) / 54 dB (Outdoor)</td>
-                  <td className="py-3 px-4 text-slate-500 text-xs hidden md:table-cell">Whisper-quiet acoustic dampening</td>
-                </tr>
-                <tr className="hover:bg-slate-50 bg-slate-50/50">
-                  <td className="py-3 px-4 font-bold text-slate-900">Indoor Unit Dimensions & Weight</td>
-                  <td className="py-3 px-4 font-medium text-slate-700">930 × 300 × 220 mm (11.0 kg Net)</td>
-                  <td className="py-3 px-4 text-slate-500 text-xs hidden md:table-cell">Ultra-compact modern architectural wall-mount profile</td>
-                </tr>
-                <tr className="hover:bg-slate-50">
-                  <td className="py-3 px-4 font-bold text-slate-900">Outdoor Unit Dimensions & Weight</td>
-                  <td className="py-3 px-4 font-medium text-slate-700">715 × 240 × 540 mm (25.0 kg Net)</td>
-                  <td className="py-3 px-4 text-slate-500 text-xs hidden md:table-cell">Heavy-duty powder-coated weatherproof metallic chassis</td>
-                </tr>
-                <tr className="hover:bg-slate-50 bg-orange-50/40">
-                  <td className="py-3 px-4 font-extrabold text-slate-950">Official Warranty Package</td>
-                  <td className="py-3 px-4 font-extrabold text-orange-700">
-                    Compressor: 12 Years • PCB Board: 5 Years • Spare Parts: 5 Years • Service: 2 Years Free (2x Free Hydro Wash)
-                  </td>
-                  <td className="py-3 px-4 text-slate-600 text-xs font-semibold hidden md:table-cell">
-                    Comprehensive nationwide doorstep technician coverage
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      {/* 8. NATIONWIDE SHOWROOM & SERVICE CENTER LOCATOR */}
-      <section id="showrooms" className="bg-slate-100 py-16 border-t border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10 pb-4 border-b border-slate-200">
-            <div>
-              <span className="text-xs font-extrabold uppercase tracking-wider text-orange-600">
-                Direct Brand Outlets
-              </span>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1">
-                Authorized Showrooms & Official Service Centers
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-600 mt-1">
-                Experience products in person with certified engineers or book official warranty services.
-              </p>
-            </div>
-
-            {/* City Filter Pills */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-2">
-              {['Dhaka', 'Chittagong', 'Sylhet', 'Khulna'].map((city) => (
-                <button
-                  key={city}
-                  onClick={() => setSelectedShowroomCity(city)}
-                  className={`px-4 py-2 rounded-xl text-xs font-extrabold transition whitespace-nowrap shadow-sm ${
-                    selectedShowroomCity === city
-                      ? 'bg-orange-600 text-white shadow-md shadow-orange-600/20'
-                      : 'bg-white hover:bg-slate-200 text-slate-700 border border-slate-300'
-                  }`}
-                >
-                  {city}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Showroom Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {showrooms
-              .filter((s) => s.city === selectedShowroomCity)
-              .map((showroom, idx) => (
-                <div
-                  key={idx}
-                  className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition space-y-4"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center flex-shrink-0">
-                      <MapPin className="w-5 h-5" />
+        {/* Showroom Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {showroomsList
+            .filter((s) => s.city === selectedShowroomCity)
+            .map((s) => (
+              <div
+                key={s.id}
+                className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-sm flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="w-8 h-8 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center">
+                      <MapPin className="w-4 h-4" />
                     </div>
-                    <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-700">
-                      {showroom.city}
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200">
+                      {s.badge}
                     </span>
                   </div>
 
-                  <div>
-                    <h4 className="text-base font-extrabold text-slate-900 leading-snug">
-                      {showroom.name}
-                    </h4>
-                    <p className="text-xs text-slate-600 mt-2 leading-relaxed flex items-start gap-1.5">
-                      <MapPin className="w-3.5 h-3.5 text-slate-400 mt-0.5 flex-shrink-0" />
-                      <span>{showroom.address}</span>
-                    </p>
-                  </div>
+                  <h3 className="text-base font-extrabold text-slate-900 leading-snug">
+                    {s.name}
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+                    {s.address}
+                  </p>
 
-                  <div className="pt-3 border-t border-slate-100 space-y-2 text-xs">
-                    <div className="flex items-center justify-between text-slate-600">
-                      <span className="flex items-center gap-1.5">
-                        <Phone className="w-3.5 h-3.5 text-orange-600" />
-                        <span>Hotline:</span>
-                      </span>
-                      <span className="font-bold text-slate-900">{showroom.phone}</span>
+                  <div className="mt-4 pt-3 border-t border-slate-100 space-y-2 text-xs">
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-400 font-medium">Hotline</span>
+                      <span className="font-bold text-slate-900">{s.hotline}</span>
                     </div>
-
-                    <div className="flex items-center justify-between text-slate-600">
-                      <span className="flex items-center gap-1.5">
-                        <Clock className="w-3.5 h-3.5 text-slate-400" />
-                        <span>Hours:</span>
-                      </span>
-                      <span className="font-medium text-slate-700">{showroom.hours}</span>
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-400 font-medium">Hours</span>
+                      <span className="font-bold text-slate-900">{s.hours}</span>
                     </div>
                   </div>
-
-                  <a
-                    href={`tel:09606111777`}
-                    className="w-full py-2 px-3 rounded-xl bg-slate-900 hover:bg-orange-600 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition text-center"
-                  >
-                    <Phone className="w-3.5 h-3.5" />
-                    <span>Call Hotline / Get Directions</span>
-                  </a>
                 </div>
-              ))}
-          </div>
+
+                <div className="grid grid-cols-2 gap-2 mt-5">
+                  <a
+                    href="tel:09606111777"
+                    className="py-2.5 px-3 rounded-xl bg-black hover:bg-slate-800 text-white font-bold text-xs text-center transition"
+                  >
+                    Call hotline
+                  </a>
+                  <button
+                    onClick={() => setSelectedDirectionShowroom(s)}
+                    className="py-2.5 px-3 rounded-xl border border-slate-200 hover:border-slate-400 text-slate-700 font-bold text-xs text-center transition"
+                  >
+                    Directions
+                  </button>
+                </div>
+              </div>
+            ))}
         </div>
       </section>
 
-      {/* 9. TECHNICAL SPECIFICATION & PRODUCT DETAIL MODAL */}
-      {detailModalProduct && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="bg-white rounded-3xl max-w-4xl w-full overflow-hidden shadow-2xl border border-slate-200 my-8 flex flex-col max-h-[90vh]">
-            {/* Modal Header */}
-            <div className="p-4 sm:p-6 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800">
-              <div className="flex items-center gap-2.5">
-                <span className="px-2.5 py-1 rounded bg-orange-600 text-white font-extrabold text-xs">
-                  {detailModalProduct.brand?.name || 'Electronics'}
-                </span>
-                <h3 className="text-base sm:text-lg font-bold text-white line-clamp-1">
-                  {detailModalProduct.title}
-                </h3>
-              </div>
+      {/* Showroom Direction Modal */}
+      {selectedDirectionShowroom && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200">
+                {selectedDirectionShowroom.badge}
+              </span>
               <button
-                onClick={() => setDetailModalProduct(null)}
-                className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition"
+                onClick={() => setSelectedDirectionShowroom(null)}
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
-
-            {/* Modal Body */}
-            <div className="p-6 overflow-y-auto space-y-6 flex-1">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Images */}
-                <div className="space-y-3">
-                  <div className="aspect-[4/3] rounded-2xl bg-slate-100 overflow-hidden border border-slate-200">
-                    <img
-                      src={
-                        detailModalProduct.images?.[modalImageIndex] ||
-                        detailModalProduct.images?.[0] ||
-                        'https://images.unsplash.com/photo-1585338107529-13afc5f02586?auto=format&fit=crop&w=800&q=80'
-                      }
-                      alt={detailModalProduct.title}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-
-                  {/* Thumbnails if multiple images */}
-                  {detailModalProduct.images && detailModalProduct.images.length > 1 && (
-                    <div className="flex gap-2 overflow-x-auto pb-1">
-                      {detailModalProduct.images.map((img: string, i: number) => (
-                        <button
-                          key={i}
-                          onClick={() => setModalImageIndex(i)}
-                          className={`w-16 h-16 rounded-xl overflow-hidden border-2 flex-shrink-0 ${
-                            modalImageIndex === i ? 'border-orange-600 ring-2 ring-orange-500/20' : 'border-slate-200'
-                          }`}
-                        >
-                          <img src={img} alt="thumb" className="w-full h-full object-cover" />
-                        </button>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Quick Trust Badges */}
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2">
-                      <Truck className="w-4 h-4 text-emerald-600" />
-                      <span>Free Delivery & Installation</span>
-                    </div>
-                    <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2">
-                      <ShieldCheck className="w-4 h-4 text-orange-600" />
-                      <span>12 Years Compressor Warranty</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Details & Pricing */}
-                <div className="space-y-4">
-                  <div>
-                    <span className="text-xs font-bold text-orange-600 uppercase tracking-wider">
-                      {detailModalProduct.category?.name || 'Air Conditioner'}
-                    </span>
-                    <h2 className="text-xl sm:text-2xl font-black text-slate-900 mt-1 leading-snug">
-                      {detailModalProduct.title}
-                    </h2>
-                  </div>
-
-                  {/* Pricing Box */}
-                  <div className="p-4 rounded-2xl bg-orange-50 border border-orange-200 flex items-baseline justify-between">
-                    <div>
-                      <div className="text-2xl sm:text-3xl font-black text-slate-950">
-                        BDT {detailModalProduct.price.toLocaleString()}
-                      </div>
-                      {detailModalProduct.comparePrice && (
-                        <div className="text-xs text-slate-400 line-through">
-                          BDT {detailModalProduct.comparePrice.toLocaleString()}
-                        </div>
-                      )}
-                    </div>
-                    <div className="text-right">
-                      <span className="text-[10px] font-bold text-orange-800 uppercase block">
-                        12 Months 0% EMI
-                      </span>
-                      <span className="text-sm font-extrabold text-orange-700">
-                        BDT {Math.round(detailModalProduct.price / 12).toLocaleString()}/mo
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Quantity & Order action */}
-                  <div className="space-y-3 pt-2">
-                    <div className="flex items-center gap-4">
-                      <span className="text-xs font-bold text-slate-700">Quantity:</span>
-                      <div className="flex items-center border border-slate-300 rounded-xl overflow-hidden bg-white">
-                        <button
-                          onClick={() => setModalQuantity(Math.max(1, modalQuantity - 1))}
-                          className="px-3 py-1.5 hover:bg-slate-100 text-slate-700 font-bold"
-                        >
-                          <Minus className="w-3.5 h-3.5" />
-                        </button>
-                        <span className="px-4 py-1.5 text-xs font-black text-slate-900">
-                          {modalQuantity}
-                        </span>
-                        <button
-                          onClick={() => setModalQuantity(modalQuantity + 1)}
-                          className="px-3 py-1.5 hover:bg-slate-100 text-slate-700 font-bold"
-                        >
-                          <Plus className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={handleModalAddToCart}
-                      className="w-full py-3.5 px-6 rounded-2xl bg-orange-600 hover:bg-orange-500 text-white font-extrabold text-sm shadow-xl shadow-orange-600/30 flex items-center justify-center gap-2 transition active:scale-95"
-                    >
-                      <ShoppingBag className="w-4 h-4" />
-                      <span>Add to Cart & Proceed to Checkout</span>
-                    </button>
-                  </div>
-                </div>
+            <div>
+              <h3 className="text-lg font-black text-slate-900">
+                {selectedDirectionShowroom.name}
+              </h3>
+              <p className="text-xs text-slate-600 mt-2 flex items-start gap-1.5">
+                <MapPin className="w-4 h-4 text-orange-600 shrink-0 mt-0.5" />
+                <span>{selectedDirectionShowroom.address}</span>
+              </p>
+            </div>
+            <div className="p-3 bg-slate-50 rounded-xl space-y-1.5 text-xs">
+              <div className="flex justify-between">
+                <span className="text-slate-500">Showroom Manager:</span>
+                <span className="font-bold text-slate-800">{selectedDirectionShowroom.manager}</span>
               </div>
-
-              {/* Parsed Technical Specifications Sheet in Modal */}
-              <div className="pt-4 border-t border-slate-200">
-                <div className="flex items-center gap-2 mb-3">
-                  <Award className="w-4 h-4 text-orange-600" />
-                  <h4 className="text-sm font-extrabold text-slate-900">
-                    Comprehensive Technical Specifications Chart
-                  </h4>
-                </div>
-
-                <div className="rounded-2xl border border-slate-200 overflow-hidden text-xs">
-                  <div className="divide-y divide-slate-100">
-                    {getProductParsedSpecs(detailModalProduct).map((spec, i) => (
-                      <div
-                        key={i}
-                        className={`grid grid-cols-3 p-2.5 ${i % 2 === 0 ? 'bg-slate-50/70' : 'bg-white'}`}
-                      >
-                        <div className="font-bold text-slate-800">{spec.label}</div>
-                        <div className="col-span-2 text-slate-700 font-medium">{spec.value}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Hotline:</span>
+                <span className="font-bold text-slate-800">{selectedDirectionShowroom.hotline}</span>
               </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Visiting Hours:</span>
+                <span className="font-bold text-slate-800">{selectedDirectionShowroom.hours}</span>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <a
+                href={`tel:09606111777`}
+                className="py-2.5 rounded-xl bg-black text-white font-bold text-xs text-center"
+              >
+                Call Outlet
+              </a>
+              <button
+                onClick={() => {
+                  window.open(
+                    `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                      selectedDirectionShowroom.address
+                    )}`,
+                    '_blank'
+                  );
+                }}
+                className="py-2.5 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-800 font-bold text-xs text-center"
+              >
+                Open Google Maps
+              </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* 10. FOOTER WITH DROOTO HELPLINE */}
-      <footer className="bg-slate-950 text-slate-300 border-t border-slate-800 mt-auto">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8 pb-8 border-b border-slate-800">
+      {/* 11. FOOTER (Matching PDF Page 4, Red Callout 11) */}
+      <footer className="bg-[#0b0f19] text-slate-400 text-xs py-14 border-t border-slate-800 mt-auto">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-10 pb-10 border-b border-slate-800">
             {/* Col 1 */}
             <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-orange-600 flex items-center justify-center text-white">
-                  <Zap className="w-4 h-4 fill-white" />
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-black border border-slate-700 flex items-center justify-center text-amber-400">
+                  <Zap className="w-4 h-4 fill-amber-400 text-amber-400" />
                 </div>
-                <span className="text-lg font-black text-white">{tenant?.name || 'SmartVolt'}</span>
+                <span className="text-base font-black text-white">
+                  SmartVolt Electrical & Automation
+                </span>
               </div>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Bangladesh&apos;s leading authorized retail platform for smart inverter air conditioners, refrigerators, and major home appliances.
+              <p className="text-slate-400 leading-relaxed">
+                Bangladesh&apos;s trusted authorised retail platform for smart inverter air conditioners, refrigerators and major home appliances.
               </p>
-              <div className="text-xs text-orange-400 font-bold flex items-center gap-1.5 pt-1">
-                <Phone className="w-3.5 h-3.5" />
-                <span>Helpline: 09606 111 777</span>
+              <div className="font-bold text-white pt-1">
+                Helpline: 09606 111 777
               </div>
             </div>
 
             {/* Col 2 */}
             <div>
-              <h4 className="text-xs font-extrabold uppercase tracking-wider text-white mb-3">
-                Appliance Categories
+              <h4 className="font-black uppercase tracking-wider text-white mb-3">
+                CATEGORIES
               </h4>
-              <ul className="space-y-2 text-xs text-slate-400">
-                <li className="hover:text-orange-400 cursor-pointer">Smart Inverter ACs</li>
-                <li className="hover:text-orange-400 cursor-pointer">Frost-Free Refrigerators</li>
-                <li className="hover:text-orange-400 cursor-pointer">4K Google Smart TVs</li>
-                <li className="hover:text-orange-400 cursor-pointer">Direct Drive Washers</li>
-                <li className="hover:text-orange-400 cursor-pointer">Electric Vehicles (EV)</li>
+              <ul className="space-y-2 text-slate-400">
+                <li onClick={() => handleSelectCategory('ac')} className="hover:text-white cursor-pointer">Smart inverter ACs</li>
+                <li onClick={() => handleSelectCategory('fridge')} className="hover:text-white cursor-pointer">Frost-free refrigerators</li>
+                <li onClick={() => handleSelectCategory('tv')} className="hover:text-white cursor-pointer">4K Google Smart TVs</li>
+                <li onClick={() => handleSelectCategory('washer')} className="hover:text-white cursor-pointer">Direct drive washers</li>
+                <li onClick={() => handleSelectCategory('ev')} className="hover:text-white cursor-pointer">Electric vehicles (EV)</li>
               </ul>
             </div>
 
             {/* Col 3 */}
             <div>
-              <h4 className="text-xs font-extrabold uppercase tracking-wider text-white mb-3">
-                Warranty & Services
+              <h4 className="font-black uppercase tracking-wider text-white mb-3">
+                WARRANTY AND SERVICES
               </h4>
-              <ul className="space-y-2 text-xs text-slate-400">
-                <li className="hover:text-orange-400 cursor-pointer">12 Years Official Compressor Warranty</li>
-                <li className="hover:text-orange-400 cursor-pointer">Free Doorstep Installation Booking</li>
-                <li className="hover:text-orange-400 cursor-pointer">0% Bank EMI Facility</li>
-                <li className="hover:text-orange-400 cursor-pointer">Official Service Points & Spare Parts</li>
+              <ul className="space-y-2 text-slate-400">
+                <li className="hover:text-white cursor-pointer">12 years official compressor warranty</li>
+                <li className="hover:text-white cursor-pointer">Free doorstep installation booking</li>
+                <li className="hover:text-white cursor-pointer">0% bank EMI facility</li>
+                <li className="hover:text-white cursor-pointer">Official service points and spare parts</li>
+                <li className="pt-2">
+                  <Link
+                    href={`/admin/dashboard?tenant=${tenantSlug}`}
+                    className="inline-flex items-center gap-1.5 text-amber-400 hover:text-amber-300 font-bold"
+                  >
+                    <LayoutDashboard className="w-3.5 h-3.5" />
+                    <span>Merchant Admin Portal</span>
+                  </Link>
+                </li>
               </ul>
             </div>
 
             {/* Col 4 */}
             <div>
-              <h4 className="text-xs font-extrabold uppercase tracking-wider text-white mb-3">
-                Corporate Office & Hours
+              <h4 className="font-black uppercase tracking-wider text-white mb-3">
+                CORPORATE OFFICE
               </h4>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Nawabpur Road Electrical Market, Dhaka-1100, Bangladesh.
+              <p className="text-slate-400 leading-relaxed">
+                Nawabpur Road Electrical Market, Dhaka-1100, Bangladesh
               </p>
-              <div className="mt-3 text-xs text-slate-400 space-y-1">
-                <div>Email: support@smartvoltbd.com</div>
-                <div>Hours: 10:00 AM - 09:00 PM (Daily)</div>
+              <div className="mt-3 space-y-1">
+                <div>support@smartvoltbd.com</div>
+                <div>Open daily, 10:00 AM to 09:00 PM</div>
               </div>
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-2">
-            <div>© 2026 {tenant?.name || 'SmartVolt'}. All rights reserved. Powered by SaaS Multi-Tenant Engine.</div>
+          <div className="flex flex-col sm:flex-row items-center justify-between text-slate-500 text-xs gap-3">
+            <div>© 2026 SmartVolt Electrical & Automation. All rights reserved.</div>
             <div className="flex items-center gap-4">
-              <span>Security Guaranteed</span>
-              <span>100% Genuine Official Seal</span>
+              <Link href={`/admin/dashboard?tenant=${tenantSlug}`} className="hover:text-slate-300 underline">
+                Merchant Portal
+              </Link>
+              <span>•</span>
+              <span>Secure checkout · 100% genuine seal</span>
             </div>
           </div>
         </div>

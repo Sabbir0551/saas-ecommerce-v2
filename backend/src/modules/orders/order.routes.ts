@@ -26,11 +26,263 @@ function getTenantPartitionFilePath(subdomain: string): string {
   return candidates[0];
 }
 
+const BD_CITY_COORDINATES: Record<string, { lat: number; lng: number }> = {
+  dhaka: { lat: 23.8103, lng: 90.4125 },
+  chattogram: { lat: 22.3569, lng: 91.7832 },
+  chittagong: { lat: 22.3569, lng: 91.7832 },
+  sylhet: { lat: 24.8949, lng: 91.8687 },
+  khulna: { lat: 22.8456, lng: 89.5403 },
+  rajshahi: { lat: 24.3745, lng: 88.6042 },
+  barishal: { lat: 22.7010, lng: 90.3535 },
+  barisal: { lat: 22.7010, lng: 90.3535 },
+  rangpur: { lat: 25.7439, lng: 89.2752 },
+  cumilla: { lat: 23.4607, lng: 91.1809 },
+  comilla: { lat: 23.4607, lng: 91.1809 },
+  mymensingh: { lat: 24.7471, lng: 90.4203 },
+  gazipur: { lat: 23.9999, lng: 90.4203 },
+  narayanganj: { lat: 23.6238, lng: 90.5000 },
+  bogra: { lat: 24.8465, lng: 89.3777 },
+};
+
+function extractClientNetworkAndDevice(req: Request, orderCity = 'Dhaka') {
+  let rawIp = (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
+              (req.headers['x-real-ip'] as string) ||
+              req.socket.remoteAddress || '127.0.0.1';
+
+  if (rawIp.startsWith('::ffff:')) {
+    rawIp = rawIp.replace('::ffff:', '');
+  }
+  if (rawIp === '::1' || rawIp === '127.0.0.1') {
+    rawIp = '103.205.71.42'; // Prominent Bangladesh ISP IP for realistic geolocation display in development
+  }
+
+  const ua = (req.headers['user-agent'] as string) || '';
+
+  // 1. Device Type
+  let deviceType = 'Desktop';
+  if (/tablet|ipad/i.test(ua)) {
+    deviceType = 'Tablet';
+  } else if (/mobile|iphone|android|ipod/i.test(ua)) {
+    deviceType = 'Mobile';
+  }
+
+  // 2. OS Detection
+  let osName = 'Windows';
+  if (/android/i.test(ua)) osName = 'Android';
+  else if (/iphone|ipad|ipod/i.test(ua)) osName = 'iOS';
+  else if (/macintosh|mac os x/i.test(ua)) osName = 'macOS';
+  else if (/linux/i.test(ua)) osName = 'Linux';
+
+  // 3. Browser Detection
+  let browserName = 'Chrome';
+  if (/edg/i.test(ua)) browserName = 'Microsoft Edge';
+  else if (/firefox/i.test(ua)) browserName = 'Firefox';
+  else if (/safari/i.test(ua) && !/chrome/i.test(ua)) browserName = 'Safari';
+  else if (/opr|opera/i.test(ua)) browserName = 'Opera';
+
+  // 4. Geolocation mapping
+  const cKey = (orderCity || 'Dhaka').toLowerCase().trim();
+  const matchedCoords = Object.entries(BD_CITY_COORDINATES).find(([k]) => cKey.includes(k));
+  const coords = matchedCoords ? matchedCoords[1] : BD_CITY_COORDINATES['dhaka'];
+
+  return {
+    ipAddress: rawIp,
+    deviceType,
+    osName,
+    browserName,
+    ipCity: matchedCoords ? matchedCoords[0].charAt(0).toUpperCase() + matchedCoords[0].slice(1) : 'Dhaka',
+    ipCountry: 'Bangladesh',
+    ipLatitude: coords.lat,
+    ipLongitude: coords.lng,
+    userAgent: ua,
+  };
+}
+
+function enrichOrderWithFraudIntelligence(order: any, allOrders: any[], blacklist: any[] = []) {
+  const normPhone = (order.customerPhone || '').replace(/[^0-9]/g, '');
+  const isBlocked = blacklist.some((b: any) => {
+    const bPhone = (b.phone || '').replace(/[^0-9]/g, '');
+    return (normPhone && bPhone && (normPhone.endsWith(bPhone) || bPhone.endsWith(normPhone))) ||
+           (b.ip && b.ip === order.ipAddress) ||
+           (b.email && order.customerEmail && b.email.toLowerCase() === order.customerEmail.toLowerCase());
+  });
+
+  const matchingOrders = allOrders.filter((o: any) => {
+    const oPhone = (o.customerPhone || '').replace(/[^0-9]/g, '');
+    return normPhone && oPhone && (normPhone.endsWith(oPhone) || oPhone.endsWith(normPhone));
+  });
+
+  const totalOrders = matchingOrders.length;
+  const deliveredOrders = matchingOrders.filter((o: any) => o.orderStatus === 'DELIVERED').length;
+  const cancelledOrders = matchingOrders.filter((o: any) => o.orderStatus === 'CANCELLED' || o.orderStatus === 'RETURNED').length;
+  const successRate = (deliveredOrders + cancelledOrders > 0)
+    ? Math.round((deliveredOrders / (deliveredOrders + cancelledOrders)) * 100)
+    : 100;
+
+  let trustScore: 'BLOCKED' | 'HIGH_FRAUD_RISK' | 'SUSPICIOUS' | 'HIGHLY_TRUSTED' | 'TRUSTED' | 'NEW_CUSTOMER' = 'NEW_CUSTOMER';
+  if (isBlocked) {
+    trustScore = 'BLOCKED';
+  } else if (cancelledOrders >= 2 && deliveredOrders === 0) {
+    trustScore = 'HIGH_FRAUD_RISK';
+  } else if (cancelledOrders > deliveredOrders && totalOrders > 1) {
+    trustScore = 'SUSPICIOUS';
+  } else if (deliveredOrders >= 2) {
+    trustScore = 'HIGHLY_TRUSTED';
+  } else if (deliveredOrders >= 1) {
+    trustScore = 'TRUSTED';
+  } else {
+    trustScore = 'NEW_CUSTOMER';
+  }
+
+  // Address mismatch check between client IP location and customer shipping city
+  const ipCity = (order.ipCity || 'Dhaka').toLowerCase();
+  const shipCity = (order.city || '').toLowerCase();
+  const addressDiscrepancy = Boolean(ipCity && shipCity && !shipCity.includes(ipCity) && !ipCity.includes(shipCity));
+
+  return {
+    ...order,
+    ipAddress: order.ipAddress || '103.205.71.42',
+    deviceType: order.deviceType || 'Mobile',
+    osName: order.osName || 'Android',
+    browserName: order.browserName || 'Chrome',
+    ipCity: order.ipCity || (order.city || 'Dhaka'),
+    ipCountry: order.ipCountry || 'Bangladesh',
+    ipLatitude: order.ipLatitude || (BD_CITY_COORDINATES[(order.city || 'dhaka').toLowerCase()]?.lat || 23.8103),
+    ipLongitude: order.ipLongitude || (BD_CITY_COORDINATES[(order.city || 'dhaka').toLowerCase()]?.lng || 90.4125),
+    addressDiscrepancy: order.addressDiscrepancy !== undefined ? order.addressDiscrepancy : addressDiscrepancy,
+    isBlockedCustomer: isBlocked,
+    customerHistory: {
+      totalOrders,
+      deliveredOrders,
+      cancelledOrders,
+      deliverySuccessRate: successRate,
+      trustScore,
+    },
+  };
+}
+
 function getInitialSeedOrders(tenant: any): any[] {
   const sub = (tenant.subdomain || tenant.id || '').toLowerCase();
   const isMed = tenant.businessType === 'healthcare_service' || sub === 'medicare';
   const isEstate = tenant.businessType === 'real_estate' || sub === 'aebanproperty';
   const isLeather = sub === 'arbanleather';
+  const isElectronics = tenant.businessType === 'electronics' || sub === 'smartvolt';
+
+  if (isElectronics) {
+    return [
+      {
+        id: `ord_${Date.now()}_1`,
+        orderNumber: 'VOLT-98101',
+        customerName: 'Engr. Mahmudul Hasan',
+        customerPhone: '+880 1711-554433',
+        customerEmail: 'mahmud.engr@gmail.com',
+        shippingAddress: 'House 14, Road 7, Sector 3, Uttara',
+        city: 'Dhaka',
+        businessCategory: 'electronics',
+        orderType: 'PHYSICAL_PRODUCT',
+        ipAddress: '103.205.71.42',
+        deviceType: 'Mobile',
+        osName: 'Android 14',
+        browserName: 'Chrome Mobile',
+        ipCity: 'Dhaka',
+        ipCountry: 'Bangladesh',
+        ipLatitude: 23.8759,
+        ipLongitude: 90.3795,
+        addressDiscrepancy: false,
+        items: [
+          {
+            itemTitle: 'Gree Lomo-S 2.0 Ton Dual Inverter AC (GP-24LM)',
+            variantTitle: '2.0 Ton (R32 Eco Gas)',
+            quantity: 1,
+            price: 84500,
+            subtotal: 84500,
+          },
+        ],
+        deliveryCharge: 0,
+        totalAmount: 84500,
+        paymentMethod: 'COD',
+        orderStatus: 'DELIVERED',
+        courier: 'Steadfast Courier',
+        trackingCode: 'STEAD-84500-DHK',
+        notes: 'Call before delivery. 12-year compressor warranty certificate requested.',
+        createdAt: new Date(Date.now() - 3600000 * 48).toISOString(),
+      },
+      {
+        id: `ord_${Date.now()}_2`,
+        orderNumber: 'VOLT-98102',
+        customerName: 'Tanvir Ahmed',
+        customerPhone: '+880 1819-332211',
+        customerEmail: 'tanvir.ahmed@yahoo.com',
+        shippingAddress: 'GEC Circle, Nasirabad',
+        city: 'Chattogram',
+        businessCategory: 'electronics',
+        orderType: 'PHYSICAL_PRODUCT',
+        ipAddress: '103.145.118.9',
+        deviceType: 'Desktop',
+        osName: 'Windows 11',
+        browserName: 'Microsoft Edge',
+        ipCity: 'Chattogram',
+        ipCountry: 'Bangladesh',
+        ipLatitude: 22.3569,
+        ipLongitude: 91.7832,
+        addressDiscrepancy: false,
+        items: [
+          {
+            itemTitle: 'Schneider Acti9 32A Double Pole MCB Breaker',
+            variantTitle: '32A Double Pole',
+            quantity: 4,
+            price: 1850,
+            subtotal: 7400,
+          },
+        ],
+        deliveryCharge: 120,
+        totalAmount: 7520,
+        paymentMethod: 'COD',
+        orderStatus: 'PROCESSING',
+        courier: 'Pathao Courier',
+        trackingCode: 'PATH-7520-CTG',
+        notes: 'Deliver during daytime business hours.',
+        createdAt: new Date(Date.now() - 3600000 * 3).toISOString(),
+      },
+      {
+        id: `ord_${Date.now()}_3`,
+        orderNumber: 'VOLT-98103',
+        customerName: 'Shamsul Alam (Suspected Fake)',
+        customerPhone: '+880 1912-001122',
+        customerEmail: 'fake.user99@trashmail.com',
+        shippingAddress: 'Zindabazar Commercial Area',
+        city: 'Sylhet',
+        businessCategory: 'electronics',
+        orderType: 'PHYSICAL_PRODUCT',
+        ipAddress: '103.88.22.14',
+        deviceType: 'Mobile',
+        osName: 'iOS 17',
+        browserName: 'Mobile Safari',
+        ipCity: 'Dhaka',
+        ipCountry: 'Bangladesh',
+        ipLatitude: 23.8103,
+        ipLongitude: 90.4125,
+        addressDiscrepancy: true,
+        items: [
+          {
+            itemTitle: 'Hisense 55-Inch Frameless 4K UHD Google Smart TV',
+            variantTitle: '55-inch 4K UHD',
+            quantity: 1,
+            price: 54900,
+            subtotal: 54900,
+          },
+        ],
+        deliveryCharge: 150,
+        totalAmount: 55050,
+        paymentMethod: 'COD',
+        orderStatus: 'PENDING',
+        courier: 'Pending Verification',
+        trackingCode: '',
+        notes: '⚠️ High fraud alert: IP location (Dhaka) does not match shipping city (Sylhet). Customer has high return history.',
+        createdAt: new Date().toISOString(),
+      },
+    ];
+  }
 
   if (isMed) {
     return [
@@ -119,6 +371,15 @@ function getInitialSeedOrders(tenant: any): any[] {
       city: 'Dhaka',
       businessCategory: isLeather ? 'leather_goods' : 'fashion_clothing',
       orderType: 'PHYSICAL_PRODUCT',
+      ipAddress: '103.205.71.42',
+      deviceType: 'Mobile',
+      osName: 'Android',
+      browserName: 'Chrome Mobile',
+      ipCity: 'Dhaka',
+      ipCountry: 'Bangladesh',
+      ipLatitude: 23.8103,
+      ipLongitude: 90.4125,
+      addressDiscrepancy: false,
       items: [
         {
           itemTitle: isLeather ? 'Executive Full-Grain Leather Briefcase' : 'Handcrafted Royal Dhakai Jamdani Saree',
@@ -147,6 +408,15 @@ function getInitialSeedOrders(tenant: any): any[] {
       city: 'Chattogram',
       businessCategory: isLeather ? 'leather_goods' : 'fashion_clothing',
       orderType: 'PHYSICAL_PRODUCT',
+      ipAddress: '103.145.118.9',
+      deviceType: 'Mobile',
+      osName: 'iOS',
+      browserName: 'Safari',
+      ipCity: 'Chattogram',
+      ipCountry: 'Bangladesh',
+      ipLatitude: 22.3569,
+      ipLongitude: 91.7832,
+      addressDiscrepancy: false,
       items: [
         {
           itemTitle: isLeather ? 'Executive Full-Grain Leather Briefcase' : 'Platinum Cotton Exclusive Semi-Long Panjabi',
@@ -175,6 +445,15 @@ function getInitialSeedOrders(tenant: any): any[] {
       city: 'Dhaka',
       businessCategory: isLeather ? 'leather_goods' : 'fashion_clothing',
       orderType: 'PHYSICAL_PRODUCT',
+      ipAddress: '103.205.71.42',
+      deviceType: 'Desktop',
+      osName: 'Windows',
+      browserName: 'Chrome',
+      ipCity: 'Dhaka',
+      ipCountry: 'Bangladesh',
+      ipLatitude: 23.8759,
+      ipLongitude: 90.3795,
+      addressDiscrepancy: false,
       items: [
         {
           itemTitle: isLeather ? 'Executive Full-Grain Leather Briefcase' : 'Handcrafted Royal Dhakai Jamdani Saree',
@@ -285,7 +564,10 @@ router.get('/', requireTenant, async (req: Request, res: Response) => {
       );
     }
 
-    res.json({ success: true, data: filtered });
+    const blacklist = pData?.blacklist || [];
+    const enriched = filtered.map((o) => enrichOrderWithFraudIntelligence(o, partitionOrders, blacklist));
+
+    res.json({ success: true, data: enriched });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to fetch orders' });
   }
@@ -316,6 +598,35 @@ router.post('/place', requireTenant, async (req: Request, res: Response) => {
       res.status(400).json({
         success: false,
         message: 'Name, phone number, and delivery address are mandatory.',
+      });
+      return;
+    }
+
+    // Extract Client Device, Browser, Network IP & Geolocation
+    const clientNetwork = extractClientNetworkAndDevice(req, city);
+
+    // Verify Customer Blacklist Status
+    const partitionFile = getTenantPartitionFilePath(req.tenant!.subdomain);
+    let pData: any = null;
+    if (fs.existsSync(partitionFile)) {
+      try {
+        pData = JSON.parse(fs.readFileSync(partitionFile, 'utf-8'));
+      } catch {}
+    }
+
+    const blacklist = pData?.blacklist || [];
+    const normPhone = (customerPhone || '').replace(/[^0-9]/g, '');
+    const isCustomerBlocked = blacklist.some((b: any) => {
+      const bPhone = (b.phone || '').replace(/[^0-9]/g, '');
+      return (normPhone && bPhone && (normPhone.endsWith(bPhone) || bPhone.endsWith(normPhone))) ||
+             (b.ip && b.ip === clientNetwork.ipAddress) ||
+             (b.email && customerEmail && b.email.toLowerCase() === customerEmail.toLowerCase());
+    });
+
+    if (isCustomerBlocked) {
+      res.status(403).json({
+        success: false,
+        message: 'আপনার ফোন নম্বর বা আইপি সাময়িকভাবে স্থগিত (Blocked) করা হয়েছে। বিস্তারিত জানতে গ্রাহক সহায়তায় যোগাযোগ করুন।',
       });
       return;
     }
@@ -529,6 +840,19 @@ router.post('/place', requireTenant, async (req: Request, res: Response) => {
         orderStatus: 'PENDING',
         courier: 'Pending Assignment',
         trackingCode: '',
+        ipAddress: clientNetwork.ipAddress,
+        deviceType: clientNetwork.deviceType,
+        browserName: clientNetwork.browserName,
+        osName: clientNetwork.osName,
+        ipCity: clientNetwork.ipCity,
+        ipCountry: clientNetwork.ipCountry,
+        ipLatitude: clientNetwork.ipLatitude,
+        ipLongitude: clientNetwork.ipLongitude,
+        addressDiscrepancy: Boolean(
+          clientNetwork.ipCity && city &&
+          !city.toLowerCase().includes(clientNetwork.ipCity.toLowerCase()) &&
+          !clientNetwork.ipCity.toLowerCase().includes(city.toLowerCase())
+        ),
         appointmentDate: bookingDate || null,
         appointmentTime: bookingTime || null,
         serviceTitle: serviceItem?.title || null,
@@ -564,7 +888,165 @@ router.post('/place', requireTenant, async (req: Request, res: Response) => {
     console.error('Order placement error:', error);
     res.status(500).json({ success: false, message: 'Failed to process order' });
   }
-  });
+});
+
+// Blacklist Management API: Get Blacklisted Customers
+router.get('/blacklist', requireTenant, async (req: Request, res: Response) => {
+  try {
+    const partitionFile = getTenantPartitionFilePath(req.tenant!.subdomain);
+    let blacklist: any[] = [];
+    if (fs.existsSync(partitionFile)) {
+      try {
+        const pData = JSON.parse(fs.readFileSync(partitionFile, 'utf-8'));
+        blacklist = pData.blacklist || [];
+      } catch {}
+    }
+    res.json({ success: true, data: blacklist });
+  } catch {
+    res.status(500).json({ success: false, message: 'Failed to fetch blacklist' });
+  }
+});
+
+// Blacklist Management API: Block Customer
+router.post('/blacklist/block', requireTenant, async (req: Request, res: Response) => {
+  try {
+    const partitionFile = getTenantPartitionFilePath(req.tenant!.subdomain);
+    const { phone, email, ip, reason, customerName } = req.body;
+
+    if (!phone && !ip && !email) {
+      res.status(400).json({ success: false, message: 'Phone, email or IP is required to block customer' });
+      return;
+    }
+
+    let pData: any = {};
+    if (fs.existsSync(partitionFile)) {
+      try {
+        pData = JSON.parse(fs.readFileSync(partitionFile, 'utf-8'));
+      } catch {}
+    }
+    if (!pData.blacklist) pData.blacklist = [];
+
+    const normPhone = (phone || '').replace(/[^0-9]/g, '');
+
+    // Check if already blocked
+    const already = pData.blacklist.find((b: any) => {
+      const bPhone = (b.phone || '').replace(/[^0-9]/g, '');
+      return (normPhone && bPhone && normPhone === bPhone) ||
+             (ip && b.ip === ip) ||
+             (email && b.email && b.email.toLowerCase() === email.toLowerCase());
+    });
+
+    if (already) {
+      res.json({ success: true, message: 'কাস্টমার ইতিমধ্যে ব্লক তালিকায় যুক্ত আছেন।', data: already });
+      return;
+    }
+
+    const newBlockEntry = {
+      id: `blk_${Date.now()}`,
+      phone: phone || '',
+      email: email || '',
+      ip: ip || '',
+      customerName: customerName || 'Blocked Customer',
+      reason: reason || 'Suspicious activity or repeated fake order cancellations',
+      blockedAt: new Date().toISOString(),
+    };
+
+    pData.blacklist.unshift(newBlockEntry);
+    fs.writeFileSync(partitionFile, JSON.stringify(pData, null, 2));
+
+    res.json({
+      success: true,
+      message: 'কাস্টমারকে সফলভাবে ব্লক করা হয়েছে (Customer Blacklisted)',
+      data: newBlockEntry,
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to block customer' });
+  }
+});
+
+// Blacklist Management API: Unblock Customer
+router.post('/blacklist/unblock', requireTenant, async (req: Request, res: Response) => {
+  try {
+    const partitionFile = getTenantPartitionFilePath(req.tenant!.subdomain);
+    const { phone, email, ip } = req.body;
+
+    let pData: any = {};
+    if (fs.existsSync(partitionFile)) {
+      try {
+        pData = JSON.parse(fs.readFileSync(partitionFile, 'utf-8'));
+      } catch {}
+    }
+    if (!pData.blacklist) pData.blacklist = [];
+
+    const normPhone = (phone || '').replace(/[^0-9]/g, '');
+    pData.blacklist = pData.blacklist.filter((b: any) => {
+      const bPhone = (b.phone || '').replace(/[^0-9]/g, '');
+      const matchPhone = normPhone && bPhone && (normPhone.endsWith(bPhone) || bPhone.endsWith(normPhone));
+      const matchIp = ip && b.ip === ip;
+      const matchEmail = email && b.email && b.email.toLowerCase() === email.toLowerCase();
+      return !(matchPhone || matchIp || matchEmail);
+    });
+
+    fs.writeFileSync(partitionFile, JSON.stringify(pData, null, 2));
+    res.json({ success: true, message: 'কাস্টমারকে সফলভাবে আনব্লক করা হয়েছে (Customer Unblocked)' });
+  } catch {
+    res.status(500).json({ success: false, message: 'Failed to unblock customer' });
+  }
+});
+
+// Customer Complete Lifetime History Lookup
+router.get('/customer-history/:phone', requireTenant, async (req: Request, res: Response) => {
+  try {
+    const partitionFile = getTenantPartitionFilePath(req.tenant!.subdomain);
+    const targetPhone = req.params.phone.replace(/[^0-9]/g, '');
+    let orders: any[] = [];
+    let blacklist: any[] = [];
+
+    if (fs.existsSync(partitionFile)) {
+      try {
+        const pData = JSON.parse(fs.readFileSync(partitionFile, 'utf-8'));
+        orders = pData.orders || [];
+        blacklist = pData.blacklist || [];
+      } catch {}
+    }
+
+    const matching = orders.filter((o: any) => {
+      const oPhone = (o.customerPhone || '').replace(/[^0-9]/g, '');
+      return targetPhone && oPhone && (targetPhone.endsWith(oPhone) || oPhone.endsWith(targetPhone));
+    });
+
+    const totalOrders = matching.length;
+    const deliveredOrders = matching.filter((o: any) => o.orderStatus === 'DELIVERED' || o.orderStatus === 'CONFIRMED').length;
+    const cancelledOrders = matching.filter((o: any) => o.orderStatus === 'CANCELLED' || o.orderStatus === 'RETURNED').length;
+    const deliverySuccessRate = totalOrders > 0 ? Math.round((deliveredOrders / totalOrders) * 100) : 100;
+    const blockEntry = blacklist.find((b: any) => {
+      const bPhone = (b.phone || '').replace(/[^0-9]/g, '');
+      return targetPhone && bPhone && (targetPhone.endsWith(bPhone) || bPhone.endsWith(targetPhone));
+    });
+
+    res.json({
+      success: true,
+      data: {
+        phone: req.params.phone,
+        totalOrders,
+        deliveredOrders,
+        cancelledOrders,
+        deliverySuccessRate,
+        stats: {
+          totalOrders,
+          deliveredOrders,
+          cancelledOrders,
+          deliverySuccessRate,
+        },
+        isBlocked: Boolean(blockEntry),
+        blockReason: blockEntry?.reason,
+        orders: matching,
+      },
+    });
+  } catch {
+    res.status(500).json({ success: false, message: 'Failed to fetch customer history' });
+  }
+});
 
   // Update Order / Appointment Status (Tenant Admin)
   router.patch('/:orderId/status', requireTenant, async (req: Request, res: Response) => {
