@@ -1,0 +1,454 @@
+const fs = require('fs');
+const path = require('path');
+const { execSync } = require('child_process');
+
+const htmlContent = `<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <title>দৈনিক কাজের অগ্রগতি রিপোর্ট - ২৩ অক্টোবর ২০২৬</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap');
+
+    @page {
+      size: A4;
+      margin: 14mm 14mm 14mm 14mm;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Hind Siliguri', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: #1e293b;
+      background: #ffffff;
+      line-height: 1.55;
+      font-size: 13px;
+    }
+
+    .header {
+      border-bottom: 2px solid #0f172a;
+      padding-bottom: 12px;
+      margin-bottom: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .brand-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.5px;
+      text-transform: uppercase;
+    }
+
+    .brand-subtitle {
+      font-size: 12px;
+      color: #475569;
+      margin-top: 3px;
+      font-weight: 600;
+    }
+
+    .meta-box {
+      text-align: right;
+      font-size: 11px;
+      color: #64748b;
+    }
+
+    .meta-box strong {
+      color: #0f172a;
+    }
+
+    .badge-doc {
+      display: inline-block;
+      background: #0f172a;
+      color: #ffffff;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    h2 {
+      font-size: 15px;
+      font-weight: 700;
+      color: #0f172a;
+      border-left: 4px solid #4f46e5;
+      padding-left: 10px;
+      margin-top: 18px;
+      margin-bottom: 10px;
+    }
+
+    p {
+      margin-bottom: 8px;
+      color: #334155;
+    }
+
+    .summary-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 14px;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .stat-pill {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      padding: 10px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .stat-pill .num {
+      font-size: 18px;
+      font-weight: 800;
+      color: #4f46e5;
+      display: block;
+    }
+
+    .stat-pill .label {
+      font-size: 10.5px;
+      color: #64748b;
+      font-weight: 600;
+    }
+
+    .feature-box {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+      page-break-inside: avoid;
+    }
+
+    .feature-box h3 {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #1e1b4b;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .feature-box ul {
+      padding-left: 18px;
+      margin-top: 4px;
+    }
+
+    .feature-box li {
+      margin-bottom: 4px;
+      color: #334155;
+    }
+
+    .tag {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+      margin-right: 4px;
+    }
+
+    .tag-blue { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+    .tag-green { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+    .tag-red { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+    .tag-purple { background: #faf5ff; color: #7e22ce; border: 1px solid #e9d5ff; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+      margin-bottom: 12px;
+      font-size: 11.5px;
+      page-break-inside: avoid;
+    }
+
+    th, td {
+      border: 1px solid #e2e8f0;
+      padding: 7px 10px;
+      text-align: left;
+    }
+
+    th {
+      background: #f1f5f9;
+      color: #0f172a;
+      font-weight: 700;
+    }
+
+    tr:nth-child(even) {
+      background: #f8fafc;
+    }
+
+    .alert-banner {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 12px;
+      color: #92400e;
+      margin: 10px 0;
+      page-break-inside: avoid;
+    }
+
+    .alert-banner strong {
+      color: #78350f;
+    }
+
+    .code-pill {
+      font-family: monospace;
+      font-size: 11px;
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      padding: 1px 5px;
+      border-radius: 4px;
+      color: #0f172a;
+    }
+
+    .footer {
+      border-top: 1px solid #e2e8f0;
+      padding-top: 10px;
+      margin-top: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10.5px;
+      color: #94a3b8;
+    }
+
+    .page-break {
+      page-break-before: always;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div>
+      <div class="brand-title">SaaS E-Commerce Engine v2.0</div>
+      <div class="brand-subtitle">দৈনিক কাজের অগ্রগতি ও বাস্তবায়ন রিপোর্ট (Daily Work Progress Report)</div>
+    </div>
+    <div class="meta-box">
+      <div class="badge-doc">Official Technical Report</div>
+      <div><strong>তারিখ:</strong> ২৩ অক্টোবর ২০২৬</div>
+      <div><strong>প্ল্যাটফর্ম:</strong> Multi-Tenant SaaS E-commerce</div>
+      <div><strong>রিপোজিটরি:</strong> Sabbir0551/saas-ecommerce-v2</div>
+    </div>
+  </div>
+
+  <!-- EXECUTIVE SUMMARY -->
+  <div class="summary-card">
+    <h3 style="font-size: 14px; font-weight: 700; color: #0f172a; margin-bottom: 6px;">
+      📌 আজকের মূল অর্জনের সারসংক্ষেপ (Executive Summary)
+    </h3>
+    <p style="font-size: 12.5px; color: #334155;">
+      আজকের ওয়ার্কিং সেশনে ইউজারের রিকোয়ারমেন্ট অনুযায়ী ই-কমার্স প্ল্যাটফর্মের প্রোডাক্ট ব্রাউজিং এক্সপেরিয়েন্সকে আধুনিকায়ন করা হয়েছে এবং প্রতারক ও ভুয়া কাস্টমার অর্ডার সনাক্তকরণ ও প্রতিরোধে একটি পূর্ণাঙ্গ <strong>AI-Ready Fraud Prevention & Geolocation System</strong> সফলভাবে তৈরি, টেস্ট ও গিটহাবে পুশ করা হয়েছে।
+    </p>
+
+    <div class="summary-grid">
+      <div class="stat-pill">
+        <span class="num">১০০%</span>
+        <span class="label">ফুল পেজ প্রোডাক্ট ভিউ</span>
+      </div>
+      <div class="stat-pill">
+        <span class="num">রিয়েল-টাইম</span>
+        <span class="label">IP ও গুগল ম্যাপ পিন</span>
+      </div>
+      <div class="stat-pill">
+        <span class="num">৪-টায়ার</span>
+        <span class="label">কাস্টমার ট্রাস্ট স্কোরিং</span>
+      </div>
+      <div class="stat-pill">
+        <span class="num">HTTP 403</span>
+        <span class="label">অটোমেটিক ব্লকলিস্ট প্রোটেকশন</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 1 -->
+  <h2>১. ডেডিকেটেড ফুল-পেজ প্রোডাক্ট ভিউ (Dedicated Product Page Overhaul)</h2>
+  <div class="feature-box">
+    <h3>
+      <span>🛍️</span>
+      <span>পপআপ মোডাল অপসারিত করে ফুল-পেজ ভিউ বাস্তবায়ন</span>
+    </h3>
+    <p>পূর্বে প্রোডাক্টে ক্লিক করলে ছোট পপআপ মোডাল আসত, যা ইউজার ফ্রেন্ডলি ছিল না। এটি সম্পূর্ণ অপসারণ করে আধুনিক আন্তর্জাতিক মানের ডেডিকেটেড পেজ তৈরি করা হয়েছে:</p>
+    <ul>
+      <li><strong>ডেডিকেটেড রাউট:</strong> <span class="code-pill">/products/[slug]?tenant=smartvolt</span></li>
+      <li><strong>বামে মূল প্রোডাক্ট কলাম:</strong> হাই-রেজ্যুলেশন ইমেজ গ্যালারি, কভার ব্যাজ, ভেরিফাইড কাস্টমার রেটিং (৪.৯ ★), ডিসকাউন্ট % হিসাব, ০% ইএমআই মান্থলি পেমেন্ট সিমুলেটর, লাইভ ইনভেন্টরি স্টক স্ট্যাটাস, ডাইনামিক স্পেসিফিকেশন টেবিল, এবং এক্সপ্রেস চেকআউট অ্যাকশন বাটন।</li>
+      <li><strong>ডানপাশে সম্পর্কিত প্রোডাক্ট (Related Products Sidebar):</strong> একই ক্যাটাগরির সম্পর্কিত প্রোডাক্টের থাম্বনেইল, দাম, ছাড় এবং সরাসরি লিঙ্কযুক্ত স্টিকি সাইডবার। সাথে সার্বক্ষণিক হেল্পলাইন কার্ড।</li>
+      <li><strong>নিচে স্টোরের আরও পণ্য (Store Recommendations Grid):</strong> পেজের নিচে রেসপনসিভ ৪-কলাম গ্রিডে স্টোরের অন্যান্য জনপ্রিয় প্রোডাক্টস প্রদর্শিত হয়।</li>
+    </ul>
+  </div>
+
+  <!-- SECTION 2 -->
+  <h2>২. ভুয়া কাস্টমার সনাক্তকরণ ও লাইফটাইম হিস্ট্রি (Fake Customer Intelligence)</h2>
+  <div class="feature-box">
+    <h3>
+      <span>🛡️</span>
+      <span>কাস্টমার লাইফটাইম অর্ডার রেকর্ড ও ট্রাস্ট স্কোরিং</span>
+    </h3>
+    <p>অ্যাডমিন প্যানেলে যেকোনো অর্ডার আসলে ব্যাকএন্ড সিস্টেম স্বয়ংক্রিয়ভাবে উক্ত কাস্টমারের মোবাইল নম্বর দিয়ে তার পূর্ববর্তী সকল অর্ডারের বিশ্লেষণ সম্পন্ন করে:</p>
+    <ul>
+      <li><strong>লাইফটাইম মেট্রিক্স:</strong> মোট অর্ডার সংখ্যা, সফল ডেলিভারি সংখ্যা, কুরিয়ার থেকে ফিরিয়ে দেওয়া/বাতিল অর্ডার এবং ডেলিভারি সফলতার হার (%) তাৎক্ষণিক হিসাব।</li>
+      <li><strong>স্মার্ট ট্রাস্ট ব্যাজ (Trust Score Badges):</strong>
+        <div style="margin-top: 5px;">
+          <span class="tag tag-green">💎 অত্যন্ত বিশ্বস্ত (৮০%+)</span>
+          <span class="tag tag-blue">✓ বিশ্বস্ত (৫০-৭৯%)</span>
+          <span class="tag tag-purple">✨ নতুন কাস্টমার</span>
+          <span class="tag tag-red">⚠️ সন্দেহজনক কাস্টমার (<৫০%)</span>
+          <span class="tag tag-red">🚨 ভুয়া অর্ডার ঝুঁকি</span>
+          <span class="tag tag-red">🚫 ব্লক করা কাস্টমার</span>
+        </div>
+      </li>
+      <li><strong>[👁️ হিস্ট্রি] মোডাল:</strong> অর্ডারের পাশে ‘হিস্ট্রি’ বাটনে ক্লিক করলে কাস্টমারের বিগত সব অর্ডারের তারিখ, অর্ডারের পণ্য, মোট টাকা এবং ডেলিভারি স্ট্যাটাস টেবিল আকারে প্রদর্শিত হয়।</li>
+    </ul>
+  </div>
+
+  <!-- PAGE BREAK FOR CLEAN PRINTING -->
+  <div class="page-break"></div>
+
+  <!-- HEADER PAGE 2 -->
+  <div class="header">
+    <div>
+      <div class="brand-title" style="font-size: 16px;">SaaS E-Commerce Engine v2.0</div>
+      <div class="brand-subtitle">দৈনিক কাজের অগ্রগতি ও বাস্তবায়ন রিপোর্ট (চলমান...)</div>
+    </div>
+    <div class="meta-box">
+      <div><strong>তারিখ:</strong> ২৩ অক্টোবর ২০২৬ | <strong>পৃষ্ঠা:</strong> ২</div>
+    </div>
+  </div>
+
+  <!-- SECTION 3 -->
+  <h2>৩. ডিভাইস, ব্রাউজার ও ক্লায়েন্ট IP Geolocation গুগল ম্যাপ (Real-Time Location)</h2>
+  <div class="feature-box">
+    <h3>
+      <span>📍</span>
+      <span>অটোমেটিক ডিভাইস ডিটেকশন ও গুগল ম্যাপস পিন</span>
+    </h3>
+    <p>চেকআউট ফর্ম সাবমিটের সাথে সাথে ক্লায়েন্টের নেটওয়ার্ক ও ডিভাইস ডেটা ব্যাকএন্ডে স্বয়ংক্রিয়ভাবে প্রসেস করা হয়:</p>
+    <ul>
+      <li><strong>ডিভাইস ও ব্রাউজার ট্র্যাকিং:</strong> কাস্টমার কোন ডিভাইস (মোবাইল / ডেস্কটপ / ট্যাবলেট), কোন ওএস (Android / iOS / Windows / macOS) এবং কোন ব্রাউজার (Chrome / Firefox / Safari) থেকে অর্ডার করেছেন তা সুনির্দিষ্টভাবে রেকর্ড হয়।</li>
+      <li><strong>ক্লায়েন্ট IP ও শহর রেজোলিউশন:</strong> অর্ডারের সময় ক্লায়েন্টের আসল IP অ্যাড্রেস এবং বাংলাদেশের বিভাগ/শহর ভিত্তিক কোঅর্ডিনেট (Dhaka, Chittagong, Sylhet, Khulna, etc.) নির্ধারণ করা হয়।</li>
+      <li><strong>[🗺️ গুগল ম্যাপে IP লোকেশন পিন]:</strong> অ্যাডমিন ড্যাশবোর্ড থেকে বাটনে ক্লিক করলেই গুগল ম্যাপের মাধ্যমে সঠিক অক্ষাংশ ও দ্রাঘিমাংশে লাইভ লোকেশন পিন প্রদর্শিত হয়।</li>
+      <li><strong>লোকেশন অমিল সতর্কবার্তা (Address Discrepancy Warning):</strong> কাস্টমারের IP লোকেশন যদি এক শহরের হয় কিন্তু পার্সেল পাঠানোর ঠিকানা অন্য শহরের হয়, তবে সিস্টেমে তাৎক্ষণিক লাল সতর্কবার্তা ফ্ল্যাশ করে।</li>
+    </ul>
+  </div>
+
+  <!-- SECTION 4 -->
+  <h2>৪. কাস্টমার ব্লকলিস্ট ও অর্ডার রেস্ট্রিকশন ইঞ্জিন (Blacklisting Engine)</h2>
+  <div class="feature-box">
+    <h3>
+      <span>🚫</span>
+      <span>এক ক্লিকে ভুয়া কাস্টমার ব্লক ও HTTP 403 প্রোটেকশন</span>
+    </h3>
+    <p>প্রতারক গ্রাহক এবং বারবার পার্সেল বাতিল করা ব্যক্তিদের বিরুদ্ধে কার্যকর প্রতিরোধ ব্যবস্থা:</p>
+    <ul>
+      <li><strong>এক ক্লিকে ব্লক:</strong> অ্যাডমিন ড্যাশবোর্ডে যেকোনো অর্ডারের পাশে <span class="code-pill">[🚫 কাস্টমার ব্লক]</span> বাটনে ক্লিক করে কারণ নির্বাচন করলেই গ্রাহক কালো তালিকাভুক্ত হয়ে যায়।</li>
+      <li><strong>ইনস্ট্যান্ট চেকআউট ব্লকিং (HTTP 403):</strong> ব্লক করা ফোন নম্বর, ইমেইল বা IP অ্যাড্রেস ব্যবহার করে প্ল্যাটফর্মের যেকোনো স্টোরে অর্ডার করার চেষ্টা করলে সিস্টেম তাৎক্ষণিক অর্ডার বাতিল করে বাংলায় নোটিশ দেখায়:
+        <div class="alert-banner">
+          <strong>বাংলায় গ্রাহক নোটিশ:</strong> "আপনার ফোন নম্বর বা আইপি সাময়িকভাবে স্থগিত (Blocked) করা হয়েছে। বিস্তারিত জানতে গ্রাহক সহায়তায় যোগাযোগ করুন।"
+        </div>
+      </li>
+      <li><strong>সহজ আনব্লক অপশন:</strong> যেকোনো সময় অ্যাডমিন চাইলে এক ক্লিকে কাস্টমারকে ব্লকলিস্ট থেকে মুক্ত করতে পারবেন।</li>
+    </ul>
+  </div>
+
+  <!-- SECTION 5 -->
+  <h2>৫. পরিবর্তিত ফাইল ও গিটহাব পুশ লগ (GitHub Commit Log)</h2>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 25%;">ফাইল পাথ</th>
+        <th style="width: 20%;">মডিউল</th>
+        <th>মূল পরিবর্তন ও অবদান</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="code-pill">frontend/src/app/(storefront)/products/[slug]/page.tsx</span></td>
+        <td>Storefront Product</td>
+        <td>ফুল পেজ প্রোডাক্ট ভিউ, গ্যালারি, স্পেসিফিকেশন, সম্পর্কিত প্রোডাক্ট সাইডবার ও বটম গ্রিড তৈরি</td>
+      </tr>
+      <tr>
+        <td><span class="code-pill">frontend/src/components/ElectronicsStorefront.tsx</span></td>
+        <td>Storefront Engine</td>
+        <td>প্রোডাক্ট পপআপ মোডাল অপসারণ এবং ডেডিকেটেড পেজ লিঙ্ক স্থাপন</td>
+      </tr>
+      <tr>
+        <td><span class="code-pill">backend/src/modules/orders/order.routes.ts</span></td>
+        <td>Backend Orders</td>
+        <td>ডিভাইস ডিটেকশন, IP জিওলোকেশন, ব্লকলিস্ট ভ্যালিডেশন (403), এবং লাইফটাইম হিস্ট্রি এন্ডপয়েন্ট</td>
+      </tr>
+      <tr>
+        <td><span class="code-pill">frontend/src/app/(admin)/admin/dashboard/page.tsx</span></td>
+        <td>Admin Dashboard</td>
+        <td>ফ্রড ফিল্টার ট্যাব, ট্রাস্ট ব্যাজ, ডিভাইস ও IP কার্ড, গুগল ম্যাপস মোডাল ও ব্লকলিস্ট মোডাল</td>
+      </tr>
+      <tr>
+        <td><span class="code-pill">frontend/src/lib/api.ts</span></td>
+        <td>API Client</td>
+        <td>ব্লকলিস্ট ও কাস্টমার হিস্ট্রি সংক্রান্ত এপিআই মেথড সংযোজন</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- GITHUB REPO BADGE -->
+  <div style="background: #0f172a; color: #ffffff; padding: 12px 16px; border-radius: 8px; margin-top: 14px; display: flex; justify-content: space-between; align-items: center; font-size: 11.5px;">
+    <div>
+      <strong>গিটহাব কমিট সম্পন্ন:</strong> <span style="font-family: monospace; color: #38bdf8;">ed7b0d1</span> • ব্রাঞ্চ: <span style="font-family: monospace; color: #4ade80;">main</span>
+      <div style="color: #94a3b8; font-size: 10.5px; margin-top: 2px;">https://github.com/Sabbir0551/saas-ecommerce-v2.git</div>
+    </div>
+    <div style="text-align: right; font-weight: 700; color: #38bdf8;">
+      STATUS: DEPLOYED & TESTED ✓
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div>স্বত্বাধিকার © ২০২৬ SaaS E-Commerce Engine. সর্বস্বত্ব সংরক্ষিত।</div>
+    <div>তৈরি করেছেন: Antigravity AI Pair Programmer</div>
+  </div>
+
+</body>
+</html>
+`;
+
+const htmlPath = path.join(__dirname, 'daily_work_report.html');
+const pdfPath = path.join(__dirname, 'daily_work_report_2026-10-23.pdf');
+const brainPdfPath = 'C:/Users/user/.gemini/antigravity-ide/brain/fb711ded-fece-4131-8231-4c5fd3462780/daily_work_report_2026-10-23.pdf';
+
+fs.writeFileSync(htmlPath, htmlContent, 'utf-8');
+console.log('HTML generated at:', htmlPath);
+
+const edgeExecutable = 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe';
+
+try {
+  const fileUrl = 'file:///' + htmlPath.replace(/\\/g, '/');
+  const cmd = `"${edgeExecutable}" --headless --disable-gpu --run-all-compositor-stages-before-draw --no-pdf-header-footer --print-to-pdf="${pdfPath}" "${fileUrl}"`;
+  console.log('Running Edge PDF generation with clean margins...');
+  execSync(cmd, { stdio: 'inherit' });
+  console.log('PDF successfully generated at:', pdfPath);
+
+  // Copy to brain directory for artifact access
+  fs.copyFileSync(pdfPath, brainPdfPath);
+  console.log('PDF copied to brain artifact directory at:', brainPdfPath);
+} catch (err) {
+  console.error('Failed to generate PDF with Edge:', err);
+}

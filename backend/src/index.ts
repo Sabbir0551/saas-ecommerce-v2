@@ -14,6 +14,7 @@ import complianceRoutes from './modules/compliance/compliance.routes.js';
 import analyticsRoutes from './modules/analytics/analytics.routes.js';
 import superAdminRoutes from './modules/super-admin/super-admin.routes.js';
 import inventoryRoutes from './modules/inventory/inventory.routes.js';
+import authRoutes from './modules/auth/auth.routes.js';
 
 dotenv.config();
 
@@ -44,6 +45,7 @@ app.use('/api/compliance', complianceRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/super-admin', superAdminRoutes);
 app.use('/api/inventory', inventoryRoutes);
+app.use('/api/auth', authRoutes);
 
 // Welcome & API Status endpoint
 app.get('/', (req, res) => {

@@ -5,6 +5,23 @@ export async function fetchWithTenant(endpoint: string, options: RequestInit = {
   headers.set('Content-Type', 'application/json');
   headers.set('x-tenant-slug', tenantSlug);
 
+  // Automatically attach Authorization token if user is logged in
+  if (typeof window !== 'undefined' && !headers.has('Authorization')) {
+    try {
+      const storedAuth = 
+        localStorage.getItem(`admin_auth_${tenantSlug}`) || 
+        localStorage.getItem('admin_auth') || 
+        localStorage.getItem('superadmin_auth');
+      if (storedAuth) {
+        const parsed = JSON.parse(storedAuth);
+        const token = parsed?.token || parsed?.data?.token;
+        if (token) {
+          headers.set('Authorization', `Bearer ${token}`);
+        }
+      }
+    } catch {}
+  }
+
   try {
     const res = await fetch(`${API_BASE_URL}${endpoint}`, {
       ...options,
@@ -61,6 +78,15 @@ export const api = {
   getSuperAdminOverview: () => fetchWithTenant('/super-admin/overview'),
   superAdminLogin: (data: { email: string; password: string }) => 
     fetchWithTenant('/super-admin/login', { method: 'POST', body: JSON.stringify(data) }),
+  // Unified Admin & Merchant Auth
+  login: (data: { email: string; password: string; tenantSlug?: string; role?: string }) => 
+    fetchWithTenant('/auth/login', { method: 'POST', body: JSON.stringify(data) }, data.tenantSlug || 'fashion'),
+  getMe: (slug = 'fashion') => 
+    fetchWithTenant('/auth/me', {}, slug),
+  changePassword: (data: { currentPassword?: string; newPassword: string }, slug = 'fashion') => 
+    fetchWithTenant('/auth/change-password', { method: 'POST', body: JSON.stringify(data) }, slug),
+  logout: (slug = 'fashion') => 
+    fetchWithTenant('/auth/logout', { method: 'POST' }, slug),
   createTenant: (data: any) => fetchWithTenant('/super-admin/tenants/create', { method: 'POST', body: JSON.stringify(data) }),
   toggleTenantStatus: (tenantId: string, isActive: boolean) => 
     fetchWithTenant(`/super-admin/tenants/${tenantId}/status`, { method: 'PATCH', body: JSON.stringify({ isActive }) }),

@@ -44,6 +44,24 @@ import {
   Filter,
 } from 'lucide-react';
 
+function getCategoryIcon(name: string = '') {
+  const n = name.toLowerCase();
+  if (n.includes('ac') || n.includes('air condition')) return Wind;
+  if (n.includes('fridge') || n.includes('refrigerat')) return Refrigerator;
+  if (n.includes('tv') || n.includes('audio') || n.includes('sound')) return Tv;
+  if (n.includes('wash') || n.includes('laundry')) return WashingMachine;
+  if (n.includes('kitchen') || n.includes('cook') || n.includes('microwave') || n.includes('oven')) return Flame;
+  if (n.includes('ev') || n.includes('vehicle') || n.includes('scooter') || n.includes('bike')) return Bike;
+  if (n.includes('fan')) return Fan;
+  if (n.includes('personal') || n.includes('care') || n.includes('trimmer') || n.includes('razor')) return Scissors;
+  if (n.includes('light') || n.includes('lamp') || n.includes('bulb')) return Lightbulb;
+  if (n.includes('laptop') || n.includes('computer')) return Laptop;
+  if (n.includes('smart') || n.includes('automation') || n.includes('bell')) return Bell;
+  if (n.includes('cable') || n.includes('wire') || n.includes('breaker') || n.includes('panel') || n.includes('switch')) return Sliders;
+  if (n.includes('power') || n.includes('ips') || n.includes('battery')) return BatteryCharging;
+  return Zap;
+}
+
 interface ElectronicsStorefrontProps {
   tenant: any;
   tenantSlug: string;
@@ -451,34 +469,112 @@ export function ElectronicsStorefront({
     },
   ];
 
-  // Merge real items from backend with UI display metadata
-  const liveProducts = useMemo(() => {
-    return defaultProducts.map((defProd) => {
-      const realItem = items.find(
-        (i) => i.id === defProd.id || i.slug === defProd.id || i.title === defProd.title
-      );
-      if (realItem) {
+  // Dynamic categories derived from backend or fallback
+  const liveCategories = useMemo(() => {
+    if (categories && Array.isArray(categories) && categories.length > 0) {
+      return categories.map((cat: any) => {
+        const count = items.filter(
+          (it) => it.categoryId === cat.id || it.category?.slug === cat.slug || it.category?.id === cat.id || it.category?.name?.toLowerCase() === cat.name?.toLowerCase()
+        ).length;
         return {
-          ...defProd,
-          id: realItem.id,
-          title: realItem.title,
-          price: Number(realItem.price || defProd.price),
-          comparePrice: Number(realItem.comparePrice || defProd.comparePrice),
-          stockQuantity: Number(realItem.stockQuantity ?? defProd.stockQuantity),
-          sku: realItem.sku || defProd.sku,
-          brand: realItem.brand?.name || defProd.brand,
-          category: realItem.category?.name || defProd.category,
-          shortDescription: realItem.shortDescription,
-          description: realItem.description,
-          images: realItem.images || [],
+          id: cat.slug || cat.id,
+          rawId: cat.id,
+          name: cat.name,
+          sub: cat.promoSlogan || `${count} products in catalog`,
+          count: `${count} ${count === 1 ? 'product' : 'products'}`,
+          matchKeys: [cat.slug, cat.name.toLowerCase()],
+          icon: getCategoryIcon(cat.name),
         };
-      }
-      return defProd;
+      });
+    }
+    return applianceHubCategories;
+  }, [categories, items]);
+
+  // Dynamic showrooms derived from backend settings
+  const liveShowrooms = useMemo(() => {
+    const backendShowrooms = tenant?.settings?.showrooms;
+    if (backendShowrooms && Array.isArray(backendShowrooms) && backendShowrooms.length > 0) {
+      return backendShowrooms.map((s: any) => ({
+        id: s.id,
+        city: s.city || 'Dhaka',
+        name: s.name,
+        address: s.address,
+        hotline: s.phone || s.hotline || '09606 111 777',
+        hours: s.hours || '10:00 AM - 09:00 PM',
+        manager: s.manager || 'Engr. Tanvir Ahmed',
+        badge: s.badge || (s.isActive !== false ? 'Open daily' : 'Closed'),
+      }));
+    }
+    return showroomsList;
+  }, [tenant?.settings?.showrooms]);
+
+  // Available cities from showrooms
+  const availableCities = useMemo(() => {
+    const cities = Array.from(new Set(liveShowrooms.map((s: any) => s.city).filter(Boolean)));
+    return cities.length > 0 ? (cities as string[]) : ['Dhaka', 'Chittagong', 'Sylhet', 'Khulna'];
+  }, [liveShowrooms]);
+
+  // Dynamic products mapped directly from backend items
+  const liveProducts = useMemo(() => {
+    if (!items || items.length === 0) {
+      return defaultProducts.map((d) => ({
+        ...d,
+        slug: d.id,
+        shortDescription: d.title,
+        description: '',
+        images: [] as string[],
+        isFeatured: false,
+      }));
+    }
+    return items.map((realItem) => {
+      const defProd = defaultProducts.find(
+        (d) => d.id === realItem.id || d.title.toLowerCase() === realItem.title.toLowerCase()
+      );
+      const price = Number(realItem.price || 0);
+      const comparePrice = realItem.comparePrice ? Number(realItem.comparePrice) : (defProd?.comparePrice || undefined);
+      const discount = realItem.badge || (comparePrice && comparePrice > price 
+        ? `${Math.round(((comparePrice - price) / comparePrice) * 100)}% OFF` 
+        : (defProd?.discount || 'Special Offer'));
+
+      const catName = realItem.category?.name || defProd?.category || 'General';
+      const brandName = realItem.brand?.name || defProd?.brand || 'Authorized';
+      const tags = realItem.specifications && Array.isArray(realItem.specifications) && realItem.specifications.length > 0
+        ? realItem.specifications.map((s: any) => `${s.value || s.key}`)
+        : (defProd?.tags || [catName, brandName]);
+
+      const catId = realItem.categoryId || realItem.category?.slug || defProd?.catId || 'general';
+
+      return {
+        id: realItem.id,
+        slug: realItem.slug || realItem.id,
+        title: realItem.title,
+        price,
+        comparePrice,
+        discount,
+        warranty: realItem.badge || defProd?.warranty || 'Official Brand Warranty',
+        warrantyType: defProd?.warrantyType || 'brand',
+        category: catName,
+        catId,
+        brand: brandName,
+        rating: defProd?.rating || '4.9 / 5',
+        tags,
+        stockQuantity: Number(realItem.stockQuantity ?? 20),
+        sku: realItem.sku || defProd?.sku || `SKU-${realItem.id.slice(-6).toUpperCase()}`,
+        shortDescription: realItem.shortDescription || defProd?.title,
+        description: realItem.description,
+        images: Array.isArray(realItem.images) && realItem.images.length > 0 
+          ? realItem.images 
+          : (Array.isArray((defProd as any)?.images) && (defProd as any).images.length > 0
+              ? (defProd as any).images
+              : ['https://images.unsplash.com/photo-1550009158-9ebf69173e03?auto=format&fit=crop&w=800&q=80']),
+        icon: defProd?.icon || getCategoryIcon(catName),
+        isFeatured: Boolean(realItem.isFeatured),
+      };
     });
   }, [items]);
 
-  // Featured Hisense Inverter AC for hero block
-  const featuredHeroProduct = liveProducts[0];
+  // Featured product for hero block (either marked as isFeatured or top product)
+  const featuredHeroProduct = liveProducts.find((p) => p.isFeatured) || liveProducts[0];
 
   // Filter products by category and search query
   const filteredProducts = useMemo(() => {
@@ -494,20 +590,18 @@ export function ElectronicsStorefront({
 
       // 2. Active Category filter
       if (activeCategoryFilter !== 'all') {
-        const hubCat = applianceHubCategories.find((c) => c.id === activeCategoryFilter);
-        if (hubCat) {
-          const catLower = p.category.toLowerCase();
-          const titleLower = p.title.toLowerCase();
-          const match = hubCat.matchKeys.some(
-            (k) => catLower.includes(k) || titleLower.includes(k)
-          );
-          if (!match && p.catId !== activeCategoryFilter) return false;
-        }
+        const target = activeCategoryFilter.toLowerCase();
+        const match =
+          p.catId === activeCategoryFilter ||
+          p.category.toLowerCase().includes(target) ||
+          p.title.toLowerCase().includes(target) ||
+          liveCategories.find((c) => c.id === activeCategoryFilter)?.name.toLowerCase() === p.category.toLowerCase();
+        if (!match) return false;
       }
 
       return true;
     });
-  }, [liveProducts, searchQuery, activeCategoryFilter]);
+  }, [liveProducts, searchQuery, activeCategoryFilter, liveCategories]);
 
   // Handle adding product to cart
   const handleAddToCart = (product: any, qty = 1) => {
@@ -538,13 +632,17 @@ export function ElectronicsStorefront({
 
   return (
     <div className="min-h-screen bg-[#fafbfc] text-slate-800 flex flex-col font-sans selection:bg-amber-400 selection:text-black">
-      {/* 1. TOP HELPLINE & PERKS BAR (Matching PDF Page 1) */}
+      {/* 1. TOP HELPLINE & PERKS BAR */}
       <div className="bg-[#0b0f19] text-slate-300 text-xs py-2 px-4 sm:px-6 lg:px-8 border-b border-slate-800">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-2">
           {/* Left: 24/7 Helpline */}
           <div className="flex items-center gap-3">
-            <span className="font-bold text-white tracking-wide">09606 111 777</span>
-            <span className="text-slate-400">24/7 helpline and certified technical support</span>
+            <span className="font-bold text-white tracking-wide">
+              {tenant?.settings?.phone || '09606 111 777'}
+            </span>
+            <span className="text-slate-400">
+              {tenant?.settings?.announcementText || tenant?.settings?.slogan || '24/7 helpline and certified technical support'}
+            </span>
           </div>
 
           {/* Right: Key Perks + Quick Admin Dashboard Link */}
@@ -568,7 +666,7 @@ export function ElectronicsStorefront({
         </div>
       </div>
 
-      {/* 2. MAIN HEADER & BRAND NAVIGATION (Matching PDF Page 1) */}
+      {/* 2. MAIN HEADER & BRAND NAVIGATION */}
       <header className="bg-white border-b border-slate-200/90 sticky top-0 z-40 shadow-[0_1px_3px_rgba(0,0,0,0.05)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5">
           <div className="flex items-center justify-between gap-4">
@@ -579,7 +677,7 @@ export function ElectronicsStorefront({
               </div>
               <div>
                 <span className="text-xl font-black tracking-tight text-slate-900 block leading-tight">
-                  SmartVolt
+                  {tenant?.name || tenant?.settings?.name || 'SmartVolt'}
                 </span>
                 <span className="text-[11px] text-slate-500 font-medium block">
                   Electrical & Automation
@@ -654,7 +752,7 @@ export function ElectronicsStorefront({
           </div>
         </div>
 
-        {/* Category Sub-navigation Pills Strip (Matching PDF Page 1) */}
+        {/* Category Sub-navigation Pills Strip (Dynamic from liveCategories) */}
         <div className="border-t border-slate-100 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 overflow-x-auto flex items-center gap-6 text-xs font-semibold text-slate-600 justify-start lg:justify-between scrollbar-none">
             <button
@@ -665,86 +763,17 @@ export function ElectronicsStorefront({
             >
               All Products
             </button>
-            <button
-              onClick={() => handleSelectCategory('ev')}
-              className={`whitespace-nowrap transition cursor-pointer ${
-                activeCategoryFilter === 'ev' ? 'font-black text-black border-b-2 border-black pb-0.5' : 'hover:text-black'
-              }`}
-            >
-              Electric Vehicles
-            </button>
-            <button
-              onClick={() => handleSelectCategory('ac')}
-              className={`whitespace-nowrap transition cursor-pointer ${
-                activeCategoryFilter === 'ac' ? 'font-black text-black border-b-2 border-black pb-0.5' : 'hover:text-black'
-              }`}
-            >
-              Air Conditioners
-            </button>
-            <button
-              onClick={() => handleSelectCategory('fridge')}
-              className={`whitespace-nowrap transition cursor-pointer ${
-                activeCategoryFilter === 'fridge' ? 'font-black text-black border-b-2 border-black pb-0.5' : 'hover:text-black'
-              }`}
-            >
-              Refrigerators
-            </button>
-            <button
-              onClick={() => handleSelectCategory('tv')}
-              className={`whitespace-nowrap transition cursor-pointer ${
-                activeCategoryFilter === 'tv' ? 'font-black text-black border-b-2 border-black pb-0.5' : 'hover:text-black'
-              }`}
-            >
-              TVs & Audio
-            </button>
-            <button
-              onClick={() => handleSelectCategory('washer')}
-              className={`whitespace-nowrap transition cursor-pointer ${
-                activeCategoryFilter === 'washer' ? 'font-black text-black border-b-2 border-black pb-0.5' : 'hover:text-black'
-              }`}
-            >
-              Washers & Laundry
-            </button>
-            <button
-              onClick={() => handleSelectCategory('kitchen')}
-              className={`whitespace-nowrap transition cursor-pointer ${
-                activeCategoryFilter === 'kitchen' ? 'font-black text-black border-b-2 border-black pb-0.5' : 'hover:text-black'
-              }`}
-            >
-              Kitchen Appliances
-            </button>
-            <button
-              onClick={() => handleSelectCategory('fans')}
-              className={`whitespace-nowrap transition cursor-pointer ${
-                activeCategoryFilter === 'fans' ? 'font-black text-black border-b-2 border-black pb-0.5' : 'hover:text-black'
-              }`}
-            >
-              Fans & Air Care
-            </button>
-            <button
-              onClick={() => handleSelectCategory('personal')}
-              className={`whitespace-nowrap transition cursor-pointer ${
-                activeCategoryFilter === 'personal' ? 'font-black text-black border-b-2 border-black pb-0.5' : 'hover:text-black'
-              }`}
-            >
-              Personal Care
-            </button>
-            <button
-              onClick={() => handleSelectCategory('lighting')}
-              className={`whitespace-nowrap transition cursor-pointer ${
-                activeCategoryFilter === 'lighting' ? 'font-black text-black border-b-2 border-black pb-0.5' : 'hover:text-black'
-              }`}
-            >
-              Lighting
-            </button>
-            <button
-              onClick={() => handleSelectCategory('computers')}
-              className={`whitespace-nowrap transition cursor-pointer ${
-                activeCategoryFilter === 'computers' ? 'font-black text-black border-b-2 border-black pb-0.5' : 'hover:text-black'
-              }`}
-            >
-              Computers & Office
-            </button>
+            {liveCategories.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => handleSelectCategory(cat.id)}
+                className={`whitespace-nowrap transition cursor-pointer ${
+                  activeCategoryFilter === cat.id ? 'font-black text-black border-b-2 border-black pb-0.5' : 'hover:text-black'
+                }`}
+              >
+                {cat.name}
+              </button>
+            ))}
           </div>
         </div>
       </header>
@@ -766,10 +795,10 @@ export function ElectronicsStorefront({
         </div>
       )}
 
-      {/* 3. HERO SECTION - BENTO GRID LAYOUT (Matching PDF Page 1) */}
+      {/* 3. HERO SECTION - BENTO GRID LAYOUT */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* LEFT LARGE CARD: YEAR-END FESTIVAL & FEATURED INVERTER AC */}
+          {/* LEFT LARGE CARD: FESTIVAL & FEATURED PRODUCT */}
           <div className="lg:col-span-8 bg-[#0a1120] text-white rounded-3xl p-6 sm:p-10 relative overflow-hidden border border-slate-800 shadow-2xl flex flex-col justify-between">
             {/* Subtle background lightning vector graphic */}
             <div className="absolute right-6 top-8 opacity-15 pointer-events-none text-blue-400">
@@ -784,18 +813,14 @@ export function ElectronicsStorefront({
                 MEGA SALE · 0% EMI AVAILABLE
               </div>
 
-              {/* Heading */}
+              {/* Heading (Dynamic from tenant.settings.heroTitle) */}
               <h1 className="text-3xl sm:text-5xl font-black text-white leading-[1.1] tracking-tight mt-5">
-                Year-End<br />
-                Electronics<br />
-                Discount<br />
-                Festival<br />
-                2026
+                {tenant?.settings?.heroTitle || 'Year-End Electronics Discount Festival 2026'}
               </h1>
 
-              {/* Subtitle */}
+              {/* Subtitle (Dynamic from tenant.settings.heroSubtitle) */}
               <p className="text-slate-400 text-xs sm:text-sm mt-4 max-w-md leading-relaxed">
-                Up to 45% off on smart inverter ACs and major appliances, with free nationwide delivery and installation.
+                {tenant?.settings?.heroSubtitle || 'Authorized Direct Factory-Grade Inverter ACs, Smart Home Automation, and Heavy Industrial Switchgear with Official Brand Warranty.'}
               </p>
 
               {/* Action Buttons */}
@@ -871,64 +896,39 @@ export function ElectronicsStorefront({
             </div>
           </div>
 
-          {/* RIGHT 3 STACKED CARDS (Matching PDF Page 1) */}
+          {/* RIGHT 3 STACKED CARDS (Dynamic from Products Catalog) */}
           <div className="lg:col-span-4 space-y-4 flex flex-col justify-between">
-            {/* Promo Card 1: Whirlpool Refrigerator */}
-            <div
-              onClick={() => handleSelectCategory('fridge')}
-              className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-sm hover:shadow-md transition flex items-center justify-between gap-4 cursor-pointer"
-            >
-              <div className="space-y-1.5">
-                <span className="inline-block text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full">
-                  Cashback BDT 1,000
-                </span>
-                <h4 className="text-sm font-bold text-slate-900 leading-snug">
-                  Whirlpool 6th Sense Inverter Frost-Free
-                </h4>
-                <p className="text-xs text-slate-500">10 years official warranty</p>
-              </div>
-              <div className="w-16 h-16 rounded-2xl bg-amber-50/60 flex items-center justify-center text-amber-600 shrink-0 border border-amber-100">
-                <Refrigerator className="w-8 h-8" />
-              </div>
-            </div>
-
-            {/* Promo Card 2: Toshiba Washer */}
-            <div
-              onClick={() => handleSelectCategory('washer')}
-              className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-sm hover:shadow-md transition flex items-center justify-between gap-4 cursor-pointer"
-            >
-              <div className="space-y-1.5">
-                <span className="inline-block text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">
-                  Free installation
-                </span>
-                <h4 className="text-sm font-bold text-slate-900 leading-snug">
-                  Toshiba Direct Drive Inverter Washer
-                </h4>
-                <p className="text-xs text-slate-500">BLDC motor and 90°C steam anti-allergy</p>
-              </div>
-              <div className="w-16 h-16 rounded-2xl bg-emerald-50/60 flex items-center justify-center text-emerald-600 shrink-0 border border-emerald-100">
-                <WashingMachine className="w-8 h-8" />
-              </div>
-            </div>
-
-            {/* Promo Card 3: Philips Air Fryer */}
-            <div
-              onClick={() => handleSelectCategory('kitchen')}
-              className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-sm hover:shadow-md transition flex items-center justify-between gap-4 cursor-pointer"
-            >
-              <div className="space-y-1.5">
-                <span className="inline-block text-[11px] font-bold text-orange-700 bg-orange-50 border border-orange-200 px-2.5 py-0.5 rounded-full">
-                  Flash deal · 35% off
-                </span>
-                <h4 className="text-sm font-bold text-slate-900 leading-snug">
-                  Philips Rapid Air Fryer and Kitchen Combo
-                </h4>
-                <p className="text-xs text-slate-500">90% less oil, healthy frying</p>
-              </div>
-              <div className="w-16 h-16 rounded-2xl bg-orange-50/60 flex items-center justify-center text-orange-600 shrink-0 border border-orange-100">
-                <Flame className="w-8 h-8" />
-              </div>
-            </div>
+            {liveProducts.slice(1, 4).map((promoProd, pIdx) => {
+              const PromoIcon = promoProd.icon || Zap;
+              return (
+                <div
+                  key={promoProd.id || pIdx}
+                  onClick={() => {
+                    if (promoProd.catId) handleSelectCategory(promoProd.catId);
+                  }}
+                  className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-sm hover:shadow-md transition flex items-center justify-between gap-4 cursor-pointer"
+                >
+                  <div className="space-y-1.5 flex-1 min-w-0">
+                    <span className="inline-block text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full">
+                      {promoProd.discount || 'Special Offer'}
+                    </span>
+                    <h4 className="text-sm font-bold text-slate-900 leading-snug truncate">
+                      {promoProd.title}
+                    </h4>
+                    <p className="text-xs text-slate-500 truncate">
+                      BDT {promoProd.price.toLocaleString()} • {promoProd.warranty}
+                    </p>
+                  </div>
+                  <div className="w-16 h-16 rounded-2xl bg-amber-50/60 flex items-center justify-center text-amber-600 shrink-0 border border-amber-100 overflow-hidden">
+                    {promoProd.images?.[0] ? (
+                      <img src={promoProd.images[0]} alt={promoProd.title} className="w-full h-full object-cover" />
+                    ) : (
+                      <PromoIcon className="w-8 h-8" />
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -976,8 +976,8 @@ export function ElectronicsStorefront({
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3.5">
-          {applianceHubCategories.map((cat) => {
-            const IconComp = cat.icon;
+          {liveCategories.map((cat) => {
+            const IconComp = cat.icon || Zap;
             const isSelected = activeCategoryFilter === cat.id;
             return (
               <div
@@ -1066,7 +1066,7 @@ export function ElectronicsStorefront({
             <div className="ml-auto flex items-center gap-2">
               <span className="text-xs font-semibold text-slate-500">Filtered by:</span>
               <span className="px-3 py-1 rounded-full text-xs font-bold bg-slate-900 text-white flex items-center gap-1.5">
-                <span>{applianceHubCategories.find((c) => c.id === activeCategoryFilter)?.name}</span>
+                <span>{liveCategories.find((c) => c.id === activeCategoryFilter)?.name || activeCategoryFilter}</span>
                 <X
                   onClick={() => setActiveCategoryFilter('all')}
                   className="w-3 h-3 cursor-pointer hover:text-red-400"
@@ -1123,10 +1123,19 @@ export function ElectronicsStorefront({
 
                     {/* Product Visual Illustration / Image */}
                     <Link
-                      href={`/products/${p.slug || p.id}?tenant=${tenantSlug}`}
-                      className="block aspect-[4/3] rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-700 mb-4 group-hover:scale-105 transition-transform duration-300 overflow-hidden cursor-pointer"
+                      href={`/products/${(p as any).slug || p.id}?tenant=${tenantSlug}`}
+                      className="block aspect-[4/3] rounded-2xl bg-white border border-slate-100 flex items-center justify-center text-slate-700 mb-4 group-hover:scale-105 transition-transform duration-300 overflow-hidden cursor-pointer relative"
                     >
-                      <IconComponent className="w-16 h-16 stroke-[1.2] text-slate-600" />
+                      {p.images && p.images.length > 0 && p.images[0] ? (
+                        <img
+                          src={p.images[0]}
+                          alt={p.title}
+                          className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-300"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <IconComponent className="w-16 h-16 stroke-[1.2] text-slate-600" />
+                      )}
                     </Link>
 
                     {/* Category & Rating */}
@@ -1137,7 +1146,7 @@ export function ElectronicsStorefront({
 
                     {/* Product Title (Direct Link to Full Page) */}
                     <Link
-                      href={`/products/${p.slug || p.id}?tenant=${tenantSlug}`}
+                      href={`/products/${(p as any).slug || p.id}?tenant=${tenantSlug}`}
                       className="block text-sm font-extrabold text-slate-900 leading-snug line-clamp-2 cursor-pointer group-hover:text-orange-600 transition"
                       title={p.title}
                     >
@@ -1177,7 +1186,7 @@ export function ElectronicsStorefront({
                     {/* Buttons: Full Spec Page & Add to cart */}
                     <div className="grid grid-cols-2 gap-2">
                       <Link
-                        href={`/products/${p.slug || p.id}?tenant=${tenantSlug}`}
+                        href={`/products/${(p as any).slug || p.id}?tenant=${tenantSlug}`}
                         className="py-2 px-3 rounded-xl border border-slate-300 hover:border-slate-800 text-slate-800 font-bold text-xs text-center transition flex items-center justify-center gap-1"
                       >
                         <span>Spec sheet</span>
@@ -1200,10 +1209,13 @@ export function ElectronicsStorefront({
         {/* Show More Products Button */}
         <div className="text-center mt-10">
           <button
-            onClick={() => setActiveCategoryFilter('all')}
+            onClick={() => {
+              setActiveCategoryFilter('all');
+              setSearchQuery('');
+            }}
             className="px-8 py-3 rounded-xl bg-black hover:bg-slate-800 text-white font-bold text-xs sm:text-sm shadow-md transition"
           >
-            Show 12 more products
+            {activeCategoryFilter !== 'all' ? `View All ${liveProducts.length} Products` : `All ${liveProducts.length} Products Loaded`}
           </button>
         </div>
       </section>
@@ -1427,14 +1439,14 @@ export function ElectronicsStorefront({
             </p>
           </div>
 
-          {/* City Filter Pills (Matching PDF Page 4) */}
+          {/* City Filter Pills (Dynamic from liveShowrooms) */}
           <div className="flex items-center gap-2 overflow-x-auto pb-1">
-            {['Dhaka', 'Chittagong', 'Sylhet', 'Khulna'].map((city) => (
+            {availableCities.map((city) => (
               <button
                 key={city}
                 onClick={() => setSelectedShowroomCity(city)}
                 className={`px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap ${
-                  selectedShowroomCity === city
+                  selectedShowroomCity.toLowerCase() === city.toLowerCase()
                     ? 'bg-black text-white shadow-sm'
                     : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
                 }`}
@@ -1447,8 +1459,8 @@ export function ElectronicsStorefront({
 
         {/* Showroom Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {showroomsList
-            .filter((s) => s.city === selectedShowroomCity)
+          {liveShowrooms
+            .filter((s) => s.city.toLowerCase() === selectedShowroomCity.toLowerCase() || availableCities.length === 1)
             .map((s) => (
               <div
                 key={s.id}
@@ -1576,14 +1588,14 @@ export function ElectronicsStorefront({
                   <Zap className="w-4 h-4 fill-amber-400 text-amber-400" />
                 </div>
                 <span className="text-base font-black text-white">
-                  SmartVolt Electrical & Automation
+                  {tenant?.name || tenant?.settings?.name || 'SmartVolt Electrical & Automation'}
                 </span>
               </div>
               <p className="text-slate-400 leading-relaxed">
-                Bangladesh&apos;s trusted authorised retail platform for smart inverter air conditioners, refrigerators and major home appliances.
+                {tenant?.settings?.slogan || tenant?.settings?.announcementText || "Bangladesh's trusted authorised retail platform for smart inverter air conditioners, refrigerators and major home appliances."}
               </p>
               <div className="font-bold text-white pt-1">
-                Helpline: 09606 111 777
+                Helpline: {tenant?.settings?.phone || '09606 111 777'}
               </div>
             </div>
 
@@ -1593,11 +1605,15 @@ export function ElectronicsStorefront({
                 CATEGORIES
               </h4>
               <ul className="space-y-2 text-slate-400">
-                <li onClick={() => handleSelectCategory('ac')} className="hover:text-white cursor-pointer">Smart inverter ACs</li>
-                <li onClick={() => handleSelectCategory('fridge')} className="hover:text-white cursor-pointer">Frost-free refrigerators</li>
-                <li onClick={() => handleSelectCategory('tv')} className="hover:text-white cursor-pointer">4K Google Smart TVs</li>
-                <li onClick={() => handleSelectCategory('washer')} className="hover:text-white cursor-pointer">Direct drive washers</li>
-                <li onClick={() => handleSelectCategory('ev')} className="hover:text-white cursor-pointer">Electric vehicles (EV)</li>
+                {liveCategories.slice(0, 6).map((cat) => (
+                  <li
+                    key={cat.id}
+                    onClick={() => handleSelectCategory(cat.id)}
+                    className="hover:text-white cursor-pointer"
+                  >
+                    {cat.name}
+                  </li>
+                ))}
               </ul>
             </div>
 
@@ -1629,17 +1645,17 @@ export function ElectronicsStorefront({
                 CORPORATE OFFICE
               </h4>
               <p className="text-slate-400 leading-relaxed">
-                Nawabpur Road Electrical Market, Dhaka-1100, Bangladesh
+                {tenant?.settings?.address || 'Nawabpur Road Electrical Market, Dhaka-1100, Bangladesh'}
               </p>
               <div className="mt-3 space-y-1">
-                <div>support@smartvoltbd.com</div>
+                <div>{tenant?.settings?.email || 'support@smartvoltbd.com'}</div>
                 <div>Open daily, 10:00 AM to 09:00 PM</div>
               </div>
             </div>
           </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-between text-slate-500 text-xs gap-3">
-            <div>© 2026 SmartVolt Electrical & Automation. All rights reserved.</div>
+            <div>© {new Date().getFullYear()} {tenant?.name || tenant?.settings?.name || 'SmartVolt Electrical & Automation'}. All rights reserved.</div>
             <div className="flex items-center gap-4">
               <Link href={`/admin/dashboard?tenant=${tenantSlug}`} className="hover:text-slate-300 underline">
                 Merchant Portal

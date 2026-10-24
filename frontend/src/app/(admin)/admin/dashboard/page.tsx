@@ -4,7 +4,6 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { api } from '@/lib/api';
-import { DynamicFieldRenderer } from '@/components/DynamicFieldRenderer';
 import { InventoryManager } from '@/components/InventoryManager';
 import {
   Boxes,
@@ -73,6 +72,9 @@ import {
   Zap,
   Shield,
   Rocket,
+  Lock,
+  KeyRound,
+  ArrowRight,
 } from 'lucide-react';
 
 function DashboardContent() {
@@ -86,6 +88,16 @@ function DashboardContent() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [revenueMetric, setRevenueMetric] = useState<'MRR' | 'ARR'>('MRR');
   const [isDarkMode, setIsDarkMode] = useState(true);
+
+  // Admin Authentication State & Security
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(false);
+  const [adminUser, setAdminUser] = useState<any>(null);
+  const [authChecking, setAuthChecking] = useState<boolean>(true);
+  const [adminLoginEmail, setAdminLoginEmail] = useState<string>(`admin@${tenantSlug}.com`);
+  const [adminLoginPassword, setAdminLoginPassword] = useState<string>('admin@123');
+  const [adminLoginLoading, setAdminLoginLoading] = useState<boolean>(false);
+  const [adminLoginError, setAdminLoginError] = useState<string>('');
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   // Electronics Showrooms state
   const [showroomsList, setShowroomsList] = useState<any[]>([
@@ -197,8 +209,7 @@ function DashboardContent() {
   const [prodBadge, setProdBadge] = useState('');
   const [prodVariants, setProdVariants] = useState('');
   const [prodSpecs, setProdSpecs] = useState<Array<{ key: string; value: string }>>([
-    { key: 'Material', value: '100% Genuine Full-Grain Leather' },
-    { key: 'Warranty', value: '2 Years Comprehensive' },
+    { key: 'Warranty', value: 'Official Brand Warranty' },
   ]);
   const [activeCategorySchema, setActiveCategorySchema] = useState<any>(null);
   const [prodCustomAttributes, setProdCustomAttributes] = useState<Record<string, any>>({});
@@ -254,6 +265,8 @@ function DashboardContent() {
   const [storeEmail, setStoreEmail] = useState('');
   const [storeAddress, setStoreAddress] = useState('');
   const [announcementText, setAnnouncementText] = useState('');
+  const [heroTitle, setHeroTitle] = useState('');
+  const [heroSubtitle, setHeroSubtitle] = useState('');
   const [savingSettings, setSavingSettings] = useState(false);
   const [settingsNotice, setSettingsNotice] = useState<string | null>(null);
 
@@ -269,6 +282,7 @@ function DashboardContent() {
   const [orderSearchQuery, setOrderSearchQuery] = useState('');
   const [orderNotice, setOrderNotice] = useState<string | null>(null);
   const [showManualOrderModal, setShowManualOrderModal] = useState(false);
+  const [creatingManualOrder, setCreatingManualOrder] = useState(false);
   const [manualOrderType, setManualOrderType] = useState<'PHYSICAL_PRODUCT' | 'SERVICE_APPOINTMENT' | 'LEAD_GEN_REAL_ESTATE'>('PHYSICAL_PRODUCT');
   const [manualCustomerName, setManualCustomerName] = useState('');
   const [manualCustomerPhone, setManualCustomerPhone] = useState('');
@@ -305,6 +319,78 @@ function DashboardContent() {
   const [mediaNotice, setMediaNotice] = useState<string | null>(null);
   const [mediaFilterCategory, setMediaFilterCategory] = useState('all');
 
+  // Check Admin Authentication Session
+  useEffect(() => {
+    setAdminLoginEmail(`admin@${tenantSlug}.com`);
+    setAdminLoginPassword('admin@123');
+    setAdminLoginError('');
+
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = 
+          localStorage.getItem(`admin_auth_${tenantSlug}`) || 
+          localStorage.getItem('admin_auth') || 
+          localStorage.getItem('superadmin_auth');
+
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          const user = parsed?.user || parsed?.data?.user || parsed;
+          if (user && (user.email || user.name)) {
+            setAdminUser(user);
+            setIsAdminAuthenticated(true);
+          } else {
+            setIsAdminAuthenticated(false);
+          }
+        } else {
+          setIsAdminAuthenticated(false);
+        }
+      } catch {
+        setIsAdminAuthenticated(false);
+      } finally {
+        setAuthChecking(false);
+      }
+    }
+  }, [tenantSlug]);
+
+  const handleDashboardAdminLogin = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setAdminLoginLoading(true);
+    setAdminLoginError('');
+    try {
+      const res = await api.login({
+        email: adminLoginEmail,
+        password: adminLoginPassword,
+        tenantSlug,
+        role: 'TENANT_ADMIN',
+      });
+      if (res?.success) {
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(`admin_auth_${tenantSlug}`, JSON.stringify(res.data));
+          localStorage.setItem('admin_auth', JSON.stringify(res.data));
+        }
+        setAdminUser(res.data.user);
+        setIsAdminAuthenticated(true);
+        setRefreshTrigger((prev) => prev + 1);
+      } else {
+        setAdminLoginError(res?.message || 'ভুল ইমেইল বা পাসওয়ার্ড। ডিফল্ট: admin@123');
+      }
+    } catch (err: any) {
+      setAdminLoginError('Authentication service unreachable.');
+    } finally {
+      setAdminLoginLoading(false);
+    }
+  };
+
+  const handleDashboardAdminLogout = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(`admin_auth_${tenantSlug}`);
+      localStorage.removeItem('admin_auth');
+    }
+    setIsAdminAuthenticated(false);
+    setAdminUser(null);
+    setShowProfileMenu(false);
+  };
+
   useEffect(() => {
     async function loadTenantData() {
       try {
@@ -322,11 +408,16 @@ function DashboardContent() {
         if (tenantRes?.success && tenantRes.data) {
           const t = tenantRes.data;
           setTenantInfo(t);
-          setStoreName(t.name || '');
-          setStorePhone(t.phone || '');
-          setStoreEmail(t.email || '');
-          setStoreAddress(t.address || '');
-          setAnnouncementText(t.announcementText || 'Special Launch Offer! Free express delivery across the country on all orders');
+          setStoreName(t.name || t.settings?.name || '');
+          setStorePhone(t.phone || t.settings?.phone || '');
+          setStoreEmail(t.email || t.settings?.email || '');
+          setStoreAddress(t.address || t.settings?.address || '');
+          setAnnouncementText(t.announcementText || t.settings?.announcementText || t.settings?.slogan || 'Special Launch Offer! Free express delivery across the country on all orders');
+          setHeroTitle(t.settings?.heroTitle || t.heroTitle || 'Year-End Electronics Discount Festival 2026');
+          setHeroSubtitle(t.settings?.heroSubtitle || t.heroSubtitle || 'Authorized Direct Factory-Grade Inverter ACs, Smart Home Automation, and Heavy Industrial Switchgear with Official Brand Warranty.');
+          if (t.settings?.showrooms && Array.isArray(t.settings.showrooms) && t.settings.showrooms.length > 0) {
+            setShowroomsList(t.settings.showrooms);
+          }
         }
         if (ordersRes?.success && Array.isArray(ordersRes.data)) {
           setOrders(ordersRes.data);
@@ -360,7 +451,7 @@ function DashboardContent() {
       }
     }
     loadTenantData();
-  }, [tenantSlug]);
+  }, [tenantSlug, refreshTrigger]);
 
   const refreshCatalogItems = async () => {
     try {
@@ -1034,17 +1125,19 @@ function DashboardContent() {
     try {
       const res = await api.updateStoreSettings(
         {
-          name: storeName,
-          phone: storePhone,
-          email: storeEmail,
-          address: storeAddress,
-          announcementText,
+          name: storeName.trim(),
+          phone: storePhone.trim(),
+          email: storeEmail.trim(),
+          address: storeAddress.trim(),
+          announcementText: announcementText.trim(),
+          heroTitle: heroTitle.trim(),
+          heroSubtitle: heroSubtitle.trim(),
         },
         tenantSlug
       );
       if (res?.success) {
-        setSettingsNotice('Store settings and branding saved successfully!');
-        if (tenantInfo) setTenantInfo({ ...tenantInfo, name: storeName, phone: storePhone, email: storeEmail, address: storeAddress, announcementText });
+        setSettingsNotice('Store settings, branding, and hero banner saved successfully!');
+        if (tenantInfo) setTenantInfo({ ...tenantInfo, name: storeName, phone: storePhone, email: storeEmail, address: storeAddress, announcementText, heroTitle, heroSubtitle });
         setTimeout(() => setSettingsNotice(null), 3500);
       }
     } catch (err) {
@@ -1073,6 +1166,169 @@ function DashboardContent() {
       item.shortDescription?.toLowerCase().includes(prodSearchQuery.toLowerCase());
     return matchCat && matchSearch;
   });
+
+  if (!authChecking && !isAdminAuthenticated) {
+    return (
+      <div className="min-h-screen bg-[#080B14] text-slate-100 flex flex-col justify-between selection:bg-rose-500 selection:text-white relative overflow-hidden">
+        {/* Ambient Glow Orbs */}
+        <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-indigo-600/20 blur-[120px] pointer-events-none" />
+        <div className="absolute -bottom-32 -right-32 w-96 h-96 rounded-full bg-rose-600/20 blur-[120px] pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-purple-600/10 blur-[160px] pointer-events-none" />
+
+        {/* Top Minimal Bar */}
+        <header className="border-b border-[#182033] bg-[#0A0E1A]/60 backdrop-blur-md px-6 py-4 flex items-center justify-between relative z-10">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-500 via-purple-600 to-rose-500 p-0.5 shadow-lg shadow-indigo-500/25 flex items-center justify-center">
+              <div className="w-full h-full bg-[#080B14] rounded-[14px] flex items-center justify-center text-white font-black text-sm">
+                ⚡
+              </div>
+            </div>
+            <div>
+              <span className="font-extrabold text-white text-base tracking-tight block">
+                {tenantInfo?.name || tenantSlug.toUpperCase() + ' Store'}
+              </span>
+              <span className="text-[11px] text-indigo-400 font-mono">
+                Admin Security Gateway • {tenantSlug}.localhost
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 text-xs">
+            <Link
+              href={`/?tenant=${tenantSlug}`}
+              target="_blank"
+              className="px-3.5 py-2 rounded-xl bg-[#111728] hover:bg-[#1A2238] border border-[#1E2840] text-slate-300 font-semibold transition flex items-center gap-1.5"
+            >
+              <ExternalLink className="w-3.5 h-3.5 text-emerald-400" />
+              <span>লাইভ স্টোর দেখুন</span>
+            </Link>
+            <Link
+              href="/login"
+              className="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold transition shadow-md shadow-indigo-600/20"
+            >
+              সুইচ স্টোর / প্ল্যাটফর্ম লগইন
+            </Link>
+          </div>
+        </header>
+
+        {/* Central Authentication Card */}
+        <main className="max-w-md mx-auto px-4 py-12 w-full flex-1 flex flex-col justify-center relative z-10">
+          <div className="bg-[#0D1222]/90 border border-[#1E2840] p-8 sm:p-10 rounded-3xl shadow-2xl backdrop-blur-2xl space-y-6">
+            
+            <div className="text-center space-y-2">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-500/20 to-purple-500/20 border border-indigo-500/30 flex items-center justify-center mx-auto text-indigo-400 shadow-inner">
+                <Lock className="w-7 h-7 text-indigo-400" />
+              </div>
+              <h1 className="text-2xl font-black text-white tracking-tight">
+                স্টোর অ্যাডমিন লগইন
+              </h1>
+              <p className="text-xs text-slate-400">
+                ড্যাশবোর্ড, সেলস অ্যানালিটিক্স ও অর্ডার নিয়ন্ত্রণে প্রবেশ করতে আপনার ক্রেডেনশিয়াল প্রদান করুন।
+              </p>
+            </div>
+
+            {/* Error Message */}
+            {adminLoginError && (
+              <div className="p-3.5 rounded-xl bg-rose-950/80 border border-rose-800 text-rose-300 text-xs font-semibold flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+                <span>{adminLoginError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleDashboardAdminLogin} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-2">
+                  অ্যাডমিন ইমেইল (Store Admin Email)
+                </label>
+                <div className="relative">
+                  <Mail className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="email"
+                    required
+                    value={adminLoginEmail}
+                    onChange={(e) => setAdminLoginEmail(e.target.value)}
+                    placeholder={`admin@${tenantSlug}.com`}
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#080B14] border border-[#1E2840] text-white placeholder-slate-600 text-xs focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 font-medium"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-semibold text-slate-300">
+                    পাসওয়ার্ড (Password)
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAdminLoginEmail(`admin@${tenantSlug}.com`);
+                      setAdminLoginPassword('admin@123');
+                    }}
+                    className="text-[11px] text-indigo-400 hover:text-indigo-300 font-semibold"
+                  >
+                    ⚡ অটো-ফিল ডিফল্ট
+                  </button>
+                </div>
+                <div className="relative">
+                  <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="password"
+                    required
+                    value={adminLoginPassword}
+                    onChange={(e) => setAdminLoginPassword(e.target.value)}
+                    placeholder="••••••••••••"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#080B14] border border-[#1E2840] text-white placeholder-slate-600 text-xs focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 font-mono"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={adminLoginLoading}
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-rose-600 hover:opacity-95 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer disabled:opacity-50"
+              >
+                {adminLoginLoading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>যাচাই করা হচ্ছে...</span>
+                  </>
+                ) : (
+                  <>
+                    <KeyRound className="w-4 h-4" />
+                    <span>ড্যাশবোর্ডে প্রবেশ করুন (Unlock Console)</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+            </form>
+
+            {/* Quick Demo Assist */}
+            <div className="pt-4 border-t border-[#182033] text-center space-y-2">
+              <span className="text-[11px] text-slate-400 block font-semibold">
+                ডেমো অ্যাডমিন অ্যাক্সেস তথ্য:
+              </span>
+              <div className="bg-[#111728] p-3 rounded-xl border border-[#1E2840] text-[11px] text-slate-300 flex items-center justify-between">
+                <div>
+                  <span className="text-slate-400">Email: </span>
+                  <span className="font-mono text-cyan-400 font-semibold">admin@{tenantSlug}.com</span>
+                </div>
+                <div>
+                  <span className="text-slate-400">Pass: </span>
+                  <span className="font-mono text-emerald-400 font-semibold">admin@123</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </main>
+
+        {/* Footer */}
+        <footer className="border-t border-[#182033] py-4 text-center text-xs text-slate-500 relative z-10">
+          &copy; {new Date().getFullYear()} SaaS E-Commerce Platform. Enterprise Tenant Security & Isolation Active.
+        </footer>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#0B0F19] text-slate-100 flex flex-row font-sans selection:bg-indigo-500 selection:text-white">
@@ -1150,58 +1406,6 @@ function DashboardContent() {
               >
                 <BarChart3 className="w-4 h-4 shrink-0 text-slate-400" />
                 {!sidebarCollapsed && <span>Analytics</span>}
-              </button>
-
-              <Link
-                href={`/?tenant=${tenantSlug}`}
-                target="_blank"
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:bg-[#111625] hover:text-slate-200 transition"
-                title="eCommerce Storefront"
-              >
-                <Store className="w-4 h-4 shrink-0 text-slate-400" />
-                {!sidebarCollapsed && (
-                  <span className="flex items-center justify-between flex-1">
-                    <span>eCommerce</span>
-                    <ExternalLink className="w-3 h-3 opacity-50" />
-                  </span>
-                )}
-              </Link>
-
-              {isServiceOrMedical && (
-                <button
-                  onClick={() => setActiveTab('appointments')}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition ${
-                    activeTab === 'appointments'
-                      ? 'bg-[#201A3D] text-indigo-300 border border-indigo-500/30 shadow-sm'
-                      : 'text-slate-400 hover:bg-[#111625] hover:text-slate-200'
-                  }`}
-                  title="CRM & Appointments"
-                >
-                  <Calendar className={`w-4 h-4 shrink-0 ${activeTab === 'appointments' ? 'text-indigo-400' : 'text-slate-400'}`} />
-                  {!sidebarCollapsed && <span>CRM & Booking</span>}
-                </button>
-              )}
-
-              <button
-                onClick={() => setActiveTab('modules')}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition ${
-                  activeTab === 'modules'
-                    ? 'bg-[#201A3D] text-indigo-300 border border-indigo-500/30 shadow-sm'
-                    : 'text-slate-400 hover:bg-[#111625] hover:text-slate-200'
-                }`}
-                title="SaaS Engine"
-              >
-                <Sparkles className={`w-4 h-4 shrink-0 ${activeTab === 'modules' ? 'text-indigo-400' : 'text-slate-400'}`} />
-                {!sidebarCollapsed && <span>SaaS Engine</span>}
-              </button>
-
-              <button
-                onClick={() => setActiveTab('overview')}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:bg-[#111625] hover:text-slate-200 transition"
-                title="Charts"
-              >
-                <LineChart className="w-4 h-4 shrink-0 text-slate-400" />
-                {!sidebarCollapsed && <span>Charts</span>}
               </button>
             </div>
 
@@ -1350,55 +1554,14 @@ function DashboardContent() {
               )}
             </div>
 
-            {/* GROUP 3: APPS */}
+            {/* GROUP 3: SYSTEM */}
             <div className="space-y-1">
               {!sidebarCollapsed && (
                 <div className="px-3 py-1 text-[11px] font-bold text-slate-500 tracking-wider uppercase flex items-center justify-between">
-                  <span>APPS</span>
+                  <span>SETTINGS</span>
                   <ChevronDown className="w-3.5 h-3.5 opacity-60" />
                 </div>
               )}
-
-              <button
-                onClick={() => setActiveTab('settings')}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:bg-[#111625] hover:text-slate-200 transition"
-                title="Mail"
-              >
-                <Mail className="w-4 h-4 shrink-0 text-slate-400" />
-                {!sidebarCollapsed && <span>Mail</span>}
-              </button>
-
-              <button
-                onClick={() => setActiveTab('settings')}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:bg-[#111625] hover:text-slate-200 transition"
-                title="Chat"
-              >
-                <MessageSquare className="w-4 h-4 shrink-0 text-slate-400" />
-                {!sidebarCollapsed && <span>Chat</span>}
-              </button>
-
-              <button
-                onClick={() => {
-                  setActiveTab('products');
-                  setProductSubTab('media');
-                }}
-                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition ${
-                  activeTab === 'products' && productSubTab === 'media'
-                    ? 'bg-[#201A3D] text-indigo-300 border border-indigo-500/30 shadow-sm'
-                    : 'text-slate-400 hover:bg-[#111625] hover:text-slate-200'
-                }`}
-                title="Files & Media"
-              >
-                <div className="flex items-center gap-3">
-                  <Folder className={`w-4 h-4 shrink-0 ${activeTab === 'products' && productSubTab === 'media' ? 'text-indigo-400' : 'text-slate-400'}`} />
-                  {!sidebarCollapsed && <span>Files & Media</span>}
-                </div>
-                {!sidebarCollapsed && (
-                  <span className="text-[11px] text-slate-500 font-mono">
-                    {mediaItems.length}
-                  </span>
-                )}
-              </button>
 
               <button
                 onClick={() => setActiveTab('settings')}
@@ -1410,7 +1573,7 @@ function DashboardContent() {
                 title="Store Settings"
               >
                 <Sliders className={`w-4 h-4 shrink-0 ${activeTab === 'settings' ? 'text-indigo-400' : 'text-slate-400'}`} />
-                {!sidebarCollapsed && <span>Settings</span>}
+                {!sidebarCollapsed && <span>Store Settings</span>}
               </button>
             </div>
           </div>
@@ -1419,27 +1582,29 @@ function DashboardContent() {
           <div className="p-3 border-t border-[#1B2236] shrink-0 bg-[#070A11]">
             <div className="flex items-center justify-between p-2 rounded-xl bg-[#111625]/80 border border-[#1E2638]">
               <div className="flex items-center gap-2.5 overflow-hidden">
-                <div className="w-8 h-8 rounded-full bg-cyan-500 text-slate-950 font-black text-xs flex items-center justify-center shrink-0 shadow">
-                  AS
+                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 text-white font-black text-xs flex items-center justify-center shrink-0 shadow">
+                  {adminUser?.name ? adminUser.name.slice(0, 2).toUpperCase() : 'AD'}
                 </div>
                 {!sidebarCollapsed && (
                   <div className="leading-tight overflow-hidden">
                     <p className="text-xs font-bold text-white truncate">
-                      {tenantInfo?.name ? tenantInfo.name.split(' ')[0] + ' S.' : 'Aigars S.'}
+                      {adminUser?.name || tenantInfo?.name || 'Store Admin'}
                     </p>
-                    <p className="text-[10px] text-slate-400 font-medium">Admin</p>
+                    <p className="text-[10px] text-emerald-400 font-mono truncate">
+                      {adminUser?.email || `admin@${tenantSlug}.com`}
+                    </p>
                   </div>
                 )}
               </div>
               {!sidebarCollapsed && (
                 <div className="flex items-center gap-1">
-                  <Link
-                    href="/super-admin"
-                    className="w-7 h-7 rounded-lg text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 flex items-center justify-center transition"
-                    title="SaaS Central Super-Admin"
+                  <button
+                    onClick={handleDashboardAdminLogout}
+                    className="w-7 h-7 rounded-lg text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 flex items-center justify-center transition cursor-pointer"
+                    title="সাইন আউট (Logout)"
                   >
-                    <ShieldAlert className="w-3.5 h-3.5" />
-                  </Link>
+                    <LogOut className="w-3.5 h-3.5" />
+                  </button>
                   <Link
                     href={`/?tenant=${tenantSlug}`}
                     target="_blank"
@@ -1557,16 +1722,19 @@ function DashboardContent() {
             <div className="relative">
               <button
                 onClick={() => setShowProfileMenu(!showProfileMenu)}
-                className="w-9 h-9 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-bold text-xs flex items-center justify-center shadow-sm hover:ring-2 hover:ring-cyan-500/50 transition cursor-pointer"
+                className="w-9 h-9 rounded-full bg-gradient-to-tr from-indigo-500/30 to-purple-500/30 text-indigo-300 border border-indigo-500/40 font-bold text-xs flex items-center justify-center shadow-sm hover:ring-2 hover:ring-indigo-500/50 transition cursor-pointer"
                 title="Profile Menu & Switcher"
               >
-                AS
+                {adminUser?.name ? adminUser.name.slice(0, 2).toUpperCase() : 'AD'}
               </button>
               {showProfileMenu && (
-                <div className="absolute right-0 mt-2 w-56 bg-[#0E1320] border border-[#1E2638] rounded-2xl shadow-2xl p-2 z-50 text-xs space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
+                <div className="absolute right-0 mt-2 w-64 bg-[#0E1320] border border-[#1E2638] rounded-2xl shadow-2xl p-2 z-50 text-xs space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
                   <div className="px-3 py-2 border-b border-[#1E2638]/80">
-                    <p className="font-bold text-white text-xs truncate">{tenantInfo?.name || 'Active Merchant'}</p>
-                    <p className="text-[11px] text-cyan-400 font-mono">store: {tenantSlug}</p>
+                    <p className="font-bold text-white text-xs truncate">{adminUser?.name || tenantInfo?.name || 'Store Admin'}</p>
+                    <p className="text-[11px] text-cyan-400 font-mono truncate">{adminUser?.email || `admin@${tenantSlug}.com`}</p>
+                    <span className="inline-block px-1.5 py-0.5 rounded text-[9.5px] font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 mt-1">
+                      {adminUser?.role || 'TENANT_ADMIN'}
+                    </span>
                   </div>
                   <Link
                     href="/super-admin"
@@ -1585,14 +1753,13 @@ function DashboardContent() {
                     <ExternalLink className="w-4 h-4 text-emerald-400" />
                     <span>Live Storefront</span>
                   </Link>
-                  <Link
-                    href="/login"
-                    onClick={() => setShowProfileMenu(false)}
-                    className="flex items-center gap-2 px-3 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-[#1A2234] transition"
+                  <button
+                    onClick={handleDashboardAdminLogout}
+                    className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-rose-400 hover:text-white hover:bg-rose-500/20 transition font-semibold text-left cursor-pointer"
                   >
-                    <LogOut className="w-4 h-4 text-slate-500" />
-                    <span>Switch Store / Logout</span>
-                  </Link>
+                    <LogOut className="w-4 h-4 text-rose-400" />
+                    <span>লগআউট (Sign Out)</span>
+                  </button>
                 </div>
               )}
             </div>
@@ -2819,7 +2986,7 @@ function DashboardContent() {
                       type="text"
                       value={manualItemTitle}
                       onChange={(e) => setManualItemTitle(e.target.value)}
-                      placeholder="e.g. Leather Briefcase"
+                      placeholder="e.g. Inverter AC 1.5 Ton / Smart TV 55 Inch"
                       className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs"
                     />
                   </div>
@@ -3535,152 +3702,6 @@ function DashboardContent() {
                 </div>
 
                 <form onSubmit={handleAddProduct} className="space-y-4">
-                  {/* Electronics Engineering & Specification Presets Bar */}
-                  {(tenantInfo?.businessType === 'electronics' || tenantSlug === 'smartvolt') && (
-                    <div className="p-4 rounded-2xl bg-gradient-to-r from-orange-50 via-amber-50 to-orange-50 border border-orange-200 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-black text-orange-950 flex items-center gap-1.5 uppercase tracking-wider">
-                          <Zap className="w-4 h-4 text-orange-600 fill-orange-600" />
-                          <span>1-Click Electronics Engineering Spec & Auto-Fill Presets:</span>
-                        </span>
-                        <span className="text-[10px] font-bold text-orange-700 bg-orange-100 px-2 py-0.5 rounded-md">
-                          Auto Spec Presets
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-2 flex-wrap pt-1">
-                        {[
-                          {
-                            label: '❄️ Hisense 1.5T Smart Inverter AC',
-                            title: 'Hisense Smart Compact AC AS18TW4RGSKB02DU',
-                            price: '73900',
-                            comparePrice: '75000',
-                            badge: '12 Years Compressor Warranty • Dual Inverter',
-                            desc: 'Basic Specifications\tAir Conditioner Type\tInverter\nAi Conditioner Function\tCooling\nCooling Capacity (BTU/h)\t18000\nCooling Capacity (W)\t5275\nRated Voltage (V)\t220-240V, 50 Hz\nRated Input Power (W)\t1700\nRated Current (A)\t7.6\nClimate Class\tT1\nEER (W/W)\t3.10\nNoise Level (dB) Indoor\t39\nNoise Level (dB) Outdoor\t54\nRefrigerant\tR32 (0.660kg)\nFin Type\tGolden Hydrophilic Fin\nCompressor Type\tRotary, Dual Inverter\nIndoor Dimensions\t930×300×220 mm\nOutdoor Dimensions\t715×240×540 mm\nWarranty\t12 Years Compressor, 5 Years PCB, 2 Years Free Service',
-                            image: 'https://images.unsplash.com/photo-1585338107529-13afc5f02586?auto=format&fit=crop&w=800&q=80',
-                            specs: [
-                              { key: 'Capacity', value: '1.5 Ton (18000 BTU/h)' },
-                              { key: 'Compressor', value: 'Dual Inverter T3 Tropical' },
-                              { key: 'EER', value: '3.10 W/W (5-Star Saver)' },
-                              { key: 'Refrigerant', value: 'Eco-Friendly R32' },
-                              { key: 'Warranty', value: '12 Years Compressor, 5 Years PCB' },
-                            ],
-                            attrs: {
-                              appliance_type: 'Air Conditioner (AC)',
-                              capacity_spec: '1.5 Ton (18000 BTU)',
-                              inverter_tech: 'Dual Inverter Compressor',
-                              energy_star_rating: '5-Star Super Saver (Up to 70% Energy Save)',
-                              refrigerant_gas: 'Eco-Friendly R32 (Zero ODP)',
-                              compressor_motor_warranty: '12 Years Official Warranty',
-                              spare_parts_warranty: '5 Years Main Board (PCB), 2 Years Free Service',
-                              noise_level_db: '19dB Ultra Quiet Sleep Mode',
-                              special_features: ['3D 4-Way Airflow', 'Golden Fin Anti-Rust Coating', '56°C High-Temp Self-Clean', 'WiFi Smart IoT App Control'],
-                              power_voltage_rating: '220-240V, 50Hz, 1700W, 7.6A',
-                            },
-                          },
-                          {
-                            label: '🧊 Whirlpool 350L Inverter Refrigerator',
-                            title: 'Whirlpool 6th Sense Inverter Frost-Free Refrigerator 350L',
-                            price: '64500',
-                            comparePrice: '69500',
-                            badge: '10 Years Compressor Warranty • 6th Sense Deep Freeze',
-                            desc: 'Capacity\t350 Liters\nCooling Type\tFrost Free Dual Inverter\nCompressor\tIntelliSense Inverter Technology\nEnergy Star\t5-Star Energy Efficient\nShelves\tToughened Glass Shelves\nDeodorizer\tActive Carbon Fresh Filter\nWarranty\t10 Years Compressor, 2 Years Parts',
-                            image: 'https://images.unsplash.com/photo-1571175443880-49e1d25b2bc5?auto=format&fit=crop&w=800&q=80',
-                            specs: [
-                              { key: 'Capacity', value: '350 Liters Frost Free' },
-                              { key: 'Compressor', value: 'IntelliSense Dual Inverter' },
-                              { key: 'Energy Rating', value: '5-Star Energy Saver' },
-                              { key: 'Warranty', value: '10 Years Compressor Warranty' },
-                            ],
-                            attrs: {
-                              appliance_type: 'Refrigerator & Freezer',
-                              capacity_spec: '350 Liters',
-                              inverter_tech: 'Smart Inverter (T3 Tropical)',
-                              energy_star_rating: '5-Star Super Saver (Up to 70% Energy Save)',
-                              refrigerant_gas: 'R600a Isobutane',
-                              compressor_motor_warranty: '10 Years Official Warranty',
-                              spare_parts_warranty: '2 Years Comprehensive Spare Parts',
-                              noise_level_db: '36dB Whisper Quiet',
-                              special_features: ['6th Sense Deep Freeze', 'Toughened Glass Shelves'],
-                              power_voltage_rating: '220-240V / 50Hz, 140W',
-                            },
-                          },
-                          {
-                            label: '📺 4K 55" Google Smart TV',
-                            title: 'Hisense 55 Inch Frameless 4K UHD Google TV Series',
-                            price: '54900',
-                            comparePrice: '58000',
-                            badge: 'Dolby Atmos Audio • 4 Years Panel Warranty',
-                            desc: 'Display Size\t55 Inch UHD 4K\nResolution\t3840 x 2160 Pixels\nOperating System\tGoogle TV OS Licensed\nAudio\tDolby Atmos 24W Stereo Speakers\nHDR\tDolby Vision HDR10+\nWarranty\t4 Years Panel Warranty, 2 Years Motherboard',
-                            image: 'https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?auto=format&fit=crop&w=800&q=80',
-                            specs: [
-                              { key: 'Screen Size', value: '55 Inch Frameless 4K UHD' },
-                              { key: 'Operating System', value: 'Google TV Certified with Voice Remote' },
-                              { key: 'Sound', value: 'Dolby Atmos 24W Studio Sound' },
-                              { key: 'Warranty', value: '4 Years Panel Warranty' },
-                            ],
-                            attrs: {
-                              appliance_type: 'Smart TV & Audio',
-                              capacity_spec: '55 Inch 4K UHD Frameless',
-                              inverter_tech: 'Smart Inverter (T3 Tropical)',
-                              energy_star_rating: '4-Star Energy Efficient',
-                              compressor_motor_warranty: '3 Years Warranty',
-                              spare_parts_warranty: '4 Years Panel Warranty, 2 Years Motherboard',
-                              special_features: ['WiFi Smart IoT App Control'],
-                              power_voltage_rating: '100-240V, 130W Max',
-                            },
-                          },
-                          {
-                            label: '🧺 Toshiba 8.5kg Direct Drive Washer',
-                            title: 'Toshiba Real Inverter Direct Drive Washer 8.5kg',
-                            price: '48900',
-                            comparePrice: '52000',
-                            badge: '10 Years Motor Warranty • 90°C Steam Wash',
-                            desc: 'Washing Capacity\t8.5 kg\nMotor Type\tReal Inverter BLDC Direct Drive\nWash Temperature\tUp to 90°C Anti-Bacterial Steam\nPrograms\t16 Pre-set Programs (15 Min Quick Wash)\nWarranty\t10 Years Motor, 2 Years Spare Parts',
-                            image: 'https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?auto=format&fit=crop&w=800&q=80',
-                            specs: [
-                              { key: 'Capacity', value: '8.5 kg Front Loading' },
-                              { key: 'Motor', value: 'Direct Drive Real Inverter BLDC' },
-                              { key: 'Steam Wash', value: '90°C Anti-Allergy Steam' },
-                              { key: 'Warranty', value: '10 Years Motor Warranty' },
-                            ],
-                            attrs: {
-                              appliance_type: 'Washing Machine & Dryer',
-                              capacity_spec: '8.5 kg Front Loading',
-                              inverter_tech: 'Direct Drive Inverter',
-                              energy_star_rating: 'Inverter Grade A+++',
-                              compressor_motor_warranty: '10 Years Official Warranty',
-                              spare_parts_warranty: '2 Years Spare Parts & Free Service',
-                              noise_level_db: '52dB Silent Wash',
-                              special_features: ['56°C High-Temp Self-Clean', 'WiFi Smart IoT App Control'],
-                              power_voltage_rating: '220-240V, 2000W Heater',
-                            },
-                          },
-                        ].map((preset, pIdx) => (
-                          <button
-                            key={pIdx}
-                            type="button"
-                            onClick={() => {
-                              setProdTitle(preset.title);
-                              setProdPrice(preset.price);
-                              setProdComparePrice(preset.comparePrice);
-                              setProdBadge(preset.badge);
-                              setProdShortDesc(preset.desc);
-                              setProdImage(preset.image);
-                              setProdSpecs(preset.specs);
-                              setProdCustomAttributes(preset.attrs);
-                              setProdNotice(`Preset "${preset.label}" successfully loaded!`);
-                              setTimeout(() => setProdNotice(null), 3000);
-                            }}
-                            className="px-3 py-1.5 rounded-xl bg-white hover:bg-orange-600 hover:text-white text-slate-800 border border-orange-200 text-xs font-bold transition shadow-sm"
-                          >
-                            {preset.label}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {/* Category Selection */}
                     <div className="space-y-1.5">
@@ -3756,7 +3777,7 @@ function DashboardContent() {
                       <input
                         type="text"
                         required
-                        placeholder="e.g. Vintage Full-Grain Leather Briefcase / Rolex Submariner Date"
+                        placeholder="e.g. Hisense Smart Compact Inverter AC 1.5 Ton / Walton Refrigerator"
                         value={prodTitle}
                         onChange={(e) => setProdTitle(e.target.value)}
                         className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:border-rose-500"
@@ -3784,7 +3805,7 @@ function DashboardContent() {
                         type="number"
                         step="0.01"
                         required
-                        placeholder="e.g. 4500"
+                        placeholder="e.g. 45000"
                         value={prodPrice}
                         onChange={(e) => setProdPrice(e.target.value)}
                         className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:border-rose-500"
@@ -3797,7 +3818,7 @@ function DashboardContent() {
                       <input
                         type="number"
                         step="0.01"
-                        placeholder="e.g. 5200"
+                        placeholder="e.g. 52000"
                         value={prodComparePrice}
                         onChange={(e) => setProdComparePrice(e.target.value)}
                         className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:border-rose-500"
@@ -3811,7 +3832,7 @@ function DashboardContent() {
                       <label className="text-xs font-bold text-slate-700">Promotional Ribbon Badge</label>
                       <input
                         type="text"
-                        placeholder="e.g. 100% Genuine Full-Grain Leather, Limited Edition"
+                        placeholder="e.g. 12 Years Compressor Warranty • 0% EMI Available"
                         value={prodBadge}
                         onChange={(e) => setProdBadge(e.target.value)}
                         className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:border-rose-500"
@@ -3822,7 +3843,7 @@ function DashboardContent() {
                       <label className="text-xs font-bold text-slate-700">Selectable Variants / Colors / Sizes</label>
                       <input
                         type="text"
-                        placeholder="e.g. Vintage Brown, Cognac Tan, Matte Black"
+                        placeholder="e.g. 1.0 Ton, 1.5 Ton, 2.0 Ton / Matte Black, Pure White"
                         value={prodVariants}
                         onChange={(e) => setProdVariants(e.target.value)}
                         className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:border-rose-500"
@@ -3830,33 +3851,6 @@ function DashboardContent() {
                       <span className="text-[11px] text-slate-400">Separate options with commas. Displayed as selectable chips on storefront.</span>
                     </div>
                   </div>
-
-                  {/* Dynamic Category Schema Fields (Auto-Generated UI Builder from Specification) */}
-                  {activeCategorySchema && activeCategorySchema.fields?.length > 0 && (
-                    <div className="p-5 rounded-3xl bg-gradient-to-br from-indigo-50/80 via-white to-indigo-50/40 border border-indigo-200/80 shadow-sm space-y-4">
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-indigo-100 pb-3">
-                        <div>
-                          <span className="text-xs font-black text-indigo-950 flex items-center gap-1.5 uppercase tracking-wider">
-                            <Sparkles className="w-4 h-4 text-indigo-600" />
-                            <span>{activeCategorySchema.name || activeCategorySchema.name_bn} — Dynamic Field Builder ({activeCategorySchema.fields.length} Fields)</span>
-                          </span>
-                          <p className="text-[11px] text-slate-500 pt-0.5">
-                            Configure specifications and filter attributes dynamically tailored for this industry category.
-                          </p>
-                        </div>
-                        <span className="text-[11px] font-bold text-indigo-700 bg-indigo-100/70 px-3 py-1 rounded-full border border-indigo-200 w-fit">
-                          Order Fulfillment: {activeCategorySchema.orderType}
-                        </span>
-                      </div>
-
-                      <DynamicFieldRenderer
-                        fields={activeCategorySchema.fields}
-                        values={prodCustomAttributes}
-                        onChange={(key, val) => setProdCustomAttributes((prev) => ({ ...prev, [key]: val }))}
-                        lang="bn"
-                      />
-                    </div>
-                  )}
 
                   {/* Manual / Additional Category Specifications */}
                   <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
@@ -3884,7 +3878,7 @@ function DashboardContent() {
                     {/* Quick suggested chips */}
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <span className="text-[10px] font-bold text-slate-400 uppercase">Quick Add:</span>
-                      {['Material', 'Warranty', 'Dimensions', 'Origin', 'Hardware', 'Color'].map((chip) => (
+                      {['Capacity', 'Compressor', 'Warranty', 'Power / Wattage', 'Dimensions', 'Origin', 'Color'].map((chip) => (
                         <button
                           key={chip}
                           type="button"
@@ -3906,7 +3900,7 @@ function DashboardContent() {
                         <div key={sIdx} className="flex items-center gap-2">
                           <input
                             type="text"
-                            placeholder="Specification (e.g. Material)"
+                            placeholder="Specification (e.g. Capacity)"
                             value={spec.key}
                             onChange={(e) => {
                               const updated = [...prodSpecs];
@@ -3917,7 +3911,7 @@ function DashboardContent() {
                           />
                           <input
                             type="text"
-                            placeholder="Value (e.g. 100% Genuine Full-Grain Leather)"
+                            placeholder="Value (e.g. 1.5 Ton / 18,000 BTU/h)"
                             value={spec.value}
                             onChange={(e) => {
                               const updated = [...prodSpecs];
@@ -4021,26 +4015,7 @@ function DashboardContent() {
                       </div>
                     )}
 
-                    {/* 1-Click Sample Presets */}
-                    <div className="flex items-center gap-2 flex-wrap pt-1 border-t border-slate-200/60">
-                      <span className="text-[10px] font-bold uppercase text-slate-400">1-Click Sample Presets:</span>
-                      {[
-                        { label: '⌚ Luxury Watch', url: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80' },
-                        { label: '👜 Leather Bag', url: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=800&auto=format&fit=crop&q=80' },
-                        { label: '🧥 Leather Jacket', url: 'https://images.unsplash.com/photo-1520639888713-7851133b1ed0?w=800&auto=format&fit=crop&q=80' },
-                        { label: '💻 Laptop PC', url: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&auto=format&fit=crop&q=80' },
-                        { label: '💍 Jewelry', url: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=800&auto=format&fit=crop&q=80' },
-                      ].map((preset) => (
-                        <button
-                          key={preset.label}
-                          type="button"
-                          onClick={() => setProdImages((prev) => [...prev, preset.url])}
-                          className="px-2.5 py-1 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-[11px] font-semibold text-slate-700 transition"
-                        >
-                          + {preset.label}
-                        </button>
-                      ))}
-                    </div>
+
 
                     {/* Product Video / Media URL */}
                     <div className="pt-2 border-t border-slate-200/60">
@@ -4275,7 +4250,7 @@ function DashboardContent() {
                       required
                       value={mediaTitle}
                       onChange={(e) => setMediaTitle(e.target.value)}
-                      placeholder="e.g. Handcrafted Leather Briefcase Durability & Water Test"
+                      placeholder="e.g. Hisense Smart Inverter AC 4-Way Airflow & Cooling Demo"
                       className="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900"
                     />
                   </div>
@@ -4782,31 +4757,7 @@ function DashboardContent() {
                   />
                 </div>
 
-                {/* Dynamic Category Specifications if Schema Exists */}
-                {editSchema && editSchema.fields && editSchema.fields.length > 0 && (
-                  <div className="p-4 rounded-2xl bg-indigo-50/60 border border-indigo-100 space-y-3">
-                    <div className="flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-indigo-600" />
-                      <h5 className="text-xs font-bold uppercase tracking-wider text-indigo-900">
-                        Dynamic Category Specifications ({editSchema.categoryName || 'Category Schema'})
-                      </h5>
-                    </div>
-                    <DynamicFieldRenderer
-                      fields={editSchema.fields}
-                      values={editForm.customAttributes || {}}
-                      onChange={(fieldKey, val) =>
-                        setEditForm((prev: any) => ({
-                          ...prev,
-                          customAttributes: {
-                            ...(prev.customAttributes || {}),
-                            [fieldKey]: val,
-                          },
-                        }))
-                      }
-                      lang="bn"
-                    />
-                  </div>
-                )}
+
 
                 {/* Action Buttons */}
                 <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
@@ -4864,7 +4815,7 @@ function DashboardContent() {
                     <input
                       type="text"
                       required
-                      placeholder="e.g. Leather Bags, Chronographs..."
+                      placeholder="e.g. Air Conditioners, Smart TVs, Inverter Refrigerators..."
                       value={newCatName}
                       onChange={(e) => setNewCatName(e.target.value)}
                       className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-rose-500"
@@ -4874,7 +4825,7 @@ function DashboardContent() {
                     <label className="text-xs font-bold text-slate-700">Campaign Slogan / Promotional Ribbon (Optional)</label>
                     <input
                       type="text"
-                      placeholder="e.g. 100% Genuine Full-Grain Leather & Handcrafted Goods - Flat 15% Festive Discount"
+                      placeholder="e.g. 12 Years Official Brand Warranty & Free Express Delivery - Flat 15% Festive Discount"
                       value={newCatPromoSlogan}
                       onChange={(e) => setNewCatPromoSlogan(e.target.value)}
                       className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-rose-500"
@@ -5151,6 +5102,30 @@ function DashboardContent() {
                   <span className="text-[11px] text-slate-400">Displayed in red ribbon bar at the top of the storefront.</span>
                 </div>
 
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700">Hero Festival Campaign Title</label>
+                  <input
+                    type="text"
+                    value={heroTitle}
+                    onChange={(e) => setHeroTitle(e.target.value)}
+                    placeholder="e.g. Year-End Electronics Discount Festival 2026"
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:border-indigo-600"
+                  />
+                  <span className="text-[11px] text-slate-400">Main headline in the hero festival banner.</span>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700">Hero Subtitle / Campaign Description</label>
+                  <textarea
+                    rows={2}
+                    value={heroSubtitle}
+                    onChange={(e) => setHeroSubtitle(e.target.value)}
+                    placeholder="e.g. Authorized Direct Factory-Grade Inverter ACs, Smart Home Automation..."
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:border-indigo-600"
+                  />
+                  <span className="text-[11px] text-slate-400">Secondary campaign description in the hero banner.</span>
+                </div>
+
                 <div className="pt-4 flex items-center justify-end">
                   <button
                     type="submit"
@@ -5365,8 +5340,14 @@ function DashboardContent() {
                       {showroom.city}
                     </span>
                     <button
-                      onClick={() => {
-                        setShowroomsList((prev) => prev.filter((s) => s.id !== showroom.id));
+                      onClick={async () => {
+                        const updated = showroomsList.filter((s) => s.id !== showroom.id);
+                        setShowroomsList(updated);
+                        try {
+                          await api.updateStoreSettings({ showrooms: updated }, tenantSlug);
+                        } catch (err) {
+                          console.error('Failed to persist showroom removal:', err);
+                        }
                       }}
                       className="text-slate-400 hover:text-rose-600 p-1"
                       title="Delete"
@@ -5436,7 +5417,7 @@ function DashboardContent() {
                   </div>
 
                   <form
-                    onSubmit={(e) => {
+                    onSubmit={async (e) => {
                       e.preventDefault();
                       if (!newShowroomName.trim() || !newShowroomAddress.trim()) return;
                       const newObj = {
@@ -5449,12 +5430,18 @@ function DashboardContent() {
                         hours: newShowroomHours.trim(),
                         isActive: true,
                       };
-                      setShowroomsList((prev) => [newObj, ...prev]);
+                      const updated = [newObj, ...showroomsList];
+                      setShowroomsList(updated);
                       setNewShowroomName('');
                       setNewShowroomAddress('');
                       setShowAddShowroomModal(false);
-                      setProdNotice('New showroom successfully added!');
+                      setProdNotice('New showroom successfully added and published!');
                       setTimeout(() => setProdNotice(null), 3000);
+                      try {
+                        await api.updateStoreSettings({ showrooms: updated }, tenantSlug);
+                      } catch (err) {
+                        console.error('Failed to persist new showroom:', err);
+                      }
                     }}
                     className="space-y-3 text-xs"
                   >

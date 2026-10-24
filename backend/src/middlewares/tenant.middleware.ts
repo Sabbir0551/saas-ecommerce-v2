@@ -19,6 +19,7 @@ export interface TenantData {
   email: string | null;
   address: string | null;
   themeConfig: string | null;
+  settings?: any;
   isActive: boolean;
 }
 
@@ -126,6 +127,7 @@ export async function tenantMiddleware(req: Request, res: Response, next: NextFu
             email: s.email || null,
             address: s.address || null,
             themeConfig: s.themeConfig ? (typeof s.themeConfig === 'string' ? s.themeConfig : JSON.stringify(s.themeConfig)) : null,
+            settings: s,
             isActive: true,
           };
         } catch {}

@@ -27,6 +27,7 @@ import {
   Film,
   ExternalLink,
   Eye,
+  Phone,
 } from 'lucide-react';
 
 function getEmbedUrl(url?: string): string | null {
@@ -136,7 +137,7 @@ function ProductDetailContent() {
         title: cartItemTitle,
         price: item.price,
         quantity: 1,
-        image: item.images?.[0] || 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80',
+        image: item.images?.[0] || 'https://images.unsplash.com/photo-1550009158-9ebf69173e03?auto=format&fit=crop&w=800&q=80',
       });
     }
     setAddedItemNotice(cartItemTitle);
@@ -193,7 +194,7 @@ function ProductDetailContent() {
 
   const imageList: string[] = (Array.isArray(item.images) && item.images.length > 0)
     ? item.images
-    : (item.images ? [item.images] : ['https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80']);
+    : (item.images ? [item.images] : ['https://images.unsplash.com/photo-1550009158-9ebf69173e03?auto=format&fit=crop&w=800&q=80']);
 
   const currentDisplayImg = imageList[activeImageIndex] || imageList[0];
 

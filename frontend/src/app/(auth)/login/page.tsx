@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, Suspense } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { api } from '@/lib/api';
 import {
   Store,
@@ -19,17 +19,36 @@ import {
 
 function LoginContent() {
   const router = useRouter();
-  const [loginMode, setLoginMode] = useState<'merchant' | 'superadmin'>('superadmin');
-  const [tenantSubdomain, setTenantSubdomain] = useState('apexwatches');
-  const [email, setEmail] = useState('superadmin@nexstore.com');
+  const searchParams = useSearchParams();
+  const urlTenant = searchParams.get('tenant') || '';
+  const urlMode = searchParams.get('mode') as 'merchant' | 'superadmin' | null;
+
+  const [loginMode, setLoginMode] = useState<'merchant' | 'superadmin'>('merchant');
+  const [tenantSubdomain, setTenantSubdomain] = useState(urlTenant || 'smartvolt');
+  const [email, setEmail] = useState(urlTenant ? `admin@${urlTenant}.com` : 'admin@smartvolt.com');
   const [password, setPassword] = useState('admin@123');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
+
+  useEffect(() => {
+    if (urlMode === 'superadmin') {
+      setLoginMode('superadmin');
+      setEmail('superadmin@nexstore.com');
+      setPassword('admin@123');
+    } else if (urlTenant) {
+      setLoginMode('merchant');
+      setTenantSubdomain(urlTenant);
+      setEmail(`admin@${urlTenant}.com`);
+      setPassword('admin@123');
+    }
+  }, [urlTenant, urlMode]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setErrorMsg('');
+    setSuccessMsg('');
 
     if (loginMode === 'superadmin') {
       try {
@@ -38,7 +57,10 @@ function LoginContent() {
           if (typeof window !== 'undefined') {
             localStorage.setItem('superadmin_auth', JSON.stringify(res.data));
           }
-          router.push('/super-admin');
+          setSuccessMsg('সুপার অ্যাডমিন অনুমোদিত! রিডাইরেক্ট হচ্ছে...');
+          setTimeout(() => {
+            router.push('/super-admin');
+          }, 400);
           return;
         } else {
           setErrorMsg(res?.message || 'Invalid credentials. Use: superadmin@nexstore.com / admin@123');
@@ -51,9 +73,34 @@ function LoginContent() {
         return;
       }
     } else {
-      setTimeout(() => {
-        router.push(`/admin/dashboard?tenant=${tenantSubdomain.toLowerCase().trim()}`);
-      }, 500);
+      const cleanSub = tenantSubdomain.toLowerCase().trim();
+      try {
+        const res = await api.login({
+          email,
+          password,
+          tenantSlug: cleanSub,
+          role: 'TENANT_ADMIN',
+        });
+        if (res?.success) {
+          if (typeof window !== 'undefined') {
+            localStorage.setItem(`admin_auth_${cleanSub}`, JSON.stringify(res.data));
+            localStorage.setItem('admin_auth', JSON.stringify(res.data));
+          }
+          setSuccessMsg(`স্টোর অ্যাডমিন অনুমোদিত (${res.data?.user?.tenantName || cleanSub})! ড্যাশবোর্ডে প্রবেশ হচ্ছে...`);
+          setTimeout(() => {
+            router.push(`/admin/dashboard?tenant=${cleanSub}`);
+          }, 400);
+          return;
+        } else {
+          setErrorMsg(res?.message || 'Invalid credentials. Default: admin@123');
+          setLoading(false);
+          return;
+        }
+      } catch (err: any) {
+        setErrorMsg('Authentication service unreachable.');
+        setLoading(false);
+        return;
+      }
     }
   };
 
@@ -153,6 +200,13 @@ function LoginContent() {
             <div className="p-3.5 rounded-xl bg-rose-950/80 border border-rose-800 text-rose-300 text-xs font-semibold flex items-center gap-2">
               <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
               <span>{errorMsg}</span>
+            </div>
+          )}
+
+          {successMsg && (
+            <div className="p-3.5 rounded-xl bg-emerald-950/80 border border-emerald-800 text-emerald-300 text-xs font-semibold flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>{successMsg}</span>
             </div>
           )}
 

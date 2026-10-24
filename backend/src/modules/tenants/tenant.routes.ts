@@ -60,7 +60,8 @@ router.get('/current', requireTenant, async (req: Request, res: Response) => {
       success: true,
       data: {
         ...tenant,
-        themeConfig: tenant.themeConfig ? JSON.parse(tenant.themeConfig) : null,
+        settings: tenant.settings || {},
+        themeConfig: tenant.themeConfig ? (typeof tenant.themeConfig === 'string' ? JSON.parse(tenant.themeConfig) : tenant.themeConfig) : null,
         modules,
       },
     });
@@ -586,7 +587,7 @@ router.delete('/brands/:id', requireTenant, async (req: Request, res: Response) 
 router.put('/settings', requireTenant, async (req: Request, res: Response) => {
   try {
     const tenant = req.tenant!;
-    const { name, phone, email, address, announcementText, bannerImage, themeConfig } = req.body;
+    const { name, phone, email, address, announcementText, bannerImage, themeConfig, heroTitle, heroSubtitle, slogan, showrooms } = req.body;
 
     try {
       await prisma.tenant.update({
@@ -616,6 +617,10 @@ router.put('/settings', requireTenant, async (req: Request, res: Response) => {
         if (announcementText !== undefined) pData.settings.announcementText = announcementText;
         if (bannerImage) pData.settings.bannerImage = bannerImage;
         if (themeConfig) pData.settings.themeConfig = themeConfig;
+        if (heroTitle) pData.settings.heroTitle = heroTitle;
+        if (heroSubtitle) pData.settings.heroSubtitle = heroSubtitle;
+        if (slogan) pData.settings.slogan = slogan;
+        if (showrooms) pData.settings.showrooms = showrooms;
         fs.writeFileSync(partitionFile, JSON.stringify(pData, null, 2));
       } catch {}
     }
