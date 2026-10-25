@@ -75,7 +75,7 @@ export function checkStockAvailability(subdomain: string, orderItems: any[]): St
 
     if (available < requestedQty) {
       errors.push(
-        `"${catalogItem.title}" পণ্যের পর্যাপ্ত স্টক নেই (অন-হ্যান্ড: ${onHand}, রিজার্ভ: ${reserved}, বিক্রয়যোগ্য: ${available}, চাওয়া হয়েছে: ${requestedQty})`
+        `Insufficient stock for "${catalogItem.title}" (On-hand: ${onHand}, Reserved: ${reserved}, Available: ${available}, Requested: ${requestedQty})`
       );
     }
   }
@@ -136,7 +136,7 @@ export function createStockReservations(subdomain: string, orderId: string, orde
         unitCost: Number(catalogItem.costPrice || 0),
         totalValue: 0,
         reference: orderNumber,
-        notes: `Order #${orderNumber} এর জন্য ${qty} পিস স্টক লক করা হয়েছে`,
+        notes: `Stock reserved: ${qty} units locked for Order #${orderNumber}`,
         performedBy: 'Checkout Reservation Engine',
         createdAt: now,
       });
@@ -206,7 +206,7 @@ export function fulfillOrderStock(
       sku: catalogItem.sku || 'SKU-UNKNOWN',
       itemTitle: catalogItem.title,
       locationId: catalogItem.locationId || 'loc_main',
-      locationName: 'Main Central Warehouse (ঢাকা কেন্দ্রীয় গুদাম)',
+      locationName: 'Main Central Warehouse (Dhaka Central WH)',
       bin: catalogItem.bin || 'A-01-01',
       movementType: 'SHIP_ORDER',
       qtyChange: -qty,
@@ -214,7 +214,7 @@ export function fulfillOrderStock(
       unitCost: Number(catalogItem.costPrice || 0),
       totalValue: qty * Number(catalogItem.costPrice || 0),
       reference: orderNumber,
-      notes: `Order #${orderNumber} কুরিয়ারে (${courier || 'Steadfast'}) পাঠানো হয়েছে`,
+      notes: `Order #${orderNumber} dispatched via courier (${courier || 'Steadfast'})`,
       performedBy,
       createdAt: now,
     });
@@ -274,7 +274,7 @@ export function cancelOrderStock(
         sku: catalogItem.sku || 'SKU-UNKNOWN',
         itemTitle: catalogItem.title,
         locationId: catalogItem.locationId || 'loc_main',
-        locationName: 'Main Central Warehouse (ঢাকা কেন্দ্রীয় গুদাম)',
+        locationName: 'Main Central Warehouse (Dhaka Central WH)',
         bin: catalogItem.bin || 'A-01-01',
         movementType: 'RETURN_RESTOCK',
         qtyChange: qty,
@@ -282,7 +282,7 @@ export function cancelOrderStock(
         unitCost: Number(catalogItem.costPrice || 0),
         totalValue: qty * Number(catalogItem.costPrice || 0),
         reference: orderNumber,
-        notes: `Order #${orderNumber} বাতিল/রিটার্ন হওয়ায় স্টক পুনরায় গুদামে যুক্ত করা হয়েছে`,
+        notes: `Order #${orderNumber} cancelled/returned: stock restocked into warehouse`,
         performedBy,
         createdAt: now,
       });
@@ -316,7 +316,7 @@ export function cancelOrderStock(
           unitCost: Number(catalogItem.costPrice || 0),
           totalValue: 0,
           reference: orderNumber,
-          notes: `Order #${orderNumber} বাতিল হওয়ায় ${r.quantity} পিস লক স্টক আনলক করা হয়েছে`,
+          notes: `Order #${orderNumber} cancelled: unlocked ${r.quantity} reserved units`,
           performedBy,
           createdAt: now,
         });

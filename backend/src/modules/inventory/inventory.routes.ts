@@ -46,7 +46,7 @@ function saveTenantData(filePath: string, data: any) {
 const DEFAULT_LOCATIONS = [
   {
     id: 'loc_main',
-    name: 'Main Central Warehouse (ঢাকা কেন্দ্রীয় গুদাম)',
+    name: 'Main Central Warehouse (Dhaka Central WH)',
     code: 'WH-MAIN',
     address: 'Tejgaon Industrial Area, Dhaka',
     bins: ['A-01-01', 'A-01-02', 'B-02-01', 'B-02-02', 'C-01-01'],
@@ -611,7 +611,7 @@ router.post('/audits', async (req: Request, res: Response) => {
           sku: catalogItem.sku || 'SKU-UNKNOWN',
           itemTitle: catalogItem.title,
           locationId: locationId || catalogItem.locationId || 'loc_main',
-          locationName: 'Main Central Warehouse (ঢাকা কেন্দ্রীয় গুদাম)',
+          locationName: 'Main Central Warehouse (Dhaka Central WH)',
           bin: catalogItem.bin || 'A-01-01',
           movementType: 'COUNT_ADJUST',
           qtyChange: discrepancy,
@@ -619,7 +619,7 @@ router.post('/audits', async (req: Request, res: Response) => {
           unitCost: Number(catalogItem.costPrice || 0),
           totalValue: Math.abs(discrepancy) * Number(catalogItem.costPrice || 0),
           reference: auditId,
-          notes: `[Cycle Count ${auditId}] ${sessionName}: ${discrepancy > 0 ? '+' + discrepancy + ' পিস উদ্বৃত্ত পাওয়া গেছে' : discrepancy + ' পিস ঘাটতি পাওয়া গেছে'}`,
+          notes: `[Cycle Count ${auditId}] ${sessionName}: ${discrepancy > 0 ? '+' + discrepancy + ' units surplus' : discrepancy + ' units discrepancy/shortage'}`,
           performedBy: conductedBy || 'Inventory Auditor',
           createdAt: now,
         });
@@ -655,7 +655,7 @@ router.post('/audits', async (req: Request, res: Response) => {
 
     res.status(201).json({
       success: true,
-      message: `সাইকেল কাউন্ট অডিট ${auditId} সফলভাবে সম্পন্ন এবং লেজারে রেকর্ড করা হয়েছে!`,
+      message: `Cycle count audit ${auditId} successfully completed and recorded to ledger!`,
       audit: auditSession,
     });
   } catch (error: any) {
@@ -735,7 +735,7 @@ router.post('/suppliers', (req: Request, res: Response) => {
 
     const { name, companyName, phone, email, address, leadTimeDays, paymentTerms, notes } = req.body;
     if (!name || !phone) {
-      return res.status(400).json({ success: false, message: 'সাপ্লায়ারের নাম ও ফোন নম্বর আবশ্যক' });
+      return res.status(400).json({ success: false, message: 'Supplier name and phone number are required' });
     }
 
     if (!Array.isArray(tenantData.suppliers)) {
@@ -761,7 +761,7 @@ router.post('/suppliers', (req: Request, res: Response) => {
 
     res.status(201).json({
       success: true,
-      message: 'নতুন সাপ্লায়ার সফলভাবে নিবন্ধিত হয়েছে',
+      message: 'New supplier registered successfully',
       supplier: newSupplier,
     });
   } catch (error: any) {
@@ -841,7 +841,7 @@ router.post('/purchase-orders', (req: Request, res: Response) => {
     const { supplierId, supplierName, supplierPhone, items, notes, expectedDate, createdBy } = req.body;
 
     if (!Array.isArray(items) || items.length === 0) {
-      return res.status(400).json({ success: false, message: 'অর্ডারের জন্য কমপক্ষে একটি আইটেম নির্বাচন করুন' });
+      return res.status(400).json({ success: false, message: 'Select at least one item for the purchase order' });
     }
 
     if (!Array.isArray(tenantData.purchaseOrders)) {
@@ -889,7 +889,7 @@ router.post('/purchase-orders', (req: Request, res: Response) => {
 
     res.status(201).json({
       success: true,
-      message: `পারচেজ অর্ডার ${poNumber} সফলভাবে তৈরি ও পাঠানো হয়েছে!`,
+      message: `Purchase Order ${poNumber} created and dispatched successfully!`,
       purchaseOrder: newPO,
     });
   } catch (error: any) {
@@ -923,7 +923,7 @@ router.patch('/purchase-orders/:id/status', (req: Request, res: Response) => {
 
     res.status(200).json({
       success: true,
-      message: `পারচেজ অর্ডারের স্ট্যাটাস '${status}' এ আপডেট করা হয়েছে`,
+      message: `Purchase Order status updated to '${status}'`,
       purchaseOrder: targetPO,
     });
   } catch (error: any) {
@@ -958,7 +958,7 @@ router.post('/purchase-orders/:id/receive', (req: Request, res: Response) => {
     } = req.body;
 
     if (!Array.isArray(receivedItems) || receivedItems.length === 0) {
-      return res.status(400).json({ success: false, message: 'অন্তত একটি আইটেমের রিসিভ বিবরণ দিন' });
+      return res.status(400).json({ success: false, message: 'Please provide receive details for at least one item' });
     }
 
     const totalFreight = Math.max(0, Number(freightCost) || 0);
@@ -971,7 +971,7 @@ router.post('/purchase-orders/:id/receive', (req: Request, res: Response) => {
     });
 
     if (totalValidUnits === 0) {
-      return res.status(400).json({ success: false, message: 'রিসিভড কোয়ান্টিটি কমপক্ষে ১ ইউনিট হতে হবে' });
+      return res.status(400).json({ success: false, message: 'Received quantity must be at least 1 unit' });
     }
 
     const surchargePerUnit = totalSurcharges / totalValidUnits;
@@ -1011,7 +1011,7 @@ router.post('/purchase-orders/:id/receive', (req: Request, res: Response) => {
           sku: catalogItem.sku || 'SKU-UNKNOWN',
           itemTitle: catalogItem.title,
           locationId: locationId || catalogItem.locationId || 'loc_main',
-          locationName: 'Main Central Warehouse (ঢাকা কেন্দ্রীয় গুদাম)',
+          locationName: 'Main Central Warehouse (Dhaka Central WH)',
           bin: ri.bin || catalogItem.bin || 'A-01-01',
           movementType: 'RECEIVE_PO',
           qtyChange: receivedQty,
@@ -1019,7 +1019,7 @@ router.post('/purchase-orders/:id/receive', (req: Request, res: Response) => {
           unitCost: landedCostPerUnit,
           totalValue: Math.round(receivedQty * landedCostPerUnit),
           reference: grnNumber,
-          notes: `[GRN ${grnNumber}] PO #${po.poNumber} থেকে রিসিভড। পরিবহন/লেবার চার্জ সহ ল্যান্ডেড কস্ট: ৳${landedCostPerUnit}/পিস`,
+          notes: `[GRN ${grnNumber}] Received from PO #${po.poNumber}. Landed cost including freight/labor: BDT ${landedCostPerUnit}/unit`,
           performedBy: inspectedBy,
           createdAt: now,
         });
@@ -1069,7 +1069,7 @@ router.post('/purchase-orders/:id/receive', (req: Request, res: Response) => {
 
     res.status(201).json({
       success: true,
-      message: `GRN (${grnNumber}) সম্পন্ন হয়েছে! মোট ${totalValidUnits} পিস স্টক ওয়্যারহাউস লেজারে বৃদ্ধি পেয়েছে এবং ল্যান্ডেড কস্ট হালনাগাদ করা হয়েছে।`,
+      message: `GRN (${grnNumber}) completed! Total ${totalValidUnits} units added to stock ledger and landed costs updated.`,
       grn: grnRecord,
       purchaseOrder: po,
     });
@@ -1179,18 +1179,18 @@ router.get('/analytics/abc', (req: Request, res: Response) => {
       let classification: 'A' | 'B' | 'C' = 'C';
       let serviceLevelTarget = '85%';
       let velocity = 'Slow Velocity / Dead Stock Risk';
-      let suggestedAction = '15-20% ফ্ল্যাশ সেল বা বান্ডেল ছাড় দিয়ে ক্যাপিটাল রিলিজ করুন';
+      let suggestedAction = 'Run a 15-20% flash sale or bundle discount to release tied-up capital';
 
       if (cumulativePercent <= 75 || index === 0) {
         classification = 'A';
         serviceLevelTarget = '98%';
         velocity = 'High Velocity (Fast Mover)';
-        suggestedAction = 'সর্বোচ্চ সার্ভিস লেভেল বজায় রাখুন ও নিয়মিত স্টকআউট মনিটর করুন';
+        suggestedAction = 'Maintain maximum service level and proactively monitor stockouts';
       } else if (cumulativePercent <= 92) {
         classification = 'B';
         serviceLevelTarget = '92%';
         velocity = 'Moderate Velocity';
-        suggestedAction = 'পাক্ষিক রিভিউ ও মাঝারি সেফটি বাফার বজায় রাখুন';
+        suggestedAction = 'Perform bi-weekly review and maintain moderate safety buffer';
       } else {
         classification = 'C';
         deadStockCapital += item.tiedUpCapital;
@@ -1316,11 +1316,11 @@ router.post('/transfers', (req: Request, res: Response) => {
     } = req.body;
 
     if (!Array.isArray(items) || items.length === 0) {
-      return res.status(400).json({ success: false, message: 'ট্রান্সফারের জন্য অন্তত একটি আইটেম নির্বাচন করুন' });
+      return res.status(400).json({ success: false, message: 'Please select at least one item for transfer' });
     }
 
     if (fromLocationId === toLocationId) {
-      return res.status(400).json({ success: false, message: 'সোর্স এবং ডেস্টিনেশন লোকেশন ভিন্ন হতে হবে' });
+      return res.status(400).json({ success: false, message: 'Source and destination locations must be different' });
     }
 
     const fromLoc = (tenantData.locations || DEFAULT_LOCATIONS).find((l: any) => l.id === fromLocationId);
@@ -1344,14 +1344,14 @@ router.post('/transfers', (req: Request, res: Response) => {
       const catalogItem = (tenantData.items || []).find((ci: any) => ci.id === item.itemId || ci.sku === item.sku);
 
       if (!catalogItem) {
-        return res.status(400).json({ success: false, message: `পণ্য ${item.sku || item.itemId} খুঁজে পাওয়া যায়নি` });
+        return res.status(400).json({ success: false, message: `Product ${item.sku || item.itemId} not found` });
       }
 
       const currentStock = Number(catalogItem.stockQuantity) || 0;
       if (currentStock < transferQty) {
         return res.status(400).json({
           success: false,
-          message: `${catalogItem.title}-এর পর্যাপ্ত স্টক নেই (বর্তমান স্টক: ${currentStock}, ট্রান্সফার রিকোয়েস্ট: ${transferQty})`,
+          message: `Insufficient stock for ${catalogItem.title} (Current: ${currentStock}, Requested: ${transferQty})`,
         });
       }
 
@@ -1373,7 +1373,7 @@ router.post('/transfers', (req: Request, res: Response) => {
         unitCost: Number(catalogItem.costPrice || 0),
         totalValue: transferQty * Number(catalogItem.costPrice || 0),
         reference: challanNumber,
-        notes: `[Inter-Warehouse Transfer ${challanNumber}] ${toLoc ? toLoc.name : 'Showroom'}-এ হস্তান্তরের জন্য ডিসপ্যাচ (-${transferQty} পিস)`,
+        notes: `[Inter-Warehouse Transfer ${challanNumber}] Dispatched for transfer to ${toLoc ? toLoc.name : 'Showroom'} (-${transferQty} units)`,
         performedBy: dispatchedBy,
         createdAt: now,
       });
@@ -1412,7 +1412,7 @@ router.post('/transfers', (req: Request, res: Response) => {
 
     res.status(201).json({
       success: true,
-      message: `ইন্টার-ওয়্যারহাউস ট্রান্সফার চালান ${challanNumber} সফলভাবে ডিসপ্যাচ ও লেজারে লিপিবদ্ধ হয়েছে!`,
+      message: `Inter-warehouse transfer challan ${challanNumber} successfully dispatched and logged to ledger!`,
       transfer: transferRecord,
     });
   } catch (error: any) {
@@ -1438,7 +1438,7 @@ router.post('/transfers/:id/receive', (req: Request, res: Response) => {
     }
 
     if (transfer.status === 'RECEIVED') {
-      return res.status(400).json({ success: false, message: 'চালানটি আগেই রিসিভ করা হয়েছে' });
+      return res.status(400).json({ success: false, message: 'Challan has already been received' });
     }
 
     const { receivedBy = 'Destination Incharge', notes = '' } = req.body;
@@ -1473,7 +1473,7 @@ router.post('/transfers/:id/receive', (req: Request, res: Response) => {
           unitCost: Number(item.unitCost || catalogItem.costPrice || 0),
           totalValue: item.transferQty * Number(item.unitCost || catalogItem.costPrice || 0),
           reference: transfer.challanNumber,
-          notes: `[Inter-Warehouse Transfer ${transfer.challanNumber}] ${transfer.fromLocationName} থেকে প্রাপ্ত মাল গ্রহণ ও সেলফে জমা (+${item.transferQty} পিস)`,
+          notes: `[Inter-Warehouse Transfer ${transfer.challanNumber}] Received from ${transfer.fromLocationName} and stocked to shelf (+${item.transferQty} units)`,
           performedBy: receivedBy,
           createdAt: now,
         });
@@ -1491,7 +1491,7 @@ router.post('/transfers/:id/receive', (req: Request, res: Response) => {
 
     res.status(200).json({
       success: true,
-      message: `চালান ${transfer.challanNumber} সফলভাবে গ্রহণ করা হয়েছে এবং ডেস্টিনেশন লেজারে স্টক যোগ হয়েছে!`,
+      message: `Challan ${transfer.challanNumber} successfully received and stock added to destination ledger!`,
       transfer,
     });
   } catch (error: any) {
@@ -1579,7 +1579,7 @@ router.get('/analytics/kpis', (req: Request, res: Response) => {
         benchmarks: {
           turnoverRating: turnoverRatio >= 2.0 ? 'EXCELLENT' : turnoverRatio >= 1.0 ? 'HEALTHY' : 'SLOW',
           gmroiRating: gmroi >= 1.5 ? 'VERY PROFITABLE' : 'MODERATE RETURN',
-          cashConversionRecommendation: gmroi >= 1.5 ? `ইনভেন্টরি থেকে প্রতি ১ টাকায় ৳${gmroi} গ্রস প্রফিট জেনারেট হচ্ছে` : 'টার্নওভার বৃদ্ধির জন্য স্লো-মুভার প্রমোশন চালু করুন',
+          cashConversionRecommendation: gmroi >= 1.5 ? `Generating BDT ${gmroi} gross profit per BDT 1 of inventory` : 'Introduce promotions for slow-moving inventory to accelerate turnover',
         },
       },
     });
@@ -1621,7 +1621,7 @@ router.get('/ledger/verify-integrity', (req: Request, res: Response) => {
       latestEntryDate: ledger[0]?.createdAt || null,
       verificationSeal: `SEC-SHA256-${verificationSeal.substring(0, 16).toUpperCase()}`,
       auditStatus: 'VERIFIED_AUDIT_COMPLIANT',
-      message: 'সকল লেজার রেকর্ড ইমিউটেবল ও সম্পূর্ণ অক্ষত রয়েছে (০ টি মুছে ফেলা বা টেম্পার রেকর্ড শনাক্ত হয়েছে)',
+      message: 'All ledger records are immutable and fully intact (0 deleted or tampered records detected)',
     });
   } catch (error: any) {
     console.error('Error verifying ledger integrity:', error);

@@ -145,7 +145,7 @@ function ServiceBookingContent() {
                 </div>
                 <div className="text-right">
                   <span className="text-xs text-slate-400 block font-medium">Consultation Fee</span>
-                  <span className="text-lg font-extrabold text-slate-900">৳ {service.price}</span>
+                  <span className="text-lg font-extrabold text-slate-900">BDT {service.price}</span>
                 </div>
               </div>
             )}
@@ -305,7 +305,7 @@ function ServiceBookingContent() {
                   </div>
                   <div className="flex justify-between text-slate-600 pt-1 border-t border-slate-200">
                     <span>Consultation Fee:</span>
-                    <span className="font-extrabold text-slate-900">৳ {service?.price || 500} (Pay at Clinic)</span>
+                    <span className="font-extrabold text-slate-900">BDT {service?.price || 500} (Pay at Clinic)</span>
                   </div>
                 </div>
 

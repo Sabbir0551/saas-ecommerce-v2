@@ -351,6 +351,25 @@ router.post('/items', requireTenant, async (req: Request, res: Response) => {
     } catch {}
   }
 
+  // Subscription Status & Product Quota Gatekeeper
+  if (tenant.subscription && tenant.subscription.status === 'suspended') {
+    res.status(403).json({
+      success: false,
+      message: 'Store subscription is currently suspended or past due. Please contact Super-Admin to reactivate.',
+    });
+    return;
+  }
+
+  const maxAllowedProducts = tenant.features?.maxProducts || 500;
+  const currentProductsCount = Array.isArray(partitionData?.items) ? partitionData.items.length : 0;
+  if (currentProductsCount >= maxAllowedProducts) {
+    res.status(403).json({
+      success: false,
+      message: `Product limit reached (${currentProductsCount}/${maxAllowedProducts} items). Please upgrade your subscription tier in 'Subscription & Limits' to add more items.`,
+    });
+    return;
+  }
+
   let brandObj: any = null;
   if (partitionData?.brands && brandId) {
     brandObj = partitionData.brands.find((b: any) => b.id === brandId || b.slug === brandId || b.name === brandId);

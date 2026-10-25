@@ -563,11 +563,11 @@ function StorefrontContent({ tenantSlug }: { tenantSlug: string }) {
                               </span>
                               <div className="flex items-baseline gap-2">
                                 <span className="text-xl font-extrabold text-slate-900">
-                                  ৳ {item.price.toLocaleString()}
+                                  BDT {item.price.toLocaleString()}
                                 </span>
                                 {item.comparePrice && (
                                   <span className="text-xs text-slate-400 line-through">
-                                    ৳ {item.comparePrice.toLocaleString()}
+                                    BDT {item.comparePrice.toLocaleString()}
                                   </span>
                                 )}
                               </div>
@@ -578,10 +578,10 @@ function StorefrontContent({ tenantSlug }: { tenantSlug: string }) {
                                 href={`/products/${item.slug || item.id}?tenant=${tenantSlug}`}
                                 onClick={(e) => e.stopPropagation()}
                                 className="px-3.5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition flex items-center gap-1.5 active:scale-95 shadow-sm"
-                                title="সম্পূর্ণ ডিসপ্লেতে বিস্তারিত দেখুন"
+                                title="View details in full display"
                               >
                                 <Eye className="w-3.5 h-3.5" />
-                                <span>বিস্তারিত</span>
+                                <span>Details</span>
                               </Link>
 
                               {isService ? (
@@ -769,7 +769,7 @@ function StorefrontContent({ tenantSlug }: { tenantSlug: string }) {
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold transition shadow-sm"
                 >
                   <ExternalLink className="w-3.5 h-3.5" />
-                  <span>সম্পূর্ণ ডিসপ্লেতে বিস্তারিত ও অন্যান্য প্রোডাক্ট দেখুন</span>
+                  <span>View full product details and related items</span>
                 </Link>
                 <button
                   onClick={() => {
@@ -872,11 +872,11 @@ function StorefrontContent({ tenantSlug }: { tenantSlug: string }) {
                   {/* Pricing Section */}
                   <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-baseline gap-3">
                     <span className="text-2xl font-black text-slate-950">
-                      ৳ {modalItem.price.toLocaleString()}
+                      BDT {modalItem.price.toLocaleString()}
                     </span>
                     {modalItem.comparePrice && (
                       <span className="text-sm text-slate-400 line-through">
-                        ৳ {modalItem.comparePrice.toLocaleString()}
+                        BDT {modalItem.comparePrice.toLocaleString()}
                       </span>
                     )}
                     <span className="text-xs font-bold text-emerald-600 ml-auto">In Stock & Ready to Ship</span>
@@ -1001,7 +1001,7 @@ function StorefrontContent({ tenantSlug }: { tenantSlug: string }) {
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold uppercase tracking-wider text-rose-600 flex items-center gap-1.5">
                       <Play className="w-3.5 h-3.5 fill-rose-600" />
-                      <span>ভিডিও ডেমোনস্ট্রেশন ও রিভিউ ({relatedVideo.type})</span>
+                      <span>Video Demonstration & Review ({relatedVideo.type})</span>
                     </span>
                     <span className="text-xs text-slate-500 font-medium truncate max-w-sm">{relatedVideo.title}</span>
                   </div>
@@ -1021,7 +1021,15 @@ function StorefrontContent({ tenantSlug }: { tenantSlug: string }) {
         );
       })()}
 
-      <Footer tenantSlug={tenantSlug} storeName={tenant?.name} />
+      <Footer 
+        tenantSlug={tenantSlug} 
+        storeName={tenant?.name} 
+        phone={tenant?.phone || tenant?.settings?.phone}
+        email={tenant?.email || tenant?.settings?.email}
+        address={tenant?.address || tenant?.settings?.address}
+        dbid={tenant?.settings?.dbidRegistrationNo}
+        tradeLicense={tenant?.settings?.tradeLicenseNo}
+      />
     </div>
   );
 }

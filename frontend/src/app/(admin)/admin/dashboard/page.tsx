@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { api } from '@/lib/api';
 import { InventoryManager } from '@/components/InventoryManager';
+import SaaSInvoiceModal from '@/components/SaaSInvoiceModal';
 import {
   Boxes,
   LayoutDashboard,
@@ -75,6 +76,7 @@ import {
   Lock,
   KeyRound,
   ArrowRight,
+  CreditCard,
 } from 'lucide-react';
 
 function DashboardContent() {
@@ -83,7 +85,7 @@ function DashboardContent() {
 
   const todayStr = new Date().toISOString().split('T')[0];
   const [selectedSheetDate, setSelectedSheetDate] = useState(todayStr);
-  const [activeTab, setActiveTab] = useState<'overview' | 'orders' | 'inventory' | 'media' | 'products' | 'categories' | 'brands' | 'settings' | 'modules' | 'appointments' | 'showrooms'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'orders' | 'inventory' | 'media' | 'products' | 'categories' | 'brands' | 'settings' | 'modules' | 'appointments' | 'showrooms' | 'subscription'>('overview');
   const [productSubTab, setProductSubTab] = useState<'catalog' | 'media'>('catalog');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [revenueMetric, setRevenueMetric] = useState<'MRR' | 'ARR'>('MRR');
@@ -98,6 +100,31 @@ function DashboardContent() {
   const [adminLoginLoading, setAdminLoginLoading] = useState<boolean>(false);
   const [adminLoginError, setAdminLoginError] = useState<string>('');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  // Merchant Subscription & Plan State
+  const [subscriptionData, setSubscriptionData] = useState<any>(null);
+  const [loadingSubscription, setLoadingSubscription] = useState<boolean>(false);
+  const [merchantRequestText, setMerchantRequestText] = useState('');
+  const [merchantRequestNotice, setMerchantRequestNotice] = useState<string | null>(null);
+  const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
+  const [showInvoiceModal, setShowInvoiceModal] = useState<boolean>(false);
+
+  useEffect(() => {
+    async function loadTenantSubscriptionData() {
+      try {
+        setLoadingSubscription(true);
+        const res = await api.getTenantSubscription(tenantSlug);
+        if (res?.success && res.data) {
+          setSubscriptionData(res.data);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoadingSubscription(false);
+      }
+    }
+    loadTenantSubscriptionData();
+  }, [tenantSlug, refreshTrigger]);
 
   // Electronics Showrooms state
   const [showroomsList, setShowroomsList] = useState<any[]>([
@@ -270,6 +297,20 @@ function DashboardContent() {
   const [savingSettings, setSavingSettings] = useState(false);
   const [settingsNotice, setSettingsNotice] = useState<string | null>(null);
 
+  // Master Setup & Integrations state
+  const [metaPixelId, setMetaPixelId] = useState('');
+  const [googleAnalyticsId, setGoogleAnalyticsId] = useState('');
+  const [customDomain, setCustomDomain] = useState('');
+  const [whatsappNumber, setWhatsappNumber] = useState('');
+  const [whatsappWelcomeMsg, setWhatsappWelcomeMsg] = useState('');
+  const [steadfastApiKey, setSteadfastApiKey] = useState('');
+  const [steadfastSecretKey, setSteadfastSecretKey] = useState('');
+  const [pathaoStoreId, setPathaoStoreId] = useState('');
+  const [pathaoClientId, setPathaoClientId] = useState('');
+  const [pathaoClientSecret, setPathaoClientSecret] = useState('');
+  const [dbidRegistrationNo, setDbidRegistrationNo] = useState('');
+  const [tradeLicenseNo, setTradeLicenseNo] = useState('');
+
   // Appointment Sheet state
   const [sheetData, setSheetData] = useState<any[]>([]);
   const [loadingSheet, setLoadingSheet] = useState(false);
@@ -301,7 +342,7 @@ function DashboardContent() {
   // Fraud Prevention, Device, Geolocation & Blacklist States
   const [mapModalOrder, setMapModalOrder] = useState<any | null>(null);
   const [blockModalOrder, setBlockModalOrder] = useState<any | null>(null);
-  const [blockReason, setBlockReason] = useState('ভুয়া অর্ডার / বারবার পার্সেল বাতিল ও রিটার্ন');
+  const [blockReason, setBlockReason] = useState('Fraudulent order / Repeated cancellations and returns');
   const [isBlocking, setIsBlocking] = useState(false);
   const [fraudFilterTab, setFraudFilterTab] = useState<'all' | 'high_risk' | 'blocked' | 'trusted'>('all');
   const [customerHistoryModal, setCustomerHistoryModal] = useState<any | null>(null);
@@ -372,7 +413,7 @@ function DashboardContent() {
         setIsAdminAuthenticated(true);
         setRefreshTrigger((prev) => prev + 1);
       } else {
-        setAdminLoginError(res?.message || 'ভুল ইমেইল বা পাসওয়ার্ড। ডিফল্ট: admin@123');
+        setAdminLoginError(res?.message || 'Invalid email or password. Default: admin@123');
       }
     } catch (err: any) {
       setAdminLoginError('Authentication service unreachable.');
@@ -415,6 +456,18 @@ function DashboardContent() {
           setAnnouncementText(t.announcementText || t.settings?.announcementText || t.settings?.slogan || 'Special Launch Offer! Free express delivery across the country on all orders');
           setHeroTitle(t.settings?.heroTitle || t.heroTitle || 'Year-End Electronics Discount Festival 2026');
           setHeroSubtitle(t.settings?.heroSubtitle || t.heroSubtitle || 'Authorized Direct Factory-Grade Inverter ACs, Smart Home Automation, and Heavy Industrial Switchgear with Official Brand Warranty.');
+          setMetaPixelId(t.settings?.metaPixelId || '');
+          setGoogleAnalyticsId(t.settings?.googleAnalyticsId || '');
+          setCustomDomain(t.settings?.customDomain || t.customDomain || '');
+          setWhatsappNumber(t.settings?.whatsappNumber || t.phone || '');
+          setWhatsappWelcomeMsg(t.settings?.whatsappWelcomeMsg || '');
+          setSteadfastApiKey(t.settings?.steadfastApiKey || '');
+          setSteadfastSecretKey(t.settings?.steadfastSecretKey || '');
+          setPathaoStoreId(t.settings?.pathaoStoreId || '');
+          setPathaoClientId(t.settings?.pathaoClientId || '');
+          setPathaoClientSecret(t.settings?.pathaoClientSecret || '');
+          setDbidRegistrationNo(t.settings?.dbidRegistrationNo || '');
+          setTradeLicenseNo(t.settings?.tradeLicenseNo || '');
           if (t.settings?.showrooms && Array.isArray(t.settings.showrooms) && t.settings.showrooms.length > 0) {
             setShowroomsList(t.settings.showrooms);
           }
@@ -966,14 +1019,14 @@ function DashboardContent() {
           setOrders(updatedOrdersRes.data);
         }
         setBlockModalOrder(null);
-        setOrderNotice(`কাস্টমার "${targetName || targetPhone}" কে ব্লক করা হয়েছে।`);
+        setOrderNotice(`Customer "${targetName || targetPhone}" has been blocked.`);
         setTimeout(() => setOrderNotice(null), 3500);
       } else {
-        alert(res?.message || 'কাস্টমার ব্লক করতে ব্যর্থ হয়েছে');
+        alert(res?.message || 'Failed to block customer');
       }
     } catch (err) {
       console.error(err);
-      alert('সার্ভার এরর');
+      alert('Server error');
     } finally {
       setIsBlocking(false);
     }
@@ -983,7 +1036,7 @@ function DashboardContent() {
     const targetPhone = typeof target === 'string' ? target : (target?.customerPhone || target?.phone || '');
     const targetEmail = typeof target === 'object' ? (target?.customerEmail || target?.email) : undefined;
     const targetIp = typeof target === 'object' ? (target?.ipAddress || target?.clientIp || target?.ip) : undefined;
-    const displayName = typeof target === 'string' ? target : (target?.customerName || target?.customerPhone || 'কাস্টমার');
+    const displayName = typeof target === 'string' ? target : (target?.customerName || target?.customerPhone || 'Customer');
 
     try {
       const res = await api.unblockCustomer(
@@ -1000,7 +1053,7 @@ function DashboardContent() {
         if (updatedOrdersRes?.success && Array.isArray(updatedOrdersRes.data)) {
           setOrders(updatedOrdersRes.data);
         }
-        setOrderNotice(`কাস্টমার "${displayName}" আনব্লক করা হয়েছে।`);
+        setOrderNotice(`Customer "${displayName}" has been unblocked.`);
         setTimeout(() => setOrderNotice(null), 3500);
       }
     } catch (err) {
@@ -1132,12 +1185,50 @@ function DashboardContent() {
           announcementText: announcementText.trim(),
           heroTitle: heroTitle.trim(),
           heroSubtitle: heroSubtitle.trim(),
+          metaPixelId: metaPixelId.trim(),
+          googleAnalyticsId: googleAnalyticsId.trim(),
+          customDomain: customDomain.trim(),
+          whatsappNumber: whatsappNumber.trim(),
+          whatsappWelcomeMsg: whatsappWelcomeMsg.trim(),
+          steadfastApiKey: steadfastApiKey.trim(),
+          steadfastSecretKey: steadfastSecretKey.trim(),
+          pathaoStoreId: pathaoStoreId.trim(),
+          pathaoClientId: pathaoClientId.trim(),
+          pathaoClientSecret: pathaoClientSecret.trim(),
+          dbidRegistrationNo: dbidRegistrationNo.trim(),
+          tradeLicenseNo: tradeLicenseNo.trim(),
         },
         tenantSlug
       );
       if (res?.success) {
-        setSettingsNotice('Store settings, branding, and hero banner saved successfully!');
-        if (tenantInfo) setTenantInfo({ ...tenantInfo, name: storeName, phone: storePhone, email: storeEmail, address: storeAddress, announcementText, heroTitle, heroSubtitle });
+        setSettingsNotice('Master configuration, tracking pixels, courier credentials & domain saved successfully!');
+        if (tenantInfo) {
+          setTenantInfo({
+            ...tenantInfo,
+            name: storeName,
+            phone: storePhone,
+            email: storeEmail,
+            address: storeAddress,
+            announcementText,
+            heroTitle,
+            heroSubtitle,
+            settings: {
+              ...tenantInfo.settings,
+              metaPixelId,
+              googleAnalyticsId,
+              customDomain,
+              whatsappNumber,
+              whatsappWelcomeMsg,
+              steadfastApiKey,
+              steadfastSecretKey,
+              pathaoStoreId,
+              pathaoClientId,
+              pathaoClientSecret,
+              dbidRegistrationNo,
+              tradeLicenseNo,
+            },
+          });
+        }
         setTimeout(() => setSettingsNotice(null), 3500);
       }
     } catch (err) {
@@ -1200,13 +1291,13 @@ function DashboardContent() {
               className="px-3.5 py-2 rounded-xl bg-[#111728] hover:bg-[#1A2238] border border-[#1E2840] text-slate-300 font-semibold transition flex items-center gap-1.5"
             >
               <ExternalLink className="w-3.5 h-3.5 text-emerald-400" />
-              <span>লাইভ স্টোর দেখুন</span>
+              <span>View Live Store</span>
             </Link>
             <Link
               href="/login"
               className="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold transition shadow-md shadow-indigo-600/20"
             >
-              সুইচ স্টোর / প্ল্যাটফর্ম লগইন
+              Switch Store / Platform Login
             </Link>
           </div>
         </header>
@@ -1220,10 +1311,10 @@ function DashboardContent() {
                 <Lock className="w-7 h-7 text-indigo-400" />
               </div>
               <h1 className="text-2xl font-black text-white tracking-tight">
-                স্টোর অ্যাডমিন লগইন
+                Store Admin Login
               </h1>
               <p className="text-xs text-slate-400">
-                ড্যাশবোর্ড, সেলস অ্যানালিটিক্স ও অর্ডার নিয়ন্ত্রণে প্রবেশ করতে আপনার ক্রেডেনশিয়াল প্রদান করুন।
+                Enter your credentials to access dashboard, sales analytics and order management.
               </p>
             </div>
 
@@ -1238,7 +1329,7 @@ function DashboardContent() {
             <form onSubmit={handleDashboardAdminLogin} className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-2">
-                  অ্যাডমিন ইমেইল (Store Admin Email)
+                  Store Admin Email
                 </label>
                 <div className="relative">
                   <Mail className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -1256,7 +1347,7 @@ function DashboardContent() {
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <label className="text-xs font-semibold text-slate-300">
-                    পাসওয়ার্ড (Password)
+                    Password
                   </label>
                   <button
                     type="button"
@@ -1266,7 +1357,7 @@ function DashboardContent() {
                     }}
                     className="text-[11px] text-indigo-400 hover:text-indigo-300 font-semibold"
                   >
-                    ⚡ অটো-ফিল ডিফল্ট
+                    ⚡ Auto-fill Default
                   </button>
                 </div>
                 <div className="relative">
@@ -1290,12 +1381,12 @@ function DashboardContent() {
                 {adminLoginLoading ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>যাচাই করা হচ্ছে...</span>
+                    <span>Authenticating...</span>
                   </>
                 ) : (
                   <>
                     <KeyRound className="w-4 h-4" />
-                    <span>ড্যাশবোর্ডে প্রবেশ করুন (Unlock Console)</span>
+                    <span>Sign in to Dashboard (Unlock Console)</span>
                     <ArrowRight className="w-4 h-4" />
                   </>
                 )}
@@ -1305,7 +1396,7 @@ function DashboardContent() {
             {/* Quick Demo Assist */}
             <div className="pt-4 border-t border-[#182033] text-center space-y-2">
               <span className="text-[11px] text-slate-400 block font-semibold">
-                ডেমো অ্যাডমিন অ্যাক্সেস তথ্য:
+                Demo Admin Credentials:
               </span>
               <div className="bg-[#111728] p-3 rounded-xl border border-[#1E2840] text-[11px] text-slate-300 flex items-center justify-between">
                 <div>
@@ -1575,6 +1666,19 @@ function DashboardContent() {
                 <Sliders className={`w-4 h-4 shrink-0 ${activeTab === 'settings' ? 'text-indigo-400' : 'text-slate-400'}`} />
                 {!sidebarCollapsed && <span>Store Settings</span>}
               </button>
+
+              <button
+                onClick={() => setActiveTab('subscription')}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition ${
+                  activeTab === 'subscription'
+                    ? 'bg-[#201A3D] text-indigo-300 border border-indigo-500/30 shadow-sm'
+                    : 'text-slate-400 hover:bg-[#111625] hover:text-slate-200'
+                }`}
+                title="Subscription & Plan Limits"
+              >
+                <CreditCard className={`w-4 h-4 shrink-0 ${activeTab === 'subscription' ? 'text-indigo-400' : 'text-slate-400'}`} />
+                {!sidebarCollapsed && <span>Subscription & Limits</span>}
+              </button>
             </div>
           </div>
 
@@ -1601,7 +1705,7 @@ function DashboardContent() {
                   <button
                     onClick={handleDashboardAdminLogout}
                     className="w-7 h-7 rounded-lg text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 flex items-center justify-center transition cursor-pointer"
-                    title="সাইন আউট (Logout)"
+                    title="Sign Out"
                   >
                     <LogOut className="w-3.5 h-3.5" />
                   </button>
@@ -1758,7 +1862,7 @@ function DashboardContent() {
                     className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-rose-400 hover:text-white hover:bg-rose-500/20 transition font-semibold text-left cursor-pointer"
                   >
                     <LogOut className="w-4 h-4 text-rose-400" />
-                    <span>লগআউট (Sign Out)</span>
+                    <span>Sign Out</span>
                   </button>
                 </div>
               )}
@@ -2414,13 +2518,13 @@ function DashboardContent() {
             <div className="flex items-center gap-2 overflow-x-auto pb-1">
               <span className="text-xs font-bold text-slate-500 whitespace-nowrap flex items-center gap-1">
                 <ShieldCheck className="w-3.5 h-3.5 text-indigo-600" />
-                <span>সিকিউরিটি ফিল্টার:</span>
+                <span>Security Filter:</span>
               </span>
               {[
-                { id: 'all', label: 'সব অর্ডার (All)' },
-                { id: 'high_risk', label: '🚨 ভুয়া অর্ডার ঝুঁকি (High Risk)', color: 'text-rose-700 bg-rose-50 border-rose-300' },
-                { id: 'blocked', label: '🚫 ব্লক করা কাস্টমার (Blocked)', color: 'text-red-700 bg-red-50 border-red-300' },
-                { id: 'trusted', label: '💎 বিশ্বস্ত কাস্টমার (Trusted)', color: 'text-emerald-700 bg-emerald-50 border-emerald-300' },
+                { id: 'all', label: 'All Orders' },
+                { id: 'high_risk', label: '🚨 High Risk Orders', color: 'text-rose-700 bg-rose-50 border-rose-300' },
+                { id: 'blocked', label: '🚫 Blocked Customers', color: 'text-red-700 bg-red-50 border-red-300' },
+                { id: 'trusted', label: '💎 Trusted Customers', color: 'text-emerald-700 bg-emerald-50 border-emerald-300' },
               ].map((f) => (
                 <button
                   key={f.id}
@@ -2556,31 +2660,31 @@ function DashboardContent() {
                               {ord.isBlockedCustomer ? (
                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-red-100 text-red-800 border border-red-300">
                                   <Ban className="w-3 h-3 text-red-600" />
-                                  🚫 ব্লক করা কাস্টমার
+                                  🚫 Blocked Customer
                                 </span>
                               ) : ord.addressDiscrepancy ? (
                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-100 text-rose-800 border border-rose-300 animate-pulse">
                                   <AlertCircle className="w-3 h-3 text-rose-600" />
-                                  🚨 ভুয়া অর্ডার ঝুঁকি (IP অমিল)
+                                  🚨 High Risk (IP Mismatch)
                                 </span>
                               ) : ord.customerHistory?.trustScore === 'EXCELLENT' ? (
                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300">
                                   <Award className="w-3 h-3 text-emerald-600" />
-                                  💎 অত্যন্ত বিশ্বস্ত ({ord.customerHistory?.deliverySuccessRate}%)
+                                  💎 Highly Trusted ({ord.customerHistory?.deliverySuccessRate}%)
                                 </span>
                               ) : ord.customerHistory?.trustScore === 'GOOD' ? (
                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-blue-100 text-blue-800 border border-blue-300">
                                   <CheckCircle className="w-3 h-3 text-blue-600" />
-                                  ✓ বিশ্বস্ত ({ord.customerHistory?.deliverySuccessRate}%)
+                                  ✓ Trusted ({ord.customerHistory?.deliverySuccessRate}%)
                                 </span>
                               ) : ord.customerHistory?.trustScore === 'RISK' ? (
                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-100 text-rose-800 border border-rose-300">
                                   <AlertCircle className="w-3 h-3 text-rose-600" />
-                                  ⚠️ সন্দেহজনক কাস্টমার ({ord.customerHistory?.deliverySuccessRate}%)
+                                  ⚠️ Suspicious Customer ({ord.customerHistory?.deliverySuccessRate}%)
                                 </span>
                               ) : (
                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700">
-                                  ✨ নতুন কাস্টমার
+                                  ✨ New Customer
                                 </span>
                               )}
                             </div>
@@ -2601,10 +2705,10 @@ function DashboardContent() {
                                 type="button"
                                 onClick={() => handleViewCustomerHistory(ord.customerPhone, ord.customerName)}
                                 className="inline-flex items-center gap-1 text-[11px] font-bold text-indigo-600 hover:text-indigo-800 underline bg-indigo-50 px-2 py-0.5 rounded-lg border border-indigo-100 transition hover:bg-indigo-100"
-                                title="কাস্টমারের আগের সব অর্ডার হিস্ট্রি দেখুন"
+                                title="View customer past order history"
                               >
                                 <Eye className="w-3 h-3" />
-                                <span>হিস্ট্রি</span>
+                                <span>History</span>
                               </button>
                             </div>
 
@@ -2612,21 +2716,21 @@ function DashboardContent() {
                             {ord.customerHistory && (
                               <div className="p-2 rounded-xl bg-slate-50 border border-slate-200 text-[11px] space-y-1">
                                 <div className="flex items-center justify-between text-slate-600 font-semibold text-[10px]">
-                                  <span>লাইফটাইম অর্ডার রেকর্ড:</span>
-                                  <span className="font-mono font-bold text-slate-900">মোট {ord.customerHistory.totalOrders} টি</span>
+                                  <span>Lifetime Order Record:</span>
+                                  <span className="font-mono font-bold text-slate-900">{ord.customerHistory.totalOrders} Total</span>
                                 </div>
                                 <div className="grid grid-cols-3 gap-1 text-center font-mono text-[10px]">
                                   <div className="bg-emerald-50 text-emerald-800 rounded p-1 border border-emerald-200">
                                     <span className="block font-bold">✓ {ord.customerHistory.deliveredOrders}</span>
-                                    <span className="text-[9px] text-emerald-600 font-sans">সফল</span>
+                                    <span className="text-[9px] text-emerald-600 font-sans">Delivered</span>
                                   </div>
                                   <div className="bg-rose-50 text-rose-800 rounded p-1 border border-rose-200">
                                     <span className="block font-bold">✕ {ord.customerHistory.cancelledOrders}</span>
-                                    <span className="text-[9px] text-rose-600 font-sans">বাতিল</span>
+                                    <span className="text-[9px] text-rose-600 font-sans">Cancelled</span>
                                   </div>
                                   <div className="bg-indigo-50 text-indigo-800 rounded p-1 border border-indigo-200">
                                     <span className="block font-bold">{ord.customerHistory.deliverySuccessRate}%</span>
-                                    <span className="text-[9px] text-indigo-600 font-sans">সফলতার হার</span>
+                                    <span className="text-[9px] text-indigo-600 font-sans">Success Rate</span>
                                   </div>
                                 </div>
                               </div>
@@ -2660,7 +2764,7 @@ function DashboardContent() {
                                 <div className="p-1.5 rounded-lg bg-rose-500/20 border border-rose-500/40 text-rose-200 text-[10px] flex items-center gap-1.5">
                                   <AlertCircle className="w-3.5 h-3.5 text-rose-400 shrink-0" />
                                   <span>
-                                    <strong>সতর্কতা:</strong> IP সিটি ({ord.ipCity}) ও ডেলিভারি সিটি ({ord.city}) আলাদা!
+                                    <strong>Warning:</strong> IP City ({ord.ipCity}) & Delivery City ({ord.city}) do not match!
                                   </span>
                                 </div>
                               )}
@@ -2672,7 +2776,7 @@ function DashboardContent() {
                                 className="w-full mt-1 py-1 px-2 rounded-lg bg-cyan-600/20 hover:bg-cyan-600/40 text-cyan-300 border border-cyan-500/30 font-bold text-[10px] transition flex items-center justify-center gap-1.5"
                               >
                                 <Globe className="w-3 h-3 text-cyan-400" />
-                                <span>গুগল ম্যাপে IP লোকেশন পিন দেখুন</span>
+                                <span>View IP Location Pin on Google Maps</span>
                               </button>
                             </div>
 
@@ -2760,6 +2864,30 @@ function DashboardContent() {
                                       <option value="RedX Delivery">RedX Delivery</option>
                                       <option value="Paperfly Express">Paperfly Express</option>
                                     </select>
+                                    <button
+                                      type="button"
+                                      onClick={async () => {
+                                        try {
+                                          const res = await api.dispatchOrderToCourier(
+                                            ord.id,
+                                            { courier: ord.courier || 'Steadfast Courier' },
+                                            tenantSlug
+                                          );
+                                          if (res?.success) {
+                                            setOrderNotice(`Order #${ord.orderNumber} booked with ${ord.courier || 'Steadfast'}! Consignment tracking: ${res.data?.trackingCode}`);
+                                            setRefreshTrigger((prev) => prev + 1);
+                                            setTimeout(() => setOrderNotice(null), 4000);
+                                          }
+                                        } catch (e) {
+                                          console.error(e);
+                                        }
+                                      }}
+                                      className="px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-[11px] border border-indigo-200 transition flex items-center gap-1 shadow-xs"
+                                      title="Dispatch Consignment to Courier API"
+                                    >
+                                      <Truck className="w-3 h-3 text-indigo-600" />
+                                      <span>Dispatch API</span>
+                                    </button>
                                   </div>
                                 </div>
                               </>
@@ -2857,19 +2985,19 @@ function DashboardContent() {
                               <button
                                 onClick={() => handleUnblockCustomer(ord.customerPhone)}
                                 className="px-3 py-1.5 rounded-xl text-xs font-bold bg-red-100 hover:bg-red-200 text-red-800 border border-red-300 transition flex items-center gap-1 shadow-sm active:scale-95"
-                                title="কাস্টমার আনব্লক করুন"
+                                title="Unblock Customer"
                               >
                                 <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
-                                <span>আনব্লক করুন</span>
+                                <span>Unblock</span>
                               </button>
                             ) : (
                               <button
                                 onClick={() => setBlockModalOrder(ord)}
                                 className="px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 transition flex items-center gap-1 shadow-sm active:scale-95"
-                                title="ভুয়া কাস্টমার ব্লক করুন"
+                                title="Block Fraud Customer"
                               >
                                 <Ban className="w-3.5 h-3.5 text-rose-600" />
-                                <span>কাস্টমার ব্লক</span>
+                                <span>Block Customer</span>
                               </button>
                             )}
 
@@ -3241,7 +3369,7 @@ function DashboardContent() {
                   </div>
                   <div>
                     <h3 className="text-base font-extrabold text-slate-900">
-                      অর্ডার ডিভাইস ও IP রিয়েল-টাইম লোকেশন
+                      Order Device & Real-Time IP Location
                     </h3>
                     <p className="text-xs text-slate-500 font-mono">
                       Order #{mapModalOrder.orderNumber} • IP: {mapModalOrder.clientIp || '103.205.71.42'}
@@ -3259,22 +3387,22 @@ function DashboardContent() {
               {/* Network, Device & City Summary Card */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
                 <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200">
-                  <span className="text-[10px] text-slate-400 block font-bold uppercase">কাস্টমার</span>
+                  <span className="text-[10px] text-slate-400 block font-bold uppercase">Customer</span>
                   <span className="font-extrabold text-slate-900 truncate block">{mapModalOrder.customerName}</span>
                   <span className="font-mono text-[11px] text-slate-600">{mapModalOrder.customerPhone}</span>
                 </div>
                 <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200">
-                  <span className="text-[10px] text-slate-400 block font-bold uppercase">ডিভাইস ও ব্রাউজার</span>
+                  <span className="text-[10px] text-slate-400 block font-bold uppercase">Device & Browser</span>
                   <span className="font-extrabold text-slate-900 truncate block">{mapModalOrder.deviceType || 'Mobile'} ({mapModalOrder.os || 'Android'})</span>
                   <span className="text-[11px] text-slate-600">{mapModalOrder.browser || 'Chrome'}</span>
                 </div>
                 <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200">
-                  <span className="text-[10px] text-slate-400 block font-bold uppercase">IP লোকেশন</span>
+                  <span className="text-[10px] text-slate-400 block font-bold uppercase">IP Location</span>
                   <span className="font-extrabold text-indigo-700 truncate block">{mapModalOrder.ipCity || 'Dhaka'}, {mapModalOrder.ipCountry || 'Bangladesh'}</span>
                   <span className="font-mono text-[10px] text-slate-500">{mapModalOrder.ipLatitude || 23.8103}, {mapModalOrder.ipLongitude || 90.4125}</span>
                 </div>
                 <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200">
-                  <span className="text-[10px] text-slate-400 block font-bold uppercase">ডেলিভারি ঠিকানা</span>
+                  <span className="text-[10px] text-slate-400 block font-bold uppercase">Delivery Address</span>
                   <span className="font-extrabold text-slate-900 truncate block">{mapModalOrder.city || 'Dhaka'}</span>
                   <span className="text-[11px] text-slate-600 truncate block">{mapModalOrder.shippingAddress}</span>
                 </div>
@@ -3285,9 +3413,9 @@ function DashboardContent() {
                 <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-3">
                   <AlertCircle className="w-5 h-5 text-rose-600 shrink-0" />
                   <div>
-                    <strong className="block font-black text-rose-900">🚨 সতর্কবার্তা: লোকেশন অমিল পাওয়া গেছে!</strong>
+                    <strong className="block font-black text-rose-900">🚨 Warning: Location Mismatch Detected!</strong>
                     <span>
-                      কাস্টমার যে ডিভাইস থেকে অর্ডার করেছেন তার IP লোকেশন <strong>{mapModalOrder.ipCity}</strong>, কিন্তু পার্সেল পাঠানোর ডেলিভারি ঠিকানা দিয়েছেন <strong>{mapModalOrder.city}</strong>। ডেলিভারি নিশ্চিত করার পূর্বে গ্রাহককে ফোনে কল করুন।
+                      The IP location of the customer's ordering device is <strong>{mapModalOrder.ipCity}</strong>, but the parcel delivery address is in <strong>{mapModalOrder.city}</strong>. Please contact the customer to verify before dispatching.
                     </span>
                   </div>
                 </div>
@@ -3295,7 +3423,7 @@ function DashboardContent() {
                 <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2">
                   <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
                   <span>
-                    <strong>লোকেশন ম্যাচ করেছে:</strong> অর্ডারের IP লোকেশন ({mapModalOrder.ipCity}) এবং ডেলিভারি ঠিকানা স্বাভাবিক ও বিশ্বস্ত।
+                    <strong>Location Matched:</strong> Order IP location ({mapModalOrder.ipCity}) and delivery address are consistent and trusted.
                   </span>
                 </div>
               )}
@@ -3323,14 +3451,14 @@ function DashboardContent() {
                   className="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1.5"
                 >
                   <ExternalLink className="w-3.5 h-3.5" />
-                  <span>গুগল ম্যাপস অ্যাপে ওপেন করুন</span>
+                  <span>Open in Google Maps App</span>
                 </a>
                 <button
                   type="button"
                   onClick={() => setMapModalOrder(null)}
                   className="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow transition"
                 >
-                  বন্ধ করুন
+                  Close
                 </button>
               </div>
             </div>
@@ -3350,9 +3478,9 @@ function DashboardContent() {
                   </div>
                   <div>
                     <h3 className="text-base font-extrabold text-slate-900">
-                      কাস্টমার ব্লক / কালো তালিকাভুক্ত করুন
+                      Block / Blacklist Customer
                     </h3>
-                    <p className="text-xs text-slate-500">ভুয়া অর্ডার ও রিটার্ন প্রতিরোধ করুন</p>
+                    <p className="text-xs text-slate-500">Prevent fraudulent orders and repeated cancellations</p>
                   </div>
                 </div>
                 <button
@@ -3365,36 +3493,36 @@ function DashboardContent() {
 
               <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5 text-xs">
                 <div className="flex justify-between">
-                  <span className="text-slate-500 font-semibold">গ্রাহকের নাম:</span>
+                  <span className="text-slate-500 font-semibold">Customer Name:</span>
                   <strong className="text-slate-900">{blockModalOrder.customerName}</strong>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500 font-semibold">ফোন নম্বর:</span>
+                  <span className="text-slate-500 font-semibold">Phone Number:</span>
                   <strong className="text-rose-700 font-mono font-bold">{blockModalOrder.customerPhone}</strong>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500 font-semibold">ডিভাইস IP:</span>
+                  <span className="text-slate-500 font-semibold">Device IP:</span>
                   <span className="font-mono text-slate-700">{blockModalOrder.clientIp || '103.205.71.42'}</span>
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-slate-700">ব্লক করার কারণ নির্বাচন করুন:</label>
+                <label className="block text-xs font-bold text-slate-700">Select reason for blocking:</label>
                 <select
                   value={blockReason}
                   onChange={(e) => setBlockReason(e.target.value)}
                   className="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-rose-500"
                 >
-                  <option value="ভুয়া অর্ডার / বারবার পার্সেল বাতিল ও রিটার্ন">ভুয়া অর্ডার / বারবার পার্সেল বাতিল ও রিটার্ন</option>
-                  <option value="অকার্যকর বা অন্য কারও ফোন নম্বর প্রদান">অকার্যকর বা অন্য কারও ফোন নম্বর প্রদান</option>
-                  <option value="ডেলিভারি রাইডারকে হয়রানি বা অপব্যবহার">ডেলিভারি রাইডারকে হয়রানি বা অপব্যবহার</option>
-                  <option value="স্প্যাম বা ক্ষতিকর বট অ্যাক্টিভিটি">স্প্যাম বা ক্ষতিকর বট অ্যাক্টিভিটি</option>
-                  <option value="কাস্টমারের অনুরোধে ব্লক করা হয়েছে">কাস্টমারের অনুরোধে ব্লক করা হয়েছে</option>
+                  <option value="Fraudulent order / Repeated cancellations and returns">Fraudulent order / Repeated cancellations and returns</option>
+                  <option value="Invalid or unauthorized phone number provided">Invalid or unauthorized phone number provided</option>
+                  <option value="Rider harassment or abusive behavior">Rider harassment or abusive behavior</option>
+                  <option value="Spam or malicious bot activity">Spam or malicious bot activity</option>
+                  <option value="Blocked upon customer request">Blocked upon customer request</option>
                 </select>
               </div>
 
               <div className="p-3 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 text-[11px] leading-relaxed">
-                ⚠️ <strong>মনোযোগ দিন:</strong> ব্লক করার পর এই ফোন নম্বর বা IP ব্যবহার করে এই স্টোর বা আপনার যেকোনো স্টোরে চেকআউট করার চেষ্টা করলে সরাসরি <strong>HTTP 403 (অর্ডার প্রত্যাখ্যাত)</strong> বার্তা প্রদর্শিত হবে।
+                ⚠️ <strong>Notice:</strong> Once blocked, any attempt to checkout using this phone number or IP across your storefronts will immediately trigger an <strong>HTTP 403 (Order Rejected)</strong> response.
               </div>
 
               <div className="flex items-center justify-end gap-2.5 pt-2">
@@ -3403,7 +3531,7 @@ function DashboardContent() {
                   onClick={() => setBlockModalOrder(null)}
                   className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition"
                 >
-                  বাতিল
+                  Cancel
                 </button>
                 <button
                   type="button"
@@ -3412,7 +3540,7 @@ function DashboardContent() {
                   className="px-5 py-2 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white shadow-md transition disabled:opacity-50 flex items-center gap-1.5"
                 >
                   <Ban className="w-3.5 h-3.5" />
-                  <span>{isBlocking ? 'ব্লক করা হচ্ছে...' : 'নিশ্চিত ব্লক করুন'}</span>
+                  <span>{isBlocking ? 'Blocking...' : 'Confirm Block'}</span>
                 </button>
               </div>
             </div>
@@ -3432,7 +3560,7 @@ function DashboardContent() {
                   </div>
                   <div>
                     <h3 className="text-base font-extrabold text-slate-900">
-                      গ্রাহকের সম্পূর্ণ লাইফটাইম অর্ডার হিস্ট্রি
+                      Customer Lifetime Order History
                     </h3>
                     <p className="text-xs text-slate-500 font-mono">
                       {customerHistoryModal.customerName} • {customerHistoryModal.phone}
@@ -3450,25 +3578,25 @@ function DashboardContent() {
               {/* Lifetime Metrics Dashboard */}
               <div className="grid grid-cols-4 gap-2.5 text-center">
                 <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200">
-                  <span className="text-[10px] text-slate-400 block font-bold uppercase">মোট অর্ডার</span>
+                  <span className="text-[10px] text-slate-400 block font-bold uppercase">Total Orders</span>
                   <span className="text-lg font-black text-slate-900 font-mono">
                     {customerHistoryModal.stats?.totalOrders ?? customerHistoryModal.totalOrders ?? 0}
                   </span>
                 </div>
                 <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200">
-                  <span className="text-[10px] text-emerald-600 block font-bold uppercase">সফল ডেলিভারি</span>
+                  <span className="text-[10px] text-emerald-600 block font-bold uppercase">Delivered</span>
                   <span className="text-lg font-black text-emerald-700 font-mono">
                     {customerHistoryModal.stats?.deliveredOrders ?? customerHistoryModal.deliveredOrders ?? 0}
                   </span>
                 </div>
                 <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200">
-                  <span className="text-[10px] text-rose-600 block font-bold uppercase">বাতিল / রিটার্ন</span>
+                  <span className="text-[10px] text-rose-600 block font-bold uppercase">Cancelled / Return</span>
                   <span className="text-lg font-black text-rose-700 font-mono">
                     {customerHistoryModal.stats?.cancelledOrders ?? customerHistoryModal.cancelledOrders ?? 0}
                   </span>
                 </div>
                 <div className="p-3 rounded-2xl bg-indigo-50 border border-indigo-200">
-                  <span className="text-[10px] text-indigo-600 block font-bold uppercase">ডেলিভারি রেট</span>
+                  <span className="text-[10px] text-indigo-600 block font-bold uppercase">Delivery Rate</span>
                   <span className="text-lg font-black text-indigo-700 font-mono">
                     {customerHistoryModal.stats?.deliverySuccessRate ?? customerHistoryModal.deliverySuccessRate ?? 0}%
                   </span>
@@ -3480,37 +3608,37 @@ function DashboardContent() {
                 <div className="p-3 rounded-2xl bg-red-100 border border-red-300 text-red-900 text-xs flex items-center gap-2">
                   <Ban className="w-4 h-4 text-red-600 shrink-0" />
                   <span>
-                    <strong>এই গ্রাহক বর্তমানে কালো তালিকাভুক্ত (Blocked):</strong> কারণ: {customerHistoryModal.blockReason || 'নিয়মিত পার্সেল বাতিল ও ভুয়া অর্ডার'}
+                    <strong>This customer is currently blacklisted (Blocked):</strong> Reason: {customerHistoryModal.blockReason || 'Repeated parcel cancellations and fake orders'}
                   </span>
                 </div>
               ) : customerHistoryModal.stats?.deliverySuccessRate < 50 && customerHistoryModal.stats?.totalOrders > 1 ? (
                 <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2">
                   <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
                   <span>
-                    <strong>উচ্চ ভুয়া অর্ডার ঝুঁকি (High Risk):</strong> এই গ্রাহক পূর্বে ৫০% এর বেশি অর্ডার বাতিল করেছেন। পার্সেল পাঠানোর পূর্বে অবশ্যই অগ্রিম কুরিয়ার চার্জ গ্রহণ করুন।
+                    <strong>High Risk Customer:</strong> This customer has previously cancelled over 50% of orders. Collecting delivery fees in advance is strongly recommended before dispatching.
                   </span>
                 </div>
               ) : (
                 <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2">
                   <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
                   <span>
-                    <strong>বিশ্বস্ত গ্রাহক:</strong> সফল ডেলিভারির অনুপাত সন্তোষজনক ({customerHistoryModal.stats?.deliverySuccessRate || 100}%)।
+                    <strong>Trusted Customer:</strong> Successful delivery rate is satisfactory ({customerHistoryModal.stats?.deliverySuccessRate || 100}%).
                   </span>
                 </div>
               )}
 
               {/* Past Orders Table */}
               <div className="space-y-2">
-                <span className="text-xs font-bold text-slate-700 block">অর্ডারের তালিকা:</span>
+                <span className="text-xs font-bold text-slate-700 block">Order History List:</span>
                 <div className="border border-slate-200 rounded-2xl overflow-hidden max-h-60 overflow-y-auto">
                   <table className="w-full text-left text-xs">
                     <thead className="bg-slate-50 text-slate-600 font-bold border-b border-slate-200 sticky top-0">
                       <tr>
-                        <th className="py-2 px-3">অর্ডার #</th>
-                        <th className="py-2 px-3">তারিখ</th>
-                        <th className="py-2 px-3">পণ্য</th>
-                        <th className="py-2 px-3 text-right">টাকা</th>
-                        <th className="py-2 px-3 text-center">স্ট্যাটাস</th>
+                        <th className="py-2 px-3">Order #</th>
+                        <th className="py-2 px-3">Date</th>
+                        <th className="py-2 px-3">Product</th>
+                        <th className="py-2 px-3 text-right">Amount</th>
+                        <th className="py-2 px-3 text-center">Status</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
@@ -3521,7 +3649,7 @@ function DashboardContent() {
                             {new Date(pastOrd.createdAt).toLocaleDateString()}
                           </td>
                           <td className="py-2.5 px-3 text-slate-700 truncate max-w-[150px]">
-                            {pastOrd.items?.[0]?.itemTitle || pastOrd.items?.[0]?.title || 'পণ্য'}
+                            {pastOrd.items?.[0]?.itemTitle || pastOrd.items?.[0]?.title || 'Product'}
                           </td>
                           <td className="py-2.5 px-3 text-right font-mono font-bold text-slate-900">
                             BDT {pastOrd.totalAmount?.toLocaleString()}
@@ -3557,7 +3685,7 @@ function DashboardContent() {
                     className="px-4 py-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold border border-red-200 transition flex items-center gap-1.5"
                   >
                     <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>কাস্টমার আনব্লক করুন</span>
+                    <span>Unblock Customer</span>
                   </button>
                 ) : (
                   <button
@@ -3573,7 +3701,7 @@ function DashboardContent() {
                     className="px-4 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold border border-rose-200 transition flex items-center gap-1.5"
                   >
                     <Ban className="w-3.5 h-3.5 text-rose-600" />
-                    <span>এই কাস্টমারকে ব্লক করুন</span>
+                    <span>Block Customer</span>
                   </button>
                 )}
                 <button
@@ -3581,7 +3709,7 @@ function DashboardContent() {
                   onClick={() => setCustomerHistoryModal(null)}
                   className="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow transition"
                 >
-                  বন্ধ করুন
+                  Close
                 </button>
               </div>
             </div>
@@ -5024,27 +5152,36 @@ function DashboardContent() {
         {/* ============================================================== */}
         {/* TAB 4: STORE SETTINGS & BRANDING */}
         {/* ============================================================== */}
+        {/* ============================================================== */}
+        {/* TAB 4: STORE MASTER SETTINGS & INTEGRATIONS */}
+        {/* ============================================================== */}
         {activeTab === 'settings' && (
           <div className="space-y-6">
             {settingsNotice && (
-              <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs flex items-center gap-2">
+              <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs flex items-center gap-2 shadow-xs">
                 <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>{settingsNotice}</span>
+                <span className="font-semibold">{settingsNotice}</span>
               </div>
             )}
 
-            <div className="p-8 rounded-3xl bg-white border border-slate-200/80 shadow-sm space-y-6">
-              <div>
-                <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                  <Sliders className="w-5 h-5 text-indigo-600" />
-                  <span>Store Branding & Profile Configuration</span>
-                </h3>
-                <p className="text-xs text-slate-500 mt-1">
-                  Update your public business name, contact lines, address, and live promotional slogans.
-                </p>
-              </div>
+            <form onSubmit={handleSaveSettings} className="space-y-6">
+              {/* CARD 1: STORE BRANDING & PROFILE */}
+              <div className="p-7 rounded-3xl bg-white border border-slate-200/80 shadow-sm space-y-6">
+                <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+                  <div>
+                    <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                      <Sliders className="w-5 h-5 text-indigo-600" />
+                      <span>Store Branding & Profile Configuration</span>
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Public business name, contact lines, address, and live promotional slogans.
+                    </p>
+                  </div>
+                  <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700">
+                    Step 1 · Core Profile
+                  </span>
+                </div>
 
-              <form onSubmit={handleSaveSettings} className="space-y-5">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold text-slate-700">Store / Business Name</label>
@@ -5053,7 +5190,7 @@ function DashboardContent() {
                       required
                       value={storeName}
                       onChange={(e) => setStoreName(e.target.value)}
-                      className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:border-indigo-600"
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:border-indigo-600 font-medium"
                     />
                   </div>
 
@@ -5061,10 +5198,10 @@ function DashboardContent() {
                     <label className="text-xs font-bold text-slate-700">Official Helpline Phone</label>
                     <input
                       type="text"
-                      placeholder="+880 1700-000000"
+                      placeholder="+880 1812-778899"
                       value={storePhone}
                       onChange={(e) => setStorePhone(e.target.value)}
-                      className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:border-indigo-600"
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:border-indigo-600 font-medium"
                     />
                   </div>
 
@@ -5072,10 +5209,10 @@ function DashboardContent() {
                     <label className="text-xs font-bold text-slate-700">Customer Support Email</label>
                     <input
                       type="email"
-                      placeholder="support@yourdomain.com"
+                      placeholder="info@smartvoltbd.com"
                       value={storeEmail}
                       onChange={(e) => setStoreEmail(e.target.value)}
-                      className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:border-indigo-600"
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:border-indigo-600 font-medium"
                     />
                   </div>
 
@@ -5083,10 +5220,10 @@ function DashboardContent() {
                     <label className="text-xs font-bold text-slate-700">Physical Store / Office Address</label>
                     <input
                       type="text"
-                      placeholder="Plot 12, Block D, Banani, Dhaka"
+                      placeholder="Nawabpur Road Electrical Market, Dhaka"
                       value={storeAddress}
                       onChange={(e) => setStoreAddress(e.target.value)}
-                      className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:border-indigo-600"
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:border-indigo-600 font-medium"
                     />
                   </div>
                 </div>
@@ -5102,38 +5239,624 @@ function DashboardContent() {
                   <span className="text-[11px] text-slate-400">Displayed in red ribbon bar at the top of the storefront.</span>
                 </div>
 
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-700">Hero Festival Campaign Title</label>
+                    <input
+                      type="text"
+                      value={heroTitle}
+                      onChange={(e) => setHeroTitle(e.target.value)}
+                      placeholder="e.g. Year-End Electronics Discount Festival 2026"
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:border-indigo-600"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-700">Hero Campaign Subtitle</label>
+                    <input
+                      type="text"
+                      value={heroSubtitle}
+                      onChange={(e) => setHeroSubtitle(e.target.value)}
+                      placeholder="Authorized Direct Factory-Grade Products..."
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:border-indigo-600"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* CARD 2: MARKETING & ANALYTICS TRACKING (Meta Pixel & GA4) */}
+              <div className="p-7 rounded-3xl bg-white border border-slate-200/80 shadow-sm space-y-6">
+                <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+                  <div>
+                    <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                      <TrendingUp className="w-5 h-5 text-rose-600" />
+                      <span>Marketing & Conversion Tracking (Meta Pixel & GA4)</span>
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Automatically sends PageView, ViewContent, AddToCart, InitiateCheckout, and Purchase events to Meta & Google.
+                    </p>
+                  </div>
+                  <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                    Step 2 · Ad ROI
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                      <span>Meta Pixel (Facebook Pixel) ID</span>
+                      <span className="text-[10px] text-rose-500 font-mono">fbq('init')</span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. 182749019284710"
+                      value={metaPixelId}
+                      onChange={(e) => setMetaPixelId(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-mono text-slate-900 focus:outline-none focus:border-rose-600"
+                    />
+                    <span className="text-[11px] text-slate-400">Tracks standard e-commerce conversions across your Facebook & Instagram ads.</span>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                      <span>Google Analytics (GA4) Measurement ID</span>
+                      <span className="text-[10px] text-indigo-500 font-mono">gtag('config')</span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. G-XXXXXXXXXX or GTM-XXXXXX"
+                      value={googleAnalyticsId}
+                      onChange={(e) => setGoogleAnalyticsId(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-mono text-slate-900 focus:outline-none focus:border-indigo-600"
+                    />
+                    <span className="text-[11px] text-slate-400">Streamlines user journey tracking and Google Ads conversion events.</span>
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 text-xs text-slate-600 flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span>Active Tracking Events: <strong>PageView</strong>, <strong>ViewContent</strong>, <strong>AddToCart</strong>, <strong>Purchase</strong></span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={`w-2 h-2 rounded-full ${metaPixelId ? 'bg-emerald-500' : 'bg-slate-300'}`} />
+                    <span className="text-[11px] font-bold">{metaPixelId ? 'Meta Pixel Active' : 'Pixel Unconfigured'}</span>
+                    <span className="text-slate-300">|</span>
+                    <span className={`w-2 h-2 rounded-full ${googleAnalyticsId ? 'bg-emerald-500' : 'bg-slate-300'}`} />
+                    <span className="text-[11px] font-bold">{googleAnalyticsId ? 'GA4 Active' : 'GA4 Unconfigured'}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* CARD 3: INSTANT CONVERSIONS (WhatsApp Live Widget) */}
+              <div className="p-7 rounded-3xl bg-white border border-slate-200/80 shadow-sm space-y-6">
+                <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+                  <div>
+                    <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                      <Phone className="w-5 h-5 text-emerald-600" />
+                      <span>Instant Conversions & WhatsApp Live Chat</span>
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Configure the floating WhatsApp contact button displayed across all catalog and product pages.
+                    </p>
+                  </div>
+                  <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    Step 3 · Instant Sales
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-700">Official WhatsApp Business Number</label>
+                    <input
+                      type="text"
+                      placeholder="+880 1812-778899"
+                      value={whatsappNumber}
+                      onChange={(e) => setWhatsappNumber(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-medium text-slate-900 focus:outline-none focus:border-emerald-600"
+                    />
+                    <span className="text-[11px] text-slate-400">Accepts international or BD standard format with country code.</span>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-700">Pre-filled Customer Welcome Message</label>
+                    <input
+                      type="text"
+                      placeholder="Hello SmartVolt, I would like to inquire about your products."
+                      value={whatsappWelcomeMsg}
+                      onChange={(e) => setWhatsappWelcomeMsg(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:border-emerald-600"
+                    />
+                    <span className="text-[11px] text-slate-400">Pre-fills the customer's WhatsApp chat prompt on click.</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* CARD 4: CUSTOM DOMAIN & MULTI-TENANT ROUTING */}
+              <div className="p-7 rounded-3xl bg-white border border-slate-200/80 shadow-sm space-y-6">
+                <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+                  <div>
+                    <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                      <Globe className="w-5 h-5 text-sky-600" />
+                      <span>Custom Domain & DNS Setup</span>
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Connect your branded top-level domain (e.g. shop.smartvoltbd.com or smartvolt.com).
+                    </p>
+                  </div>
+                  <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-sky-50 text-sky-700 border border-sky-200">
+                    Step 4 · White-Label
+                  </span>
+                </div>
+
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700">Hero Festival Campaign Title</label>
+                  <label className="text-xs font-bold text-slate-700">Custom Domain Hostname</label>
                   <input
                     type="text"
-                    value={heroTitle}
-                    onChange={(e) => setHeroTitle(e.target.value)}
-                    placeholder="e.g. Year-End Electronics Discount Festival 2026"
-                    className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:border-indigo-600"
+                    placeholder="e.g. store.smartvolt.com or smartvoltbd.com"
+                    value={customDomain}
+                    onChange={(e) => setCustomDomain(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-mono text-slate-900 focus:outline-none focus:border-sky-600"
                   />
-                  <span className="text-[11px] text-slate-400">Main headline in the hero festival banner.</span>
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700">Hero Subtitle / Campaign Description</label>
-                  <textarea
-                    rows={2}
-                    value={heroSubtitle}
-                    onChange={(e) => setHeroSubtitle(e.target.value)}
-                    placeholder="e.g. Authorized Direct Factory-Grade Inverter ACs, Smart Home Automation..."
-                    className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:border-indigo-600"
-                  />
-                  <span className="text-[11px] text-slate-400">Secondary campaign description in the hero banner.</span>
+                <div className="p-4 rounded-2xl bg-sky-50/60 border border-sky-200 text-xs space-y-2 text-sky-900">
+                  <div className="font-bold flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-sky-600" />
+                    <span>DNS Configuration Instructions for Your Registrar (Namecheap, GoDaddy, BTCL):</span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 font-mono text-[11px] bg-white p-3 rounded-xl border border-sky-200">
+                    <div>
+                      <span className="text-slate-400 block text-[9px] uppercase">Record Type</span>
+                      <strong className="text-slate-800">CNAME Record</strong>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block text-[9px] uppercase">Host / Name</span>
+                      <strong className="text-slate-800">{customDomain ? customDomain.split('.')[0] : 'store'}</strong>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block text-[9px] uppercase">Target / Value</span>
+                      <strong className="text-indigo-600 font-bold">cname.nexstore.com</strong>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* CARD 5: BUSINESS & LEGAL COMPLIANCE (DBID & Trade License) */}
+              <div className="p-7 rounded-3xl bg-white border border-slate-200/80 shadow-sm space-y-6">
+                <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+                  <div>
+                    <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                      <ShieldCheck className="w-5 h-5 text-amber-600" />
+                      <span>Legal Compliance & Business Credentials (DBID / e-CAB)</span>
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Required by the Ministry of Commerce Bangladesh digital commerce regulatory guidelines.
+                    </p>
+                  </div>
+                  <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                    Step 5 · Compliance
+                  </span>
                 </div>
 
-                <div className="pt-4 flex items-center justify-end">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-700">Digital Business ID (DBID) Number</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. DBID-2026-091482"
+                      value={dbidRegistrationNo}
+                      onChange={(e) => setDbidRegistrationNo(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-mono text-slate-900 focus:outline-none focus:border-amber-600"
+                    />
+                    <span className="text-[11px] text-slate-400">Official DBID registered with the Ministry of Commerce.</span>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-700">Trade License / BIN Registration No</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. TRAD/DSCC/012984/2026"
+                      value={tradeLicenseNo}
+                      onChange={(e) => setTradeLicenseNo(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-mono text-slate-900 focus:outline-none focus:border-amber-600"
+                    />
+                    <span className="text-[11px] text-slate-400">Displayed in footer to comply with e-CAB transparency norms.</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* CARD 6: COURIER & SHIPPING LOGISTICS APIS (Steadfast & Pathao) */}
+              <div className="p-7 rounded-3xl bg-white border border-slate-200/80 shadow-sm space-y-6">
+                <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+                  <div>
+                    <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                      <Truck className="w-5 h-5 text-indigo-600" />
+                      <span>Courier Logistics & Dispatch API (Steadfast / Pathao)</span>
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Enable 1-click consignment creation, pickup orders, and live tracking code generation.
+                    </p>
+                  </div>
+                  <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                    Step 6 · Logistics
+                  </span>
+                </div>
+
+                <div className="space-y-4">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                    <span>Steadfast Courier API Integration</span>
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-slate-700">Steadfast API Key</label>
+                      <input
+                        type="password"
+                        placeholder="••••••••••••••••••••••••"
+                        value={steadfastApiKey}
+                        onChange={(e) => setSteadfastApiKey(e.target.value)}
+                        className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-mono text-slate-900 focus:outline-none focus:border-indigo-600"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-slate-700">Steadfast Secret Key</label>
+                      <input
+                        type="password"
+                        placeholder="••••••••••••••••••••••••"
+                        value={steadfastSecretKey}
+                        onChange={(e) => setSteadfastSecretKey(e.target.value)}
+                        className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-mono text-slate-900 focus:outline-none focus:border-indigo-600"
+                      />
+                    </div>
+                  </div>
+
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2 pt-2">
+                    <span className="w-2 h-2 rounded-full bg-rose-500" />
+                    <span>Pathao Courier API Integration</span>
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-slate-700">Pathao Store ID</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. 12948"
+                        value={pathaoStoreId}
+                        onChange={(e) => setPathaoStoreId(e.target.value)}
+                        className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-mono text-slate-900 focus:outline-none focus:border-indigo-600"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-slate-700">Pathao Client ID</label>
+                      <input
+                        type="text"
+                        placeholder="Client ID..."
+                        value={pathaoClientId}
+                        onChange={(e) => setPathaoClientId(e.target.value)}
+                        className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-mono text-slate-900 focus:outline-none focus:border-indigo-600"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-slate-700">Pathao Client Secret</label>
+                      <input
+                        type="password"
+                        placeholder="••••••••••••••••"
+                        value={pathaoClientSecret}
+                        onChange={(e) => setPathaoClientSecret(e.target.value)}
+                        className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-mono text-slate-900 focus:outline-none focus:border-indigo-600"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* SAVE BUTTON BAR */}
+              <div className="p-6 rounded-3xl bg-slate-900 text-white flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
+                <div className="space-y-0.5">
+                  <h4 className="text-sm font-bold flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-emerald-400" />
+                    <span>Save Master Setup Configuration</span>
+                  </h4>
+                  <p className="text-xs text-slate-400">
+                    Saves all domain mappings, tracking scripts, logistics keys, and legal credentials instantly.
+                  </p>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={savingSettings}
+                  className="px-8 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg transition flex items-center gap-2 disabled:opacity-50 shrink-0"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{savingSettings ? 'Saving All Settings...' : 'Save Master Setup'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* ============================================================== */}
+        {/* TAB 8: SUBSCRIPTION, QUOTA LIMITS & PLAN METRICS */}
+        {/* ============================================================== */}
+        {activeTab === 'subscription' && (
+          <div className="space-y-6">
+            {merchantRequestNotice && (
+              <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs flex items-center gap-2 shadow-xs">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span className="font-semibold">{merchantRequestNotice}</span>
+              </div>
+            )}
+
+            {/* Header Banner */}
+            <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white border border-indigo-900/40 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2.5">
+                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                    {subscriptionData?.subscription?.planName || 'Growth Business Pro'}
+                  </span>
+                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <span>{subscriptionData?.subscription?.status?.toUpperCase() || 'ACTIVE'}</span>
+                  </span>
+                </div>
+                <h2 className="text-2xl font-extrabold tracking-tight">SaaS Subscription & Resource Quotas</h2>
+                <p className="text-xs text-slate-300 max-w-xl leading-relaxed">
+                  Active storefront license powered by multi-tenant cloud isolation, certified DBID compliance, and automated logistics.
+                </p>
+                <div className="flex flex-wrap items-center gap-4 text-xs text-slate-300 pt-1">
+                  <span className="flex items-center gap-1.5 text-emerald-400 font-semibold">
+                    <Clock className="w-3.5 h-3.5" />
+                    Active on Platform: {subscriptionData?.subscription?.activeDays || 71} Days
+                  </span>
+                  <span>•</span>
+                  <span className="text-amber-300 font-semibold">
+                    Next Renewal: {subscriptionData?.subscription?.daysUntilRenewal !== undefined ? subscriptionData.subscription.daysUntilRenewal : 21} Days remaining
+                  </span>
+                  <span>•</span>
+                  <span>Billing: <strong>BDT {Number(subscriptionData?.subscription?.priceBDT || 3500).toLocaleString()}</strong> / {subscriptionData?.subscription?.billingCycle || 'month'}</span>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto shrink-0">
+                <a
+                  href="#request-upgrade-section"
+                  className="w-full sm:w-auto px-5 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/30 transition text-center"
+                >
+                  ⚡ Request Plan Upgrade / Feature
+                </a>
+              </div>
+            </div>
+
+            {/* Quota Usage Meters */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              {/* Product Limit */}
+              <div className="p-5 rounded-3xl bg-white border border-slate-200/80 shadow-sm space-y-3">
+                <div className="flex items-center justify-between text-xs font-bold text-slate-600">
+                  <span className="flex items-center gap-1.5">
+                    <Boxes className="w-4 h-4 text-indigo-600" />
+                    <span>Catalog Products</span>
+                  </span>
+                  <span className="text-slate-900">{subscriptionData?.usage?.products?.used || 9} / {subscriptionData?.usage?.products?.limit || 500}</span>
+                </div>
+                <div className="w-full h-2.5 rounded-full bg-slate-100 overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-indigo-600 transition-all duration-500"
+                    style={{ width: `${Math.min(100, subscriptionData?.usage?.products?.percent || 2)}%` }}
+                  />
+                </div>
+                <div className="flex justify-between items-center text-[11px] text-slate-400">
+                  <span>{subscriptionData?.usage?.products?.percent || 2}% of plan capacity</span>
+                  <span className="text-emerald-600 font-bold">Healthy</span>
+                </div>
+              </div>
+
+              {/* Monthly Orders */}
+              <div className="p-5 rounded-3xl bg-white border border-slate-200/80 shadow-sm space-y-3">
+                <div className="flex items-center justify-between text-xs font-bold text-slate-600">
+                  <span className="flex items-center gap-1.5">
+                    <ShoppingBag className="w-4 h-4 text-rose-600" />
+                    <span>Monthly Orders</span>
+                  </span>
+                  <span className="text-slate-900">{subscriptionData?.usage?.orders?.used || 2} / {subscriptionData?.usage?.orders?.limit || 1500}</span>
+                </div>
+                <div className="w-full h-2.5 rounded-full bg-slate-100 overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-rose-600 transition-all duration-500"
+                    style={{ width: `${Math.min(100, subscriptionData?.usage?.orders?.percent || 1)}%` }}
+                  />
+                </div>
+                <div className="flex justify-between items-center text-[11px] text-slate-400">
+                  <span>{subscriptionData?.usage?.orders?.percent || 0}% used this cycle</span>
+                  <span className="text-emerald-600 font-bold">Healthy</span>
+                </div>
+              </div>
+
+              {/* Staff Accounts */}
+              <div className="p-5 rounded-3xl bg-white border border-slate-200/80 shadow-sm space-y-3">
+                <div className="flex items-center justify-between text-xs font-bold text-slate-600">
+                  <span className="flex items-center gap-1.5">
+                    <Users className="w-4 h-4 text-emerald-600" />
+                    <span>Staff Accounts</span>
+                  </span>
+                  <span className="text-slate-900">{subscriptionData?.usage?.staff?.used || 1} / {subscriptionData?.usage?.staff?.limit || 5}</span>
+                </div>
+                <div className="w-full h-2.5 rounded-full bg-slate-100 overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-emerald-600 transition-all duration-500"
+                    style={{ width: `${Math.min(100, subscriptionData?.usage?.staff?.percent || 20)}%` }}
+                  />
+                </div>
+                <div className="flex justify-between items-center text-[11px] text-slate-400">
+                  <span>{subscriptionData?.usage?.staff?.percent || 20}% allocated</span>
+                  <span className="text-slate-600 font-medium">{subscriptionData?.usage?.staff?.limit || 5} seats max</span>
+                </div>
+              </div>
+
+              {/* Database Telemetry */}
+              <div className="p-5 rounded-3xl bg-white border border-slate-200/80 shadow-sm space-y-3">
+                <div className="flex items-center justify-between text-xs font-bold text-slate-600">
+                  <span className="flex items-center gap-1.5">
+                    <Database className="w-4 h-4 text-amber-600" />
+                    <span>Dedicated DB Partition</span>
+                  </span>
+                  <span className="text-emerald-600 font-bold">Isolated</span>
+                </div>
+                <div className="w-full h-2.5 rounded-full bg-slate-100 overflow-hidden">
+                  <div className="h-full rounded-full bg-amber-500 w-[12%]" />
+                </div>
+                <div className="flex justify-between items-center text-[11px] text-slate-400">
+                  <span>tenant_{tenantSlug}</span>
+                  <span className="font-mono text-slate-600">Postgres JSON</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Feature Entitlements Grid */}
+            <div className="p-6 sm:p-8 rounded-3xl bg-white border border-slate-200/80 shadow-sm space-y-5">
+              <div>
+                <h3 className="text-base font-extrabold text-slate-900 tracking-tight">Active Plan Feature Entitlements</h3>
+                <p className="text-xs text-slate-500 mt-0.5">Architectural capabilities granted by platform super-administrators for your store instance.</p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {[
+                  { label: 'Branded Custom Domain', active: subscriptionData?.features?.customDomain, desc: 'CNAME pointed domain' },
+                  { label: 'Steadfast & Pathao APIs', active: subscriptionData?.features?.courierLogisticsAPI, desc: 'Automated 1-click dispatch' },
+                  { label: 'Meta Pixel & GA4 Suite', active: subscriptionData?.features?.metaPixelAndGA4, desc: 'Full conversion tracking' },
+                  { label: 'Anti-Fraud Risk Engine', active: subscriptionData?.features?.fraudIntelligence, desc: 'Customer blacklist & protection' },
+                  { label: 'Transactional Email Receipts', active: subscriptionData?.features?.automatedEmailReceipts, desc: 'Itemized HTML manifests' },
+                  { label: 'Transactional SMS Gateway', active: subscriptionData?.features?.automatedSmsGateway, desc: 'Order tracking dispatches' },
+                  { label: 'White-Label Branding', active: subscriptionData?.features?.whiteLabelBranding, desc: 'SaaS branding removed' },
+                  { label: '24/7 Priority VIP Support', active: subscriptionData?.features?.priority24x7Support, desc: 'Emergency response hotline' },
+                ].map((feat, idx) => (
+                  <div
+                    key={idx}
+                    className={`p-4 rounded-2xl border transition flex items-start gap-3 ${
+                      feat.active
+                        ? 'bg-emerald-50/50 border-emerald-200/80 text-emerald-900'
+                        : 'bg-slate-50 border-slate-200 text-slate-400 opacity-60'
+                    }`}
+                  >
+                    <div
+                      className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
+                        feat.active ? 'bg-emerald-600 text-white' : 'bg-slate-300 text-slate-600'
+                      }`}
+                    >
+                      {feat.active ? <Check className="w-3 h-3" /> : <Lock className="w-3 h-3" />}
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-xs">{feat.label}</h4>
+                      <p className="text-[11px] opacity-80 mt-0.5">{feat.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Invoices History */}
+            <div className="p-6 sm:p-8 rounded-3xl bg-white border border-slate-200/80 shadow-sm space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-base font-extrabold text-slate-900 tracking-tight">SaaS Subscription Invoices</h3>
+                  <p className="text-xs text-slate-500 mt-0.5">Official receipts and payment ledger for store hosting and platform services.</p>
+                </div>
+              </div>
+
+              <div className="overflow-x-auto border border-slate-100 rounded-2xl">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-slate-50 text-slate-500 uppercase text-[10px] font-bold border-b border-slate-100">
+                    <tr>
+                      <th className="p-3.5">Invoice ID</th>
+                      <th className="p-3.5">Date</th>
+                      <th className="p-3.5">Amount</th>
+                      <th className="p-3.5">Payment Method</th>
+                      <th className="p-3.5">Status</th>
+                      <th className="p-3.5 text-right">Receipt / Tax Invoice</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {(subscriptionData?.subscription?.invoices || []).length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="py-6 text-center text-slate-400 font-medium">No recorded invoices yet.</td>
+                      </tr>
+                    ) : (
+                      subscriptionData.subscription.invoices.map((inv: any, idx: number) => (
+                        <tr key={idx} className="hover:bg-slate-50/60">
+                          <td className="p-3.5 font-mono font-bold text-slate-900">{inv.invoiceId}</td>
+                          <td className="p-3.5 text-slate-600">{inv.date}</td>
+                          <td className="p-3.5 font-bold text-slate-900">BDT {Number(inv.amount).toLocaleString()}</td>
+                          <td className="p-3.5 text-slate-600">{inv.paymentMethod}</td>
+                          <td className="p-3.5">
+                            <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                              {inv.status || 'PAID'}
+                            </span>
+                          </td>
+                          <td className="p-3.5 text-right">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedInvoice(inv);
+                                setShowInvoiceModal(true);
+                              }}
+                              className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-indigo-600 text-white text-[11px] font-bold shadow-sm transition inline-flex items-center gap-1.5 active:scale-95"
+                            >
+                              <Printer className="w-3.5 h-3.5" />
+                              <span>View Receipt</span>
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Request Upgrade / Custom Requirements Form */}
+            <div id="request-upgrade-section" className="p-6 sm:p-8 rounded-3xl bg-slate-900 text-white shadow-xl space-y-4">
+              <div>
+                <h3 className="text-base font-extrabold text-white tracking-tight flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-amber-400" />
+                  <span>Request Custom Feature or Plan Upgrade</span>
+                </h3>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Need a higher catalog limit, bulk barcode printers, special payment gateways, or enterprise API access? Submit directly to platform administrators.
+                </p>
+              </div>
+
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  if (!merchantRequestText.trim()) return;
+                  try {
+                    const res = await api.addMerchantRequirement(tenantSlug, merchantRequestText.trim());
+                    if (res?.success) {
+                      setMerchantRequestNotice('Your custom requirement has been submitted to the Super-Admin command center.');
+                      setMerchantRequestText('');
+                      setRefreshTrigger((prev) => prev + 1);
+                      setTimeout(() => setMerchantRequestNotice(null), 5000);
+                    }
+                  } catch (err) {
+                    console.error(err);
+                  }
+                }}
+                className="space-y-3"
+              >
+                <textarea
+                  required
+                  rows={3}
+                  value={merchantRequestText}
+                  onChange={(e) => setMerchantRequestText(e.target.value)}
+                  placeholder="Describe your requirement (e.g. Please upgrade my monthly order quota to 5,000 orders and enable custom bKash merchant checkout)..."
+                  className="w-full p-4 rounded-2xl bg-slate-800/80 border border-slate-700 text-white text-xs leading-relaxed outline-none focus:border-indigo-500"
+                />
+                <div className="flex justify-end">
                   <button
                     type="submit"
-                    disabled={savingSettings}
-                    className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md transition flex items-center gap-2 disabled:opacity-50"
+                    className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg transition flex items-center gap-2"
                   >
-                    <Save className="w-4 h-4" />
-                    <span>{savingSettings ? 'Saving Changes...' : 'Save Store Settings'}</span>
+                    <span>Submit Requirement to Super-Admin</span>
+                    <ArrowRight className="w-4 h-4" />
                   </button>
                 </div>
               </form>
@@ -5538,6 +6261,23 @@ function DashboardContent() {
             )}
           </div>
         )}
+
+        {/* Official Printable SaaS Subscription Invoice & Tax Receipt Modal */}
+        <SaaSInvoiceModal
+          isOpen={showInvoiceModal}
+          onClose={() => {
+            setShowInvoiceModal(false);
+            setSelectedInvoice(null);
+          }}
+          invoice={selectedInvoice}
+          merchant={{
+            name: tenantInfo?.name || subscriptionData?.tenantName || tenantSlug,
+            subdomain: tenantSlug,
+            businessType: tenantInfo?.businessType,
+            subscription: subscriptionData?.subscription,
+            merchantProfile: subscriptionData?.merchantProfile,
+          }}
+        />
         </main>
       </div>
     </div>

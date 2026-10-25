@@ -16,10 +16,40 @@ import superAdminRoutes from './modules/super-admin/super-admin.routes.js';
 import inventoryRoutes from './modules/inventory/inventory.routes.js';
 import authRoutes from './modules/auth/auth.routes.js';
 
+import rateLimit from 'express-rate-limit';
+
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Trust reverse proxy (Nginx, Cloudflare, Traefik)
+app.set('trust proxy', 1);
+
+// Rate Limiting Policies
+const globalApiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 1000, // Limit each IP to 1000 requests per 15 minutes
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many requests from this IP, please try again after 15 minutes' },
+});
+
+const authRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 30, // Limit each IP to 30 login attempts per 15 minutes
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many login attempts, please try again after 15 minutes' },
+});
+
+const orderRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 60, // Limit each IP to 60 checkout requests per 15 minutes
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Order submission rate limit reached, please try again later' },
+});
 
 // Security and utility middlewares
 app.use(helmet({ crossOriginResourcePolicy: false }));
@@ -32,20 +62,21 @@ app.use(
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(morgan('dev'));
+app.use('/api', globalApiLimiter);
 
 // Tenant Identification Middleware (Applied to all /api routes)
 app.use('/api', tenantMiddleware);
 
-// API Route Registration
+// API Route Registration with Targeted Security Limits
 app.use('/api/tenant', tenantRoutes);
 app.use('/api/catalog', catalogRoutes);
 app.use('/api/bookings', bookingRoutes);
-app.use('/api/orders', orderRoutes);
+app.use('/api/orders', orderRateLimiter, orderRoutes);
 app.use('/api/compliance', complianceRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/super-admin', superAdminRoutes);
 app.use('/api/inventory', inventoryRoutes);
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', authRateLimiter, authRoutes);
 
 // Welcome & API Status endpoint
 app.get('/', (req, res) => {

@@ -36,7 +36,7 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
     let tenantSlug = req.body.tenantSlug || req.query.tenant || req.headers['x-tenant-slug'] || req.tenant?.subdomain;
 
     if (!email || !password) {
-      res.status(400).json({ success: false, message: 'ইমেইল এবং পাসওয়ার্ড প্রদান করুন (Email and password are required)' });
+      res.status(400).json({ success: false, message: 'Email and password are required' });
       return;
     }
 
@@ -62,7 +62,7 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
 
         res.json({
           success: true,
-          message: 'সুপার অ্যাডমিন লগইন সফল হয়েছে (Super Admin authenticated)',
+          message: 'Super Admin authenticated successfully',
           data: {
             token,
             user: {
@@ -77,7 +77,7 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
       } else {
         res.status(401).json({
           success: false,
-          message: 'ভুল সুপার অ্যাডমিন পাসওয়ার্ড। ডিফল্ট পাসওয়ার্ড: admin@123',
+          message: 'Invalid Super Admin password. Default: admin@123',
         });
         return;
       }
@@ -114,7 +114,7 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
 
             res.json({
               success: true,
-              message: 'স্টোর অ্যাডমিন লগইন সফল হয়েছে (Admin logged in successfully)',
+              message: 'Store Admin logged in successfully',
               data: {
                 token,
                 user: {
@@ -173,7 +173,7 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
 
         res.json({
           success: true,
-          message: 'স্টোর অ্যাডমিন লগইন সফল হয়েছে (Admin logged in successfully)',
+          message: 'Store Admin logged in successfully',
           data: {
             token,
             user: {
@@ -220,7 +220,7 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
 
       res.json({
         success: true,
-        message: 'স্টোর অ্যাডমিন লগইন সফল হয়েছে (Admin logged in successfully)',
+        message: 'Store Admin logged in successfully',
         data: {
           token,
           user: {
@@ -238,7 +238,7 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
 
     res.status(401).json({
       success: false,
-      message: 'ভুল ইমেইল বা পাসওয়ার্ড। ডিফল্ট মার্চেন্ট লগইন: admin@' + targetSlug + '.com এবং পাসওয়ার্ড: admin@123',
+      message: 'Invalid email or password. Default merchant login: admin@' + targetSlug + '.com and password: admin@123',
     });
   } catch (err: any) {
     console.error('Login processing error:', err);
@@ -285,7 +285,7 @@ router.post('/change-password', authMiddleware, async (req: Request, res: Respon
     if (!user || !newPassword || newPassword.length < 6) {
       res.status(400).json({
         success: false,
-        message: 'পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে (Password must be at least 6 characters)',
+        message: 'Password must be at least 6 characters',
       });
       return;
     }
@@ -305,7 +305,7 @@ router.post('/change-password', authMiddleware, async (req: Request, res: Respon
 
     res.json({
       success: true,
-      message: 'অ্যাডমিন পাসওয়ার্ড সফলভাবে পরিবর্তিত হয়েছে (Password changed successfully)',
+      message: 'Password changed successfully',
     });
   } catch (err: any) {
     res.status(500).json({ success: false, message: 'Failed to change password' });
@@ -318,7 +318,7 @@ router.post('/change-password', authMiddleware, async (req: Request, res: Respon
 router.post('/logout', (req: Request, res: Response): void => {
   res.json({
     success: true,
-    message: 'সফলভাবে সাইন আউট করা হয়েছে (Logged out successfully)',
+    message: 'Logged out successfully',
   });
 });
 

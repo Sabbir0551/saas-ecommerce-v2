@@ -7,6 +7,7 @@ import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { useCart } from '@/lib/cart-context';
 import { api } from '@/lib/api';
+import { trackInitiateCheckout } from '@/components/AnalyticsTracker';
 import { ShoppingBag, Truck, ShieldCheck, MapPin, Phone, User, CheckCircle2, AlertCircle, Trash2 } from 'lucide-react';
 
 function CheckoutContent() {
@@ -25,6 +26,7 @@ function CheckoutContent() {
   const [paymentMethod, setPaymentMethod] = useState('COD');
   const [orderCustomAttributes, setOrderCustomAttributes] = useState<Record<string, any>>({});
   const [schema, setSchema] = useState<any>(null);
+  const [tenant, setTenant] = useState<any>(null);
 
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -34,6 +36,7 @@ function CheckoutContent() {
       try {
         const tRes = await api.getTenant(tenantSlug);
         if (tRes?.success && tRes.data) {
+          setTenant(tRes.data);
           const catKey = tRes.data.businessType || 'general';
           const sRes = await api.getCategorySchema(catKey);
           if (sRes?.success && sRes.data) {
@@ -58,6 +61,12 @@ function CheckoutContent() {
   const deliveryCharge = city.includes('Dhaka') ? 60 : 120;
   const netTotal = subtotal + (items.length > 0 ? deliveryCharge : 0);
 
+  React.useEffect(() => {
+    if (items.length > 0) {
+      trackInitiateCheckout(netTotal, items.length);
+    }
+  }, [items.length]);
+
   const handleOrderSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (items.length === 0) {
@@ -74,7 +83,7 @@ function CheckoutContent() {
       for (const field of schema.orderFields) {
         const val = orderCustomAttributes[field.key];
         if (field.required && (val === undefined || val === '' || val === false)) {
-          setErrorMessage(`${field.label_bn || field.label_en} পূরণ করা আবশ্যক।`);
+          setErrorMessage(`${field.label_en || field.label_bn} is required.`);
           document.getElementById('section-order-custom-attributes')?.scrollIntoView({ behavior: 'smooth' });
           return;
         }
@@ -187,8 +196,8 @@ function CheckoutContent() {
                   onChange={(e) => setCity(e.target.value)}
                   className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-rose-500 outline-none font-medium"
                 >
-                  <option value="Dhaka Metro">Dhaka Metropolitan Area (Express Shipping: ৳60)</option>
-                  <option value="Outside Dhaka">Outside Dhaka / Nationwide (Standard Shipping: ৳120)</option>
+                  <option value="Dhaka Metro">Dhaka Metropolitan Area (Express Shipping: BDT 60)</option>
+                  <option value="Outside Dhaka">Outside Dhaka / Nationwide (Standard Shipping: BDT 120)</option>
                 </select>
               </div>
 
@@ -222,10 +231,10 @@ function CheckoutContent() {
                 <div className="border-b border-slate-100 pb-3">
                   <h3 className="font-bold text-slate-900 text-lg flex items-center gap-2">
                     <CheckCircle2 className="w-5 h-5 text-indigo-600" />
-                    <span>2. {schema.name_bn} — অর্ডারের বিশেষ তথ্য</span>
+                    <span>2. {schema.name_en || schema.name_bn} — Order Specifications</span>
                   </h3>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    এই ক্যাটাগরির সঠিক প্রসেসিংয়ের জন্য প্রয়োজনীয় তথ্য পূরণ করুন।
+                    Please provide required category information for accurate order fulfillment.
                   </p>
                 </div>
 
@@ -235,10 +244,10 @@ function CheckoutContent() {
                     return (
                       <div key={f.key} className="space-y-1.5">
                         <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                          <span>{f.label_bn || f.label_en}</span>
+                          <span>{f.label_en || f.label_bn}</span>
                           {f.required && (
                             <span className="text-[10px] text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded font-bold">
-                              আবশ্যক
+                              Required
                             </span>
                           )}
                         </label>
@@ -249,11 +258,11 @@ function CheckoutContent() {
                               type="text"
                               value={curVal}
                               onChange={(e) => setOrderCustomAttributes(prev => ({ ...prev, [f.key]: e.target.value }))}
-                              placeholder="ফাইলের লিংক দিন বা আপলোড করুন..."
+                              placeholder="Enter file URL or upload..."
                               className="flex-1 px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-rose-500 outline-none"
                             />
                             <label className="cursor-pointer px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition flex items-center gap-1">
-                              <span>আপলোড</span>
+                              <span>Upload</span>
                               <input
                                 type="file"
                                 className="hidden"
@@ -274,7 +283,7 @@ function CheckoutContent() {
                             onChange={(e) => setOrderCustomAttributes(prev => ({ ...prev, [f.key]: e.target.value }))}
                             className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-rose-500 outline-none"
                           >
-                            <option value="">-- নির্বাচন করুন --</option>
+                            <option value="">-- Select option --</option>
                             {(f.options || []).map((opt: string) => (
                               <option key={opt} value={opt}>{opt}</option>
                             ))}
@@ -291,12 +300,12 @@ function CheckoutContent() {
                             />
                             <div className="flex-1">
                               <span className="text-xs font-semibold text-slate-800 block">
-                                {f.help_text_bn || 'আমি শর্তাবলী ও বিবরণ যাচাই করে সম্মত হচ্ছি'}
+                                {f.help_text_en || f.help_text_bn || 'I agree with the terms and verification details'}
                               </span>
                               {Boolean(curVal) && (
                                 <span className="text-[10px] text-emerald-600 font-bold flex items-center gap-1 mt-0.5">
                                   <CheckCircle2 className="w-3 h-3" />
-                                  যাচাইকৃত (Verified)
+                                  Verified
                                 </span>
                               )}
                             </div>
@@ -307,14 +316,14 @@ function CheckoutContent() {
                           <input
                             type={f.type === 'number' ? 'number' : f.type === 'date' ? 'date' : 'text'}
                             value={curVal}
-                            placeholder={f.help_text_bn || `${f.label_bn} লিখুন...`}
+                            placeholder={f.help_text_en || f.help_text_bn || `Enter ${f.label_en || f.label_bn}...`}
                             onChange={(e) => setOrderCustomAttributes(prev => ({ ...prev, [f.key]: e.target.value }))}
                             className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-rose-500 outline-none"
                           />
                         )}
 
-                        {f.help_text_bn && (
-                          <p className="text-[11px] text-slate-400">{f.help_text_bn}</p>
+                        {(f.help_text_en || f.help_text_bn) && (
+                          <p className="text-[11px] text-slate-400">{f.help_text_en || f.help_text_bn}</p>
                         )}
                       </div>
                     );
@@ -407,7 +416,7 @@ function CheckoutContent() {
                       <img src={item.image} alt={item.title} className="w-12 h-12 object-cover rounded-xl bg-slate-100 shrink-0" />
                       <div className="flex-1 min-w-0">
                         <h4 className="text-xs font-bold text-slate-900 truncate">{item.title}</h4>
-                        <span className="text-xs text-slate-500 block">৳ {item.price.toLocaleString()}</span>
+                        <span className="text-xs text-slate-500 block">BDT {item.price.toLocaleString()}</span>
                         <div className="flex items-center gap-2 mt-1">
                           <button
                             type="button"
@@ -442,15 +451,15 @@ function CheckoutContent() {
               <div className="pt-4 border-t border-slate-100 space-y-2 text-xs">
                 <div className="flex justify-between text-slate-600">
                   <span>Subtotal</span>
-                  <span className="font-bold text-slate-900">৳ {subtotal.toLocaleString()}</span>
+                  <span className="font-bold text-slate-900">BDT {subtotal.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between text-slate-600">
                   <span>Delivery Fee</span>
-                  <span className="font-bold text-slate-900">৳ {deliveryCharge}</span>
+                  <span className="font-bold text-slate-900">BDT {deliveryCharge}</span>
                 </div>
                 <div className="flex justify-between text-base font-extrabold text-slate-900 pt-2 border-t border-slate-200">
                   <span>Total Payable</span>
-                  <span className="text-rose-600 text-lg">৳ {netTotal.toLocaleString()}</span>
+                  <span className="text-rose-600 text-lg">BDT {netTotal.toLocaleString()}</span>
                 </div>
               </div>
 
@@ -471,7 +480,15 @@ function CheckoutContent() {
         </form>
       </main>
 
-      <Footer tenantSlug={tenantSlug} />
+      <Footer 
+        tenantSlug={tenantSlug} 
+        storeName={tenant?.name}
+        phone={tenant?.phone}
+        email={tenant?.email}
+        address={tenant?.address}
+        dbid={tenant?.settings?.dbidRegistrationNo}
+        tradeLicense={tenant?.settings?.tradeLicenseNo}
+      />
     </div>
   );
 }

@@ -8,6 +8,7 @@ import { Footer } from '@/components/Footer';
 import { api } from '@/lib/api';
 import { useCart } from '@/lib/cart-context';
 import { SpecificationsTable } from '@/components/DynamicFieldRenderer';
+import { trackViewContent, trackAddToCart } from '@/components/AnalyticsTracker';
 import {
   ShoppingBag,
   ArrowRight,
@@ -88,6 +89,7 @@ function ProductDetailContent() {
 
         if (targetItem) {
           setItem(targetItem);
+          trackViewContent(targetItem);
           if (targetItem.variants) {
             let vList: string[] = [];
             if (Array.isArray(targetItem.variants)) {
@@ -131,6 +133,13 @@ function ProductDetailContent() {
       : item.id;
     const cartItemTitle = selectedVariant ? `${item.title} (${selectedVariant})` : item.title;
 
+    trackAddToCart({
+      id: item.id,
+      title: cartItemTitle,
+      price: item.price,
+      quantity,
+    });
+
     for (let i = 0; i < quantity; i++) {
       addToCart({
         id: cartItemId,
@@ -151,7 +160,7 @@ function ProductDetailContent() {
         <div className="flex-1 flex items-center justify-center text-xs font-bold text-slate-500 py-32">
           <div className="text-center space-y-3">
             <div className="w-10 h-10 border-4 border-slate-900 border-t-transparent rounded-full animate-spin mx-auto" />
-            <p className="font-bold text-slate-700">প্রোডাক্ট লোড হচ্ছে...</p>
+            <p className="font-bold text-slate-700">Loading product details...</p>
           </div>
         </div>
         <Footer tenantSlug={tenantSlug} storeName={tenant?.name} />
@@ -164,14 +173,14 @@ function ProductDetailContent() {
       <div className="min-h-screen bg-slate-50 flex flex-col justify-between">
         <Navbar tenantSlug={tenantSlug} storeName={tenant?.name} />
         <div className="max-w-xl mx-auto py-24 text-center px-4 space-y-4">
-          <h2 className="text-2xl font-black text-slate-900">প্রোডাক্ট পাওয়া যায়নি (Product Not Found)</h2>
-          <p className="text-xs text-slate-500">আপনার কাঙ্ক্ষিত প্রোডাক্টটি সরানো হয়ে থাকতে পারে।</p>
+          <h2 className="text-2xl font-black text-slate-900">Product Not Found</h2>
+          <p className="text-xs text-slate-500">The product you requested might have been moved or is temporarily unavailable.</p>
           <Link
             href={`/?tenant=${tenantSlug}`}
             className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-slate-900 text-white text-xs font-bold shadow-lg"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>স্টোরের মূল ক্যাটালগে ফিরে যান</span>
+            <span>Return to Store Catalog</span>
           </Link>
         </div>
         <Footer tenantSlug={tenantSlug} storeName={tenant?.name} />
@@ -205,7 +214,7 @@ function ProductDetailContent() {
         type: item.videoUrl.includes('facebook') ? 'FACEBOOK' : 'YOUTUBE',
         embedUrl: getEmbedUrl(item.videoUrl),
         url: item.videoUrl,
-        description: 'অফিসিয়াল প্রোডাক্ট ভিডিও আনবক্সিং, ফিচার রিভিউ ও ব্যবহারবিধি।',
+        description: 'Official product unboxing video, feature walkthrough, and user guide.',
       };
     }
     const related = mediaList.find((m) =>
@@ -237,19 +246,51 @@ function ProductDetailContent() {
   );
   const displayBottomProducts = bottomProducts.length > 0 ? bottomProducts.slice(0, 8) : relatedProducts.slice(0, 8);
 
+  const productSchema = item
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'Product',
+        name: item.title,
+        image: imageList,
+        description: item.description || `${item.title} available with warranty across Bangladesh.`,
+        sku: item.sku || item.id,
+        brand: {
+          '@type': 'Brand',
+          name: tenant?.name || 'SmartVolt',
+        },
+        offers: {
+          '@type': 'Offer',
+          url: typeof window !== 'undefined' ? window.location.href : '',
+          priceCurrency: 'BDT',
+          price: item.price,
+          availability:
+            (item.stockQuantity || 10) > 0
+              ? 'https://schema.org/InStock'
+              : 'https://schema.org/OutOfStock',
+          itemCondition: 'https://schema.org/NewCondition',
+        },
+      }
+    : null;
+
   return (
     <div className="min-h-screen bg-[#fafbfc] text-slate-800 flex flex-col justify-between font-sans">
+      {productSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+        />
+      )}
       <Navbar tenantSlug={tenantSlug} storeName={tenant?.name} />
 
       {addedItemNotice && (
         <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 animate-bounce border border-slate-700">
           <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
-          <span className="text-sm font-medium">ব্যাগে যুক্ত হয়েছে: {addedItemNotice.slice(0, 24)}...</span>
+          <span className="text-sm font-medium">Added to bag: {addedItemNotice.slice(0, 24)}...</span>
           <Link
             href={`/checkout?tenant=${tenantSlug}`}
             className="text-xs bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-3 py-1.5 rounded-xl ml-2 shrink-0 transition"
           >
-            অর্ডার করুন
+            Checkout
           </Link>
         </div>
       )}
@@ -260,10 +301,10 @@ function ProductDetailContent() {
           <div className="flex items-center gap-2">
             <Link href={`/?tenant=${tenantSlug}`} className="hover:text-slate-900 font-bold flex items-center gap-1.5 transition">
               <ArrowLeft className="w-3.5 h-3.5" />
-              <span>স্টোর হোম</span>
+              <span>Store Home</span>
             </Link>
             <span>/</span>
-            <span className="text-slate-500 font-semibold">{item.category?.name || 'ক্যাটালগ'}</span>
+            <span className="text-slate-500 font-semibold">{item.category?.name || 'Catalog'}</span>
             <span>/</span>
             <span className="font-extrabold text-slate-900 truncate max-w-xs">{item.title}</span>
           </div>
@@ -272,7 +313,7 @@ function ProductDetailContent() {
             href={`/admin/dashboard?tenant=${tenantSlug}`}
             className="text-[11px] font-bold text-slate-600 hover:text-slate-900 flex items-center gap-1 bg-slate-100 hover:bg-slate-200 px-3 py-1 rounded-lg transition"
           >
-            <span>মার্চেন্ট প্যানেল</span>
+            <span>Merchant Panel</span>
             <ExternalLink className="w-3 h-3" />
           </Link>
         </div>
@@ -305,7 +346,7 @@ function ProductDetailContent() {
                     {item.comparePrice && item.comparePrice > item.price && (
                       <div className="absolute bottom-3 left-3 bg-rose-600 text-white text-[11px] font-black px-3 py-1 rounded-full shadow-md flex items-center gap-1 z-10">
                         <Tag className="w-3.5 h-3.5" />
-                        <span>{Math.round(((item.comparePrice - item.price) / item.comparePrice) * 100)}% ছাড়</span>
+                        <span>{Math.round(((item.comparePrice - item.price) / item.comparePrice) * 100)}% OFF</span>
                       </div>
                     )}
 
@@ -367,17 +408,17 @@ function ProductDetailContent() {
                   <div className="space-y-2">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="text-[11px] font-bold text-slate-700 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
-                        {item.category?.name || 'অফিসিয়াল প্রোডাক্ট'}
+                        {item.category?.name || 'Official Product'}
                       </span>
                       {item.brand && (
                         <span className="text-[11px] font-bold text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">
-                          ব্র্যান্ড: {typeof item.brand === 'object' ? item.brand.name : item.brand}
+                          Brand: {typeof item.brand === 'object' ? item.brand.name : item.brand}
                         </span>
                       )}
                       <div className="flex items-center gap-1 text-amber-500 text-xs font-bold ml-auto">
                         <Star className="w-4 h-4 fill-amber-500" />
                         <span>4.9</span>
-                        <span className="text-slate-400 font-normal">(ভেরিফাইড)</span>
+                        <span className="text-slate-400 font-normal">(Verified)</span>
                       </div>
                     </div>
 
@@ -392,7 +433,7 @@ function ProductDetailContent() {
                     )}
 
                     <p className="text-xs sm:text-sm text-slate-600 leading-relaxed pt-1">
-                      {item.shortDescription || '১০০% অরিজিনাল ও অথোরাইজড প্রোডাক্ট। অফিসিয়াল ব্র্যান্ড ওয়ারেন্টি এবং দ্রুততম হোম ডেলিভারি সুবিধা।'}
+                      {item.shortDescription || '100% genuine and authorized product with official manufacturer warranty and fast express delivery.'}
                     </p>
                   </div>
 
@@ -400,21 +441,21 @@ function ProductDetailContent() {
                   <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
                     <div className="flex items-baseline gap-3">
                       <span className="text-3xl font-black text-slate-950">
-                        ৳ {item.price?.toLocaleString()}
+                        BDT {item.price?.toLocaleString()}
                       </span>
                       {item.comparePrice && item.comparePrice > item.price && (
                         <span className="text-sm text-slate-400 line-through">
-                          ৳ {item.comparePrice?.toLocaleString()}
+                          BDT {item.comparePrice?.toLocaleString()}
                         </span>
                       )}
                     </div>
 
                     <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-200/80 text-xs">
                       <span className="text-slate-600 font-medium">
-                        ০% কিস্তি (EMI): <strong className="text-slate-900 font-bold">৳ {Math.round(item.price / 12).toLocaleString()}/মাস</strong> (১২ মাস)
+                        0% EMI: <strong className="text-slate-900 font-bold">BDT {Math.round(item.price / 12).toLocaleString()}/mo</strong> (12 Months)
                       </span>
                       <span className="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
-                        স্টকে প্রস্তুত ({item.stockQuantity !== undefined ? item.stockQuantity : 25} ইউনিট)
+                        In Stock ({item.stockQuantity !== undefined ? item.stockQuantity : 25} units)
                       </span>
                     </div>
                   </div>
@@ -423,7 +464,7 @@ function ProductDetailContent() {
                   {variantList.length > 0 && (
                     <div className="space-y-2">
                       <span className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
-                        অপশন বেছে নিন: {selectedVariant && <span className="text-slate-950 font-black">({selectedVariant})</span>}
+                        Select Option: {selectedVariant && <span className="text-slate-950 font-black">({selectedVariant})</span>}
                       </span>
                       <div className="flex flex-wrap gap-2">
                         {variantList.map((vName) => {
@@ -450,7 +491,7 @@ function ProductDetailContent() {
                   {/* Quantity & Buy Actions */}
                   <div className="pt-2 space-y-4">
                     <div className="flex items-center gap-4">
-                      <span className="text-xs font-bold text-slate-700">পরিমাণ:</span>
+                      <span className="text-xs font-bold text-slate-700">Quantity:</span>
                       <div className="flex items-center rounded-xl border border-slate-200 bg-slate-50 p-1">
                         <button
                           type="button"
@@ -479,7 +520,7 @@ function ProductDetailContent() {
                         className="w-full py-3.5 rounded-2xl bg-white hover:bg-slate-50 text-slate-900 font-extrabold text-xs sm:text-sm border-2 border-slate-900 shadow-sm transition flex items-center justify-center gap-2 active:scale-95"
                       >
                         <ShoppingBag className="w-4 h-4" />
-                        <span>কার্ট এ যোগ করুন</span>
+                        <span>Add to Cart</span>
                       </button>
 
                       <Link
@@ -487,7 +528,7 @@ function ProductDetailContent() {
                         onClick={handleAddToCart}
                         className="w-full py-3.5 rounded-2xl bg-slate-950 hover:bg-slate-800 text-white font-extrabold text-xs sm:text-sm shadow-xl transition flex items-center justify-center gap-2 active:scale-95"
                       >
-                        <span>সরাসরি অর্ডার করুন</span>
+                        <span>Order Now</span>
                         <ArrowRight className="w-4 h-4" />
                       </Link>
                     </div>
@@ -496,19 +537,19 @@ function ProductDetailContent() {
                     <div className="pt-3 grid grid-cols-2 gap-2 text-[11px] font-semibold text-slate-600 border-t border-slate-100">
                       <span className="flex items-center gap-1.5">
                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                        ক্যাশ অন ডেলিভারি (COD)
+                        Cash on Delivery (COD)
                       </span>
                       <span className="flex items-center gap-1.5">
                         <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                        অফিসিয়াল ব্র্যান্ড ওয়ারেন্টি
+                        Official Brand Warranty
                       </span>
                       <span className="flex items-center gap-1.5">
                         <Sparkles className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                        ১০০% জেনুইন নিশ্চয়তা
+                        100% Genuine Guaranteed
                       </span>
                       <span className="flex items-center gap-1.5">
                         <Clock className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                        ৭২ ঘণ্টার রিটার্ন পলিসি
+                        72-Hour Return Policy
                       </span>
                     </div>
                   </div>
@@ -523,7 +564,7 @@ function ProductDetailContent() {
                   TECHNICAL SPECIFICATIONS
                 </span>
                 <h3 className="text-lg font-black text-slate-950 mt-0.5">
-                  প্রোডাক্টের বিস্তারিত স্পেসিফিকেশন ও তথ্য
+                  Detailed Product Specifications & Features
                 </h3>
               </div>
 
@@ -531,7 +572,7 @@ function ProductDetailContent() {
                 <SpecificationsTable
                   customAttributes={item.customAttributes}
                   fields={categorySchema?.fields}
-                  lang="bn"
+                  lang="en"
                 />
               ) : specsEntries.length > 0 ? (
                 <div className="rounded-2xl border border-slate-200 overflow-hidden divide-y divide-slate-100 text-xs">
@@ -545,16 +586,16 @@ function ProductDetailContent() {
               ) : (
                 <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 space-y-1">
                   <div className="flex justify-between py-1 border-b border-slate-200/60">
-                    <span className="font-semibold text-slate-500">ওয়ারেন্টি কভারেজ:</span>
-                    <span className="font-bold text-slate-900">{item.warranty || 'অফিসিয়াল ম্যানুফ্যাকচারার ওয়ারেন্টি'}</span>
+                    <span className="font-semibold text-slate-500">Warranty Coverage:</span>
+                    <span className="font-bold text-slate-900">{item.warranty || 'Official Manufacturer Warranty'}</span>
                   </div>
                   <div className="flex justify-between py-1 border-b border-slate-200/60">
-                    <span className="font-semibold text-slate-500">ব্র্যান্ড পার্টনার:</span>
-                    <span className="font-bold text-slate-900">{typeof item.brand === 'object' ? item.brand.name : (item.brand || 'অথোরাইজড ডিলার')}</span>
+                    <span className="font-semibold text-slate-500">Brand Partner:</span>
+                    <span className="font-bold text-slate-900">{typeof item.brand === 'object' ? item.brand.name : (item.brand || 'Authorized Dealer')}</span>
                   </div>
                   <div className="flex justify-between py-1">
-                    <span className="font-semibold text-slate-500">ডেলিভারি এরিয়া:</span>
-                    <span className="font-bold text-slate-900">সমগ্র বাংলাদেশ জুড়ে এক্সপ্রেস কুরিয়ার সার্ভিস</span>
+                    <span className="font-semibold text-slate-500">Delivery Area:</span>
+                    <span className="font-bold text-slate-900">Express courier delivery across all regions of Bangladesh</span>
                   </div>
                 </div>
               )}
@@ -567,7 +608,7 @@ function ProductDetailContent() {
                   <div>
                     <span className="text-[11px] font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
                       <Play className="w-3 h-3 fill-amber-400" />
-                      <span>ভিডিও রিভিউ ও ডেমোনস্ট্রেশন</span>
+                      <span>Video Review & Demonstration</span>
                     </span>
                     <h3 className="text-lg font-black text-white mt-1">
                       {videoToShow.title}
@@ -606,13 +647,13 @@ function ProductDetailContent() {
                   </div>
                   <div>
                     <h3 className="text-sm font-black text-slate-950 uppercase tracking-tight">
-                      সম্পর্কিত প্রোডাক্ট
+                      Related Products
                     </h3>
-                    <p className="text-[11px] text-slate-400">একই ক্যাটাগরির সেরা পণ্য</p>
+                    <p className="text-[11px] text-slate-400">Top picks in this category</p>
                   </div>
                 </div>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600">
-                  {sidebarProducts.length} টি
+                  {sidebarProducts.length} items
                 </span>
               </div>
 
@@ -638,7 +679,7 @@ function ProductDetailContent() {
 
                       <div className="flex-1 min-w-0">
                         <span className="text-[10px] font-bold text-slate-500 uppercase block truncate">
-                          {relItem.category?.name || 'ক্যাটাগরি'}
+                          {relItem.category?.name || 'Category'}
                         </span>
                         <Link
                           href={`/products/${relItem.slug || relItem.id}?tenant=${tenantSlug}`}
@@ -649,11 +690,11 @@ function ProductDetailContent() {
                         </Link>
                         <div className="flex items-baseline gap-2 mt-1">
                           <span className="text-xs font-black text-slate-950">
-                            ৳ {relItem.price?.toLocaleString()}
+                            BDT {relItem.price?.toLocaleString()}
                           </span>
                           {relItem.comparePrice && relItem.comparePrice > relItem.price && (
                             <span className="text-[10px] text-slate-400 line-through">
-                              ৳ {relItem.comparePrice?.toLocaleString()}
+                              BDT {relItem.comparePrice?.toLocaleString()}
                             </span>
                           )}
                         </div>
@@ -662,7 +703,7 @@ function ProductDetailContent() {
                       <Link
                         href={`/products/${relItem.slug || relItem.id}?tenant=${tenantSlug}`}
                         className="w-8 h-8 rounded-xl bg-white border border-slate-200 hover:bg-slate-900 hover:text-white text-slate-700 flex items-center justify-center shrink-0 transition shadow-sm"
-                        title="বিস্তারিত দেখুন"
+                        title="View details"
                       >
                         <ArrowRight className="w-3.5 h-3.5" />
                       </Link>
@@ -680,7 +721,7 @@ function ProductDetailContent() {
                 </div>
                 <div>
                   <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 block">
-                    ২৪/৭ সরাসরি সহায়তা
+                    24/7 Direct Support
                   </span>
                   <div className="text-base font-black text-white">
                     09606 111 777
@@ -688,13 +729,13 @@ function ProductDetailContent() {
                 </div>
               </div>
               <p className="text-xs text-slate-400 leading-relaxed">
-                পণ্য নির্বাচন, কিস্তির নিয়মাবলি বা সরাসরি হোম ডেলিভারির জন্য আমাদের কাস্টমার কেয়ারে কল করুন।
+                For product inquiries, warranty terms, or corporate delivery orders, call our customer support team.
               </p>
               <a
                 href="tel:09606111777"
                 className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs text-center block transition border border-slate-700"
               >
-                সরাসরি কল দিন
+                Call Helpline
               </a>
             </div>
           </div>
@@ -709,13 +750,13 @@ function ProductDetailContent() {
               <div>
                 <span className="text-xs font-bold uppercase tracking-wider text-amber-600 flex items-center gap-1.5">
                   <Sparkles className="w-3.5 h-3.5" />
-                  <span>এক্সক্লুসিভ কালেকশন</span>
+                  <span>Exclusive Collection</span>
                 </span>
                 <h2 className="text-2xl font-black text-slate-950 mt-0.5">
-                  ওয়েবসাইটের আরও বেশ কিছু প্রোডাক্ট (More Products from this Store)
+                  More Products from this Store
                 </h2>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  আমাদের স্টোরের অন্যান্য আকর্ষণীয় কালেকশন ও ট্রেন্ডিং প্রোডাক্টসমূহ।
+                  Explore other popular products and trending collections from this store.
                 </p>
               </div>
 
@@ -723,7 +764,7 @@ function ProductDetailContent() {
                 href={`/?tenant=${tenantSlug}`}
                 className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition flex items-center gap-1.5 w-fit shadow-sm"
               >
-                <span>সব প্রোডাক্ট দেখুন</span>
+                <span>View All Products</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
@@ -762,7 +803,7 @@ function ProductDetailContent() {
                     <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
                       <div>
                         <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full border border-slate-200">
-                          {pItem.category?.name || 'কালেকশন'}
+                          {pItem.category?.name || 'Collection'}
                         </span>
                         <Link
                           href={`/products/${pItem.slug || pItem.id}?tenant=${tenantSlug}`}
@@ -775,11 +816,11 @@ function ProductDetailContent() {
                       <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
                         <div>
                           <span className="text-base font-black text-slate-950 block">
-                            ৳ {pItem.price?.toLocaleString()}
+                            BDT {pItem.price?.toLocaleString()}
                           </span>
                           {pItem.comparePrice && pItem.comparePrice > pItem.price && (
                             <span className="text-xs text-slate-400 line-through">
-                              ৳ {pItem.comparePrice?.toLocaleString()}
+                              BDT {pItem.comparePrice?.toLocaleString()}
                             </span>
                           )}
                         </div>
@@ -788,7 +829,7 @@ function ProductDetailContent() {
                           href={`/products/${pItem.slug || pItem.id}?tenant=${tenantSlug}`}
                           className="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition flex items-center gap-1 shadow"
                         >
-                          <span>বিস্তারিত</span>
+                          <span>Details</span>
                           <ArrowRight className="w-3 h-3" />
                         </Link>
                       </div>
@@ -801,7 +842,15 @@ function ProductDetailContent() {
         )}
       </main>
 
-      <Footer tenantSlug={tenantSlug} storeName={tenant?.name} />
+      <Footer 
+        tenantSlug={tenantSlug} 
+        storeName={tenant?.name} 
+        phone={tenant?.phone || tenant?.settings?.phone}
+        email={tenant?.email || tenant?.settings?.email}
+        address={tenant?.address || tenant?.settings?.address}
+        dbid={tenant?.settings?.dbidRegistrationNo}
+        tradeLicense={tenant?.settings?.tradeLicenseNo}
+      />
     </div>
   );
 }

@@ -15,6 +15,17 @@ function PolicyDetailContent() {
   const tenantSlug = searchParams.get('tenant') || 'fashion';
 
   const [policy, setPolicy] = useState<{ title: string; content: string } | null>(null);
+  const [tenant, setTenant] = useState<any>(null);
+
+  useEffect(() => {
+    async function fetchTenant() {
+      try {
+        const res = await api.getTenant(tenantSlug);
+        if (res?.success && res.data) setTenant(res.data);
+      } catch {}
+    }
+    fetchTenant();
+  }, [tenantSlug]);
 
   useEffect(() => {
     async function fetchPolicy() {
@@ -74,7 +85,15 @@ function PolicyDetailContent() {
         </div>
       </main>
 
-      <Footer tenantSlug={tenantSlug} />
+      <Footer 
+        tenantSlug={tenantSlug} 
+        storeName={tenant?.name}
+        phone={tenant?.phone}
+        email={tenant?.email}
+        address={tenant?.address}
+        dbid={tenant?.settings?.dbidRegistrationNo}
+        tradeLicense={tenant?.settings?.tradeLicenseNo}
+      />
     </div>
   );
 }

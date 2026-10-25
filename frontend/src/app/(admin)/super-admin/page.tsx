@@ -23,7 +23,29 @@ import {
   ArrowUpRight,
   TrendingUp,
   Search,
+  Sliders,
+  CreditCard,
+  Calendar,
+  ShieldCheck,
+  Check,
+  FileText,
+  Sparkles,
+  Clock,
+  Trash2,
+  UserCheck,
+  X,
+  RefreshCw,
+  Globe,
+  Lock,
+  MessageSquare,
+  Phone,
+  Mail,
+  MapPin,
+  FileCheck,
+  Save,
+  Printer,
 } from 'lucide-react';
+import SaaSInvoiceModal from '@/components/SaaSInvoiceModal';
 
 const DEFAULT_MIGRATED_DATA = {
   stats: {
@@ -69,6 +91,147 @@ function SuperAdminContent() {
   const [adminEmail, setAdminEmail] = useState('');
   const [creating, setCreating] = useState(false);
   const [modalMsg, setModalMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  // Merchant Deep-Dive Modal State
+  const [selectedMerchantSubdomain, setSelectedMerchantSubdomain] = useState<string | null>(null);
+  const [merchantData, setMerchantData] = useState<any>(null);
+  const [loadingMerchant, setLoadingMerchant] = useState(false);
+  const [merchantModalTab, setMerchantModalTab] = useState<'subscription' | 'features' | 'profile' | 'requirements'>('subscription');
+  const [savingSection, setSavingSection] = useState<string | null>(null);
+  const [merchantNotice, setMerchantNotice] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [newReqText, setNewReqText] = useState('');
+  const [newInvoiceAmount, setNewInvoiceAmount] = useState('3500');
+  const [newInvoiceMethod, setNewInvoiceMethod] = useState('bKash Merchant');
+  const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
+  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
+
+  const handleOpenMerchantModal = async (subdomain: string) => {
+    setSelectedMerchantSubdomain(subdomain);
+    setLoadingMerchant(true);
+    setMerchantModalTab('subscription');
+    setMerchantNotice(null);
+    try {
+      const res = await api.getMerchantProfile(subdomain);
+      if (res?.success && res.data) {
+        setMerchantData(res.data);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingMerchant(false);
+    }
+  };
+
+  const handleSaveSubscription = async () => {
+    if (!selectedMerchantSubdomain || !merchantData?.subscription) return;
+    setSavingSection('subscription');
+    setMerchantNotice(null);
+    try {
+      const res = await api.updateMerchantSubscription(selectedMerchantSubdomain, merchantData.subscription);
+      if (res?.success && res.data) {
+        setMerchantData(res.data);
+        setMerchantNotice({ type: 'success', text: 'Subscription plan & billing parameters saved successfully!' });
+      }
+    } catch {
+      setMerchantNotice({ type: 'error', text: 'Failed to save subscription.' });
+    } finally {
+      setSavingSection(null);
+      setTimeout(() => setMerchantNotice(null), 4000);
+    }
+  };
+
+  const handleAddInvoice = async () => {
+    if (!selectedMerchantSubdomain || !merchantData?.subscription) return;
+    setSavingSection('invoice');
+    try {
+      const res = await api.updateMerchantSubscription(selectedMerchantSubdomain, {
+        ...merchantData.subscription,
+        addInvoice: {
+          invoiceId: `INV-${Date.now().toString().slice(-4)}`,
+          date: new Date().toISOString().split('T')[0],
+          amount: Number(newInvoiceAmount),
+          paymentMethod: newInvoiceMethod,
+          status: 'PAID',
+        },
+      });
+      if (res?.success && res.data) {
+        setMerchantData(res.data);
+        setMerchantNotice({ type: 'success', text: 'New invoice recorded and marked as paid.' });
+      }
+    } catch {
+      setMerchantNotice({ type: 'error', text: 'Failed to add invoice.' });
+    } finally {
+      setSavingSection(null);
+      setTimeout(() => setMerchantNotice(null), 4000);
+    }
+  };
+
+  const handleSaveFeatures = async () => {
+    if (!selectedMerchantSubdomain || !merchantData?.features) return;
+    setSavingSection('features');
+    setMerchantNotice(null);
+    try {
+      const res = await api.updateMerchantFeatures(selectedMerchantSubdomain, merchantData.features);
+      if (res?.success && res.data) {
+        setMerchantData(res.data);
+        setMerchantNotice({ type: 'success', text: 'Feature gate controls and resource quotas updated successfully!' });
+      }
+    } catch {
+      setMerchantNotice({ type: 'error', text: 'Failed to update features.' });
+    } finally {
+      setSavingSection(null);
+      setTimeout(() => setMerchantNotice(null), 4000);
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    if (!selectedMerchantSubdomain || !merchantData?.merchantProfile) return;
+    setSavingSection('profile');
+    setMerchantNotice(null);
+    try {
+      const res = await api.updateMerchantProfileInfo(selectedMerchantSubdomain, merchantData.merchantProfile);
+      if (res?.success && res.data) {
+        setMerchantData(res.data);
+        setMerchantNotice({ type: 'success', text: 'Merchant verification & KYC details updated!' });
+      }
+    } catch {
+      setMerchantNotice({ type: 'error', text: 'Failed to update merchant profile.' });
+    } finally {
+      setSavingSection(null);
+      setTimeout(() => setMerchantNotice(null), 4000);
+    }
+  };
+
+  const handleAddRequirement = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedMerchantSubdomain || !newReqText.trim()) return;
+    setSavingSection('requirement');
+    try {
+      const res = await api.addMerchantRequirement(selectedMerchantSubdomain, newReqText.trim());
+      if (res?.success && res.data) {
+        setMerchantData(res.data);
+        setNewReqText('');
+        setMerchantNotice({ type: 'success', text: 'New merchant requirement recorded.' });
+      }
+    } catch {
+      setMerchantNotice({ type: 'error', text: 'Failed to add requirement.' });
+    } finally {
+      setSavingSection(null);
+      setTimeout(() => setMerchantNotice(null), 4000);
+    }
+  };
+
+  const handleDeleteRequirement = async (index: number) => {
+    if (!selectedMerchantSubdomain) return;
+    try {
+      const res = await api.deleteMerchantRequirement(selectedMerchantSubdomain, index);
+      if (res?.success && res.data) {
+        setMerchantData(res.data);
+      }
+    } catch {
+      setMerchantNotice({ type: 'error', text: 'Failed to delete requirement.' });
+    }
+  };
 
   useEffect(() => {
     loadPlatformData();
@@ -203,7 +366,7 @@ function SuperAdminContent() {
             </div>
             <div className="flex items-baseline gap-2">
               <span className="text-3xl font-black text-emerald-400">
-                ৳ {(data?.stats?.platformGrossVolume || 585000).toLocaleString()}
+                BDT {(data?.stats?.platformGrossVolume || 585000).toLocaleString()}
               </span>
             </div>
             <p className="text-xs text-slate-500">Cumulative sales across all stores</p>
@@ -233,6 +396,143 @@ function SuperAdminContent() {
               </span>
             </div>
             <p className="text-xs text-slate-500">PostgreSQL + Resilient Cache Engine</p>
+          </div>
+        </div>
+
+        {/* Platform MRR & Financials Telemetry */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+              <h2 className="text-base font-extrabold text-white tracking-tight flex items-center gap-2">
+                <CreditCard className="w-4 h-4 text-emerald-400" />
+                <span>Platform Financials & MRR Telemetry</span>
+              </h2>
+            </div>
+            <span className="text-xs font-bold text-slate-400">
+              Recurring SaaS Subscription Engine
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Card 1: Monthly Recurring Revenue (MRR) */}
+            <div className="p-6 rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950/40 border border-slate-800 shadow-xl space-y-4 relative overflow-hidden">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider">
+                  Monthly Recurring Revenue (MRR)
+                </span>
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                  +100% Retained
+                </span>
+              </div>
+
+              <div>
+                <div className="text-3xl font-black text-white">
+                  BDT {(data?.stats?.totalMRR || 98000).toLocaleString()}
+                  <span className="text-xs font-normal text-slate-400 ml-1.5">/ month</span>
+                </div>
+                <div className="text-xs text-slate-400 mt-1 flex items-center gap-2">
+                  <span>ARR Run Rate:</span>
+                  <strong className="text-emerald-400 font-mono">
+                    BDT {((data?.stats?.totalMRR || 98000) * 12).toLocaleString()} / yr
+                  </strong>
+                </div>
+              </div>
+
+              <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
+                <span>Active Paying Stores:</span>
+                <span className="font-bold text-white font-mono">{data?.stats?.activeTenants || 28} Tenants</span>
+              </div>
+            </div>
+
+            {/* Card 2: Subscription Plan Tier Distribution */}
+            <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 shadow-xl space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                  Plan Tier Distribution
+                </span>
+                <span className="text-xs font-bold text-indigo-400">3 SaaS Tiers</span>
+              </div>
+
+              <div className="space-y-2.5 text-xs">
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-slate-300 font-bold">Growth Pro (BDT 3,500/mo)</span>
+                    <span className="font-mono font-bold text-white">
+                      {data?.stats?.planDistribution?.growth_pro || 28} stores
+                    </span>
+                  </div>
+                  <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+                    <div className="h-full rounded-full bg-indigo-500 w-[95%]" />
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-slate-400">Starter Core (BDT 1,500/mo)</span>
+                    <span className="font-mono text-slate-400">
+                      {data?.stats?.planDistribution?.starter || 0} stores
+                    </span>
+                  </div>
+                  <div className="w-full h-1.5 rounded-full bg-slate-800 overflow-hidden">
+                    <div className="h-full rounded-full bg-emerald-500 w-[0%]" />
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-slate-400">Enterprise High-Scale (BDT 9,500/mo)</span>
+                    <span className="font-mono text-slate-400">
+                      {data?.stats?.planDistribution?.enterprise || 0} stores
+                    </span>
+                  </div>
+                  <div className="w-full h-1.5 rounded-full bg-slate-800 overflow-hidden">
+                    <div className="h-full rounded-full bg-amber-500 w-[0%]" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Card 3: Upcoming Renewals Pipeline */}
+            <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 shadow-xl space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <Clock className="w-4 h-4 text-amber-400" />
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                    Upcoming Renewals (30d)
+                  </span>
+                </div>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">
+                  {(data?.stats?.upcomingRenewals || []).length} Due
+                </span>
+              </div>
+
+              <div className="space-y-2 max-h-36 overflow-y-auto pr-1">
+                {(data?.stats?.upcomingRenewals || []).length === 0 ? (
+                  <p className="text-xs text-slate-500 py-4 text-center">No subscriptions renewing in the next 30 days.</p>
+                ) : (
+                  (data.stats.upcomingRenewals).slice(0, 3).map((r: any, idx: number) => (
+                    <div
+                      key={idx}
+                      className="p-2.5 rounded-xl bg-slate-950 border border-slate-800/80 flex items-center justify-between gap-2 text-xs"
+                    >
+                      <div className="truncate">
+                        <span className="font-bold text-slate-200 block truncate">{r.name}</span>
+                        <span className="text-[10px] text-amber-400 font-semibold">
+                          Renews in {r.daysUntilRenewal} days • BDT {Number(r.priceBDT || 3500).toLocaleString()}
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => handleOpenMerchantModal(r.subdomain)}
+                        className="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-bold text-slate-300 hover:text-white transition shrink-0"
+                      >
+                        Manage
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -378,6 +678,14 @@ function SuperAdminContent() {
 
                       <td className="py-4 px-4 text-right">
                         <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => handleOpenMerchantModal(t.subdomain)}
+                            className="px-3 py-1.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 text-xs font-semibold border border-indigo-500/30 flex items-center gap-1.5 transition"
+                          >
+                            <Sliders className="w-3.5 h-3.5 text-indigo-400" />
+                            <span>Profile & Plan</span>
+                          </button>
+
                           <Link
                             href={`/?tenant=${t.subdomain}`}
                             target="_blank"
@@ -511,6 +819,773 @@ function SuperAdminContent() {
           </div>
         </div>
       )}
+
+      {/* Merchant Deep-Dive Profile & Subscription Management Modal */}
+      {selectedMerchantSubdomain && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-5xl w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden my-auto animate-in fade-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="p-6 bg-slate-950/70 border-b border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shrink-0">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-rose-600 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-indigo-500/20">
+                  {merchantData?.name?.charAt(0) || 'M'}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2.5">
+                    <h3 className="font-extrabold text-white text-lg tracking-tight">
+                      {merchantData?.name || selectedMerchantSubdomain}
+                    </h3>
+                    <span className="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 font-mono border border-slate-700">
+                      {selectedMerchantSubdomain}.localhost
+                    </span>
+                    <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 font-bold border border-indigo-500/30">
+                      {merchantData?.businessType?.replace('_', ' ')}
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-4 text-xs text-slate-400 mt-1">
+                    <span className="flex items-center gap-1.5 text-emerald-400 font-medium">
+                      <Clock className="w-3.5 h-3.5" />
+                      Active for {merchantData?.subscription?.activeDays || 60} days
+                    </span>
+                    <span>•</span>
+                    <span className="text-amber-400 font-medium">
+                      Renewal in {merchantData?.subscription?.daysUntilRenewal !== undefined ? merchantData.subscription.daysUntilRenewal : 25} days
+                    </span>
+                    <span>•</span>
+                    <span>Plan: <strong className="text-white">{merchantData?.subscription?.planName || 'Growth Pro'}</strong></span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
+                <Link
+                  href={`/admin/dashboard?tenant=${selectedMerchantSubdomain}`}
+                  target="_blank"
+                  className="px-3.5 py-2 rounded-xl bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 text-xs font-bold border border-rose-500/30 flex items-center gap-1.5 transition"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span>Log in as Merchant</span>
+                </Link>
+                <button
+                  onClick={() => setSelectedMerchantSubdomain(null)}
+                  className="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Notification Banner */}
+            {merchantNotice && (
+              <div
+                className={`mx-6 mt-4 p-3.5 rounded-2xl text-xs font-bold flex items-center gap-2 shrink-0 ${
+                  merchantNotice.type === 'success'
+                    ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-800'
+                    : 'bg-rose-950/80 text-rose-400 border border-rose-800'
+                }`}
+              >
+                {merchantNotice.type === 'success' ? (
+                  <CheckCircle2 className="w-4 h-4 shrink-0" />
+                ) : (
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                )}
+                <span>{merchantNotice.text}</span>
+              </div>
+            )}
+
+            {/* Tabs Header */}
+            <div className="px-6 pt-3 bg-slate-950/40 border-b border-slate-800 flex items-center gap-3 shrink-0 overflow-x-auto">
+              <button
+                onClick={() => setMerchantModalTab('subscription')}
+                className={`pb-3 text-xs font-bold transition flex items-center gap-2 border-b-2 whitespace-nowrap ${
+                  merchantModalTab === 'subscription'
+                    ? 'border-indigo-500 text-indigo-400'
+                    : 'border-transparent text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <CreditCard className="w-4 h-4" />
+                <span>Subscription & Billing ({merchantData?.subscription?.planName || 'Plan'})</span>
+              </button>
+
+              <button
+                onClick={() => setMerchantModalTab('features')}
+                className={`pb-3 text-xs font-bold transition flex items-center gap-2 border-b-2 whitespace-nowrap ${
+                  merchantModalTab === 'features'
+                    ? 'border-indigo-500 text-indigo-400'
+                    : 'border-transparent text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <Sliders className="w-4 h-4" />
+                <span>Feature Gates & Quotas</span>
+              </button>
+
+              <button
+                onClick={() => setMerchantModalTab('profile')}
+                className={`pb-3 text-xs font-bold transition flex items-center gap-2 border-b-2 whitespace-nowrap ${
+                  merchantModalTab === 'profile'
+                    ? 'border-indigo-500 text-indigo-400'
+                    : 'border-transparent text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <ShieldCheck className="w-4 h-4" />
+                <span>KYC & Legal Verification</span>
+              </button>
+
+              <button
+                onClick={() => setMerchantModalTab('requirements')}
+                className={`pb-3 text-xs font-bold transition flex items-center gap-2 border-b-2 whitespace-nowrap ${
+                  merchantModalTab === 'requirements'
+                    ? 'border-indigo-500 text-indigo-400'
+                    : 'border-transparent text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <FileText className="w-4 h-4" />
+                <span>Custom Demands & Notes ({merchantData?.merchantProfile?.specialRequirements?.length || 0})</span>
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+              {loadingMerchant ? (
+                <div className="py-20 text-center text-slate-500 font-bold text-xs flex flex-col items-center gap-3">
+                  <RefreshCw className="w-6 h-6 animate-spin text-indigo-400" />
+                  <span>Loading Merchant Command Profile...</span>
+                </div>
+              ) : (
+                <>
+                  {/* TAB 1: SUBSCRIPTION & BILLING */}
+                  {merchantModalTab === 'subscription' && (
+                    <div className="space-y-6">
+                      {/* Subscription Plan Cards */}
+                      <div>
+                        <label className="text-xs font-bold text-slate-300 block mb-3">Subscription Tier Package</label>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          {[
+                            { id: 'starter', name: 'Starter Plan', price: 1500, desc: '50 Products, 200 Orders, Basic Storefront' },
+                            { id: 'growth_pro', name: 'Growth Business Pro', price: 3500, desc: '500 Products, 1500 Orders, Custom Domain, Courier APIs, Pixel' },
+                            { id: 'enterprise', name: 'Enterprise Custom', price: 8500, desc: '10,000 Products, Unlimited Orders, Dedicated DB, VIP Support' },
+                          ].map((tier) => (
+                            <div
+                              key={tier.id}
+                              onClick={() => {
+                                setMerchantData((prev: any) => ({
+                                  ...prev,
+                                  subscription: {
+                                    ...prev.subscription,
+                                    planId: tier.id,
+                                    planName: tier.name,
+                                    priceBDT: tier.price,
+                                  },
+                                }));
+                              }}
+                              className={`p-4 rounded-2xl cursor-pointer transition border text-left flex flex-col justify-between ${
+                                merchantData?.subscription?.planId === tier.id
+                                  ? 'bg-indigo-950/60 border-indigo-500 ring-2 ring-indigo-500/20'
+                                  : 'bg-slate-950 border-slate-800 hover:border-slate-700'
+                              }`}
+                            >
+                              <div>
+                                <div className="flex items-center justify-between mb-1">
+                                  <h4 className="font-bold text-white text-sm">{tier.name}</h4>
+                                  {merchantData?.subscription?.planId === tier.id && (
+                                    <span className="w-5 h-5 rounded-full bg-indigo-500 text-white flex items-center justify-center text-[10px]">
+                                      ✓
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-[11px] text-slate-400 leading-relaxed mb-3">{tier.desc}</p>
+                              </div>
+                              <div className="text-xs font-black text-indigo-400">
+                                BDT {tier.price.toLocaleString()} <span className="text-[10px] font-normal text-slate-500">/ month</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Billing Parameters */}
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-5 rounded-2xl bg-slate-950 border border-slate-800 text-xs">
+                        <div>
+                          <label className="text-slate-400 font-bold block mb-1.5">Subscription Status</label>
+                          <select
+                            value={merchantData?.subscription?.status || 'active'}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setMerchantData((prev: any) => ({
+                                ...prev,
+                                subscription: { ...prev.subscription, status: val },
+                              }));
+                            }}
+                            className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white font-bold outline-none"
+                          >
+                            <option value="active">🟢 Active</option>
+                            <option value="trial">🟡 Free Trial</option>
+                            <option value="grace_period">🟠 Grace Period</option>
+                            <option value="suspended">🔴 Suspended / Past Due</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="text-slate-400 font-bold block mb-1.5">Billing Cycle</label>
+                          <select
+                            value={merchantData?.subscription?.billingCycle || 'monthly'}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setMerchantData((prev: any) => ({
+                                ...prev,
+                                subscription: { ...prev.subscription, billingCycle: val },
+                              }));
+                            }}
+                            className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white font-bold outline-none"
+                          >
+                            <option value="monthly">Monthly Recurring</option>
+                            <option value="quarterly">Quarterly (3 Months)</option>
+                            <option value="yearly">Yearly (12 Months)</option>
+                            <option value="lifetime">Lifetime Contract</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="text-slate-400 font-bold block mb-1.5">Billing Amount (BDT)</label>
+                          <input
+                            type="number"
+                            value={merchantData?.subscription?.priceBDT || 3500}
+                            onChange={(e) => {
+                              const val = Number(e.target.value);
+                              setMerchantData((prev: any) => ({
+                                ...prev,
+                                subscription: { ...prev.subscription, priceBDT: val },
+                              }));
+                            }}
+                            className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white font-bold outline-none"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-slate-400 font-bold block mb-1.5">Subscription Start Date</label>
+                          <input
+                            type="date"
+                            value={merchantData?.subscription?.startDate?.split('T')[0] || '2026-08-15'}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setMerchantData((prev: any) => ({
+                                ...prev,
+                                subscription: { ...prev.subscription, startDate: new Date(val).toISOString() },
+                              }));
+                            }}
+                            className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white font-bold outline-none"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-slate-400 font-bold block mb-1.5">Next Renewal Date</label>
+                          <input
+                            type="date"
+                            value={merchantData?.subscription?.renewalDate?.split('T')[0] || '2026-11-15'}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setMerchantData((prev: any) => ({
+                                ...prev,
+                                subscription: { ...prev.subscription, renewalDate: new Date(val).toISOString() },
+                              }));
+                            }}
+                            className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white font-bold outline-none"
+                          />
+                        </div>
+
+                        <div className="flex items-end">
+                          <button
+                            onClick={handleSaveSubscription}
+                            disabled={savingSection === 'subscription'}
+                            className="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold shadow-md transition"
+                          >
+                            {savingSection === 'subscription' ? 'Saving Plan...' : 'Save Subscription Parameters'}
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Invoices & Payment Ledger */}
+                      <div className="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-4">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                          <div>
+                            <h4 className="font-bold text-white text-sm">Platform Invoices & Payment History</h4>
+                            <p className="text-[11px] text-slate-400">Track all paid subscriptions and record new disbursements</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="number"
+                              placeholder="Amount BDT"
+                              value={newInvoiceAmount}
+                              onChange={(e) => setNewInvoiceAmount(e.target.value)}
+                              className="w-28 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs font-mono"
+                            />
+                            <select
+                              value={newInvoiceMethod}
+                              onChange={(e) => setNewInvoiceMethod(e.target.value)}
+                              className="px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs"
+                            >
+                              <option value="bKash Merchant">bKash Merchant</option>
+                              <option value="Nagad Business">Nagad Business</option>
+                              <option value="Bank Wire">Bank Wire</option>
+                              <option value="Cash / Manual">Cash / Manual</option>
+                            </select>
+                            <button
+                              onClick={handleAddInvoice}
+                              disabled={savingSection === 'invoice'}
+                              className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition flex items-center gap-1 shadow-sm"
+                            >
+                              <Plus className="w-3.5 h-3.5" />
+                              <span>Record Paid Invoice</span>
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-left text-xs">
+                            <thead className="bg-slate-900/60 text-slate-400 uppercase text-[10px] font-bold">
+                              <tr>
+                                <th className="p-2.5">Invoice ID</th>
+                                <th className="p-2.5">Billing Date</th>
+                                <th className="p-2.5">Amount BDT</th>
+                                <th className="p-2.5">Payment Method</th>
+                                <th className="p-2.5">Status</th>
+                                <th className="p-2.5 text-right">Receipt / Tax Invoice</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-800/80">
+                              {(merchantData?.subscription?.invoices || []).length === 0 ? (
+                                <tr>
+                                  <td colSpan={6} className="py-4 text-center text-slate-500">No invoices issued yet.</td>
+                                </tr>
+                              ) : (
+                                merchantData.subscription.invoices.map((inv: any, idx: number) => (
+                                  <tr key={idx} className="hover:bg-slate-900/40">
+                                    <td className="p-2.5 font-mono text-indigo-400 font-bold">{inv.invoiceId}</td>
+                                    <td className="p-2.5 text-slate-300">{inv.date}</td>
+                                    <td className="p-2.5 font-bold text-white">BDT {Number(inv.amount).toLocaleString()}</td>
+                                    <td className="p-2.5 text-slate-400">{inv.paymentMethod}</td>
+                                    <td className="p-2.5">
+                                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                                        {inv.status || 'PAID'}
+                                      </span>
+                                    </td>
+                                    <td className="p-2.5 text-right">
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setSelectedInvoice(inv);
+                                          setShowInvoiceModal(true);
+                                        }}
+                                        className="px-2.5 py-1 rounded-lg bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white text-[10px] font-bold border border-indigo-500/30 transition inline-flex items-center gap-1 active:scale-95"
+                                      >
+                                        <Printer className="w-3 h-3" />
+                                        <span>View Receipt</span>
+                                      </button>
+                                    </td>
+                                  </tr>
+                                ))
+                              )}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* TAB 2: FEATURE GATES & LIMITS */}
+                  {merchantModalTab === 'features' && (
+                    <div className="space-y-6">
+                      {/* Quota Limits Bar */}
+                      <div className="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-4">
+                        <h4 className="font-bold text-white text-sm">Resource Capacities & Usage Quotas</h4>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                          <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
+                            <span className="text-xs text-slate-400 block mb-1">Catalog Item Capacity</span>
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="number"
+                                value={merchantData?.features?.maxProducts || 500}
+                                onChange={(e) => {
+                                  const val = Number(e.target.value);
+                                  setMerchantData((prev: any) => ({
+                                    ...prev,
+                                    features: { ...prev.features, maxProducts: val },
+                                  }));
+                                }}
+                                className="w-full px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-white font-mono text-sm font-bold"
+                              />
+                              <span className="text-xs text-slate-400 shrink-0">Items</span>
+                            </div>
+                            <span className="text-[10px] text-slate-500 mt-1 block">Current used: {merchantData?.stats?.totalProducts || 0}</span>
+                          </div>
+
+                          <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
+                            <span className="text-xs text-slate-400 block mb-1">Monthly Order Limit</span>
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="number"
+                                value={merchantData?.features?.maxOrdersPerMonth || 1500}
+                                onChange={(e) => {
+                                  const val = Number(e.target.value);
+                                  setMerchantData((prev: any) => ({
+                                    ...prev,
+                                    features: { ...prev.features, maxOrdersPerMonth: val },
+                                  }));
+                                }}
+                                className="w-full px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-white font-mono text-sm font-bold"
+                              />
+                              <span className="text-xs text-slate-400 shrink-0">Orders</span>
+                            </div>
+                            <span className="text-[10px] text-slate-500 mt-1 block">Current used: {merchantData?.stats?.totalOrders || 0}</span>
+                          </div>
+
+                          <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
+                            <span className="text-xs text-slate-400 block mb-1">Staff Accounts Limit</span>
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="number"
+                                value={merchantData?.features?.staffAccountsLimit || 5}
+                                onChange={(e) => {
+                                  const val = Number(e.target.value);
+                                  setMerchantData((prev: any) => ({
+                                    ...prev,
+                                    features: { ...prev.features, staffAccountsLimit: val },
+                                  }));
+                                }}
+                                className="w-full px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-white font-mono text-sm font-bold"
+                              />
+                              <span className="text-xs text-slate-400 shrink-0">Users</span>
+                            </div>
+                            <span className="text-[10px] text-slate-500 mt-1 block">Current active: {merchantData?.stats?.totalStaff || 1}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Feature Gates Switches */}
+                      <div>
+                        <h4 className="font-bold text-white text-sm mb-3">Architectural Feature Gates</h4>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                          {[
+                            { key: 'customDomain', label: 'Custom Domain & CNAME Mapping', desc: 'Allows pointing branded custom domain (e.g. store.client.com)' },
+                            { key: 'courierLogisticsAPI', label: 'Steadfast & Pathao Courier Logistics API', desc: 'Automated 1-click consignment creation & tracking codes' },
+                            { key: 'metaPixelAndGA4', label: 'Meta Pixel & Google Analytics GA4 Suite', desc: 'Full client-side marketing and purchase event telemetry' },
+                            { key: 'fraudIntelligence', label: 'Anti-Fraud Risk Scoring & Blacklist Engine', desc: 'Detects phone/IP repetition and orders with discrepancy' },
+                            { key: 'automatedEmailReceipts', label: 'Automated Transactional Emails', desc: 'Sends itemized invoice receipt to customer upon order placement' },
+                            { key: 'automatedSmsGateway', label: 'Transactional SMS Notifications', desc: 'Sends instant order confirmation and courier dispatch SMS' },
+                            { key: 'whiteLabelBranding', label: 'White-Label Branding (Remove SaaS Watermark)', desc: 'Hides "Powered by NexStore SaaS" in storefront footers' },
+                            { key: 'priority24x7Support', label: 'Priority VIP Dedicated SLA Support', desc: 'Direct WhatsApp hotline for store emergency resolution' },
+                          ].map((f) => {
+                            const isEnabled = Boolean(merchantData?.features?.[f.key]);
+                            return (
+                              <div
+                                key={f.key}
+                                onClick={() => {
+                                  setMerchantData((prev: any) => ({
+                                    ...prev,
+                                    features: {
+                                      ...prev.features,
+                                      [f.key]: !isEnabled,
+                                    },
+                                  }));
+                                }}
+                                className={`p-4 rounded-2xl border cursor-pointer transition flex items-start justify-between gap-3 ${
+                                  isEnabled
+                                    ? 'bg-slate-950 border-emerald-500/40'
+                                    : 'bg-slate-950/60 border-slate-800 hover:border-slate-700'
+                                }`}
+                              >
+                                <div>
+                                  <h5 className="font-bold text-white text-xs">{f.label}</h5>
+                                  <p className="text-[11px] text-slate-400 mt-0.5 leading-relaxed">{f.desc}</p>
+                                </div>
+                                <div
+                                  className={`w-11 h-6 rounded-full transition relative shrink-0 p-0.5 ${
+                                    isEnabled ? 'bg-emerald-500' : 'bg-slate-800'
+                                  }`}
+                                >
+                                  <div
+                                    className={`w-5 h-5 rounded-full bg-white shadow-md transition transform ${
+                                      isEnabled ? 'translate-x-5' : 'translate-x-0'
+                                    }`}
+                                  />
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      <div className="pt-2 flex justify-end">
+                        <button
+                          onClick={handleSaveFeatures}
+                          disabled={savingSection === 'features'}
+                          className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold text-xs shadow-md transition flex items-center gap-2"
+                        >
+                          <Save className="w-4 h-4" />
+                          <span>{savingSection === 'features' ? 'Saving Feature Permissions...' : 'Save Feature Gates & Quotas'}</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* TAB 3: KYC & VERIFICATION */}
+                  {merchantModalTab === 'profile' && (
+                    <div className="space-y-6">
+                      <div className="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-4">
+                        <h4 className="font-bold text-white text-sm">Merchant Identity & Legal Compliance (DBID / Trade License)</h4>
+                        
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                          <div>
+                            <label className="text-slate-400 font-bold block mb-1">Owner / Director Name</label>
+                            <input
+                              type="text"
+                              value={merchantData?.merchantProfile?.ownerName || ''}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setMerchantData((prev: any) => ({
+                                  ...prev,
+                                  merchantProfile: { ...prev.merchantProfile, ownerName: val },
+                                }));
+                              }}
+                              className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white outline-none"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="text-slate-400 font-bold block mb-1">Verified Merchant Contact Phone</label>
+                            <input
+                              type="text"
+                              value={merchantData?.merchantProfile?.contactPhone || ''}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setMerchantData((prev: any) => ({
+                                  ...prev,
+                                  merchantProfile: { ...prev.merchantProfile, contactPhone: val },
+                                }));
+                              }}
+                              className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white outline-none"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="text-slate-400 font-bold block mb-1">Emergency Escalation Phone</label>
+                            <input
+                              type="text"
+                              value={merchantData?.merchantProfile?.emergencyPhone || ''}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setMerchantData((prev: any) => ({
+                                  ...prev,
+                                  merchantProfile: { ...prev.merchantProfile, emergencyPhone: val },
+                                }));
+                              }}
+                              className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white outline-none"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="text-slate-400 font-bold block mb-1">Official Business Email</label>
+                            <input
+                              type="email"
+                              value={merchantData?.merchantProfile?.verifiedEmail || ''}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setMerchantData((prev: any) => ({
+                                  ...prev,
+                                  merchantProfile: { ...prev.merchantProfile, verifiedEmail: val },
+                                }));
+                              }}
+                              className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white outline-none"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="text-slate-400 font-bold block mb-1">DBID Registration Number</label>
+                            <input
+                              type="text"
+                              value={merchantData?.merchantProfile?.dbidRegistrationNo || ''}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setMerchantData((prev: any) => ({
+                                  ...prev,
+                                  merchantProfile: { ...prev.merchantProfile, dbidRegistrationNo: val },
+                                }));
+                              }}
+                              placeholder="e.g. DBID-2026-99120"
+                              className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-emerald-400 font-mono font-bold outline-none"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="text-slate-400 font-bold block mb-1">Municipal Trade License Number</label>
+                            <input
+                              type="text"
+                              value={merchantData?.merchantProfile?.tradeLicenseNo || ''}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setMerchantData((prev: any) => ({
+                                  ...prev,
+                                  merchantProfile: { ...prev.merchantProfile, tradeLicenseNo: val },
+                                }));
+                              }}
+                              placeholder="e.g. TRAD/DSCC/012984/2026"
+                              className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono outline-none"
+                            />
+                          </div>
+
+                          <div className="sm:col-span-2">
+                            <label className="text-slate-400 font-bold block mb-1">Registered Commercial Office / Showroom Address</label>
+                            <input
+                              type="text"
+                              value={merchantData?.merchantProfile?.officeAddress || ''}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setMerchantData((prev: any) => ({
+                                  ...prev,
+                                  merchantProfile: { ...prev.merchantProfile, officeAddress: val },
+                                }));
+                              }}
+                              className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white outline-none"
+                            />
+                          </div>
+
+                          <div className="sm:col-span-2">
+                            <label className="text-slate-400 font-bold block mb-1">National ID (NID) / Passport Verification</label>
+                            <input
+                              type="text"
+                              value={merchantData?.merchantProfile?.nidOrPassport || ''}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setMerchantData((prev: any) => ({
+                                  ...prev,
+                                  merchantProfile: { ...prev.merchantProfile, nidOrPassport: val },
+                                }));
+                              }}
+                              className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono outline-none"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="pt-2 flex justify-end">
+                          <button
+                            onClick={handleSaveProfile}
+                            disabled={savingSection === 'profile'}
+                            className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold text-xs shadow-md transition flex items-center gap-2"
+                          >
+                            <Save className="w-4 h-4" />
+                            <span>{savingSection === 'profile' ? 'Saving KYC Profile...' : 'Save KYC & Legal Data'}</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* TAB 4: CUSTOM REQUIREMENTS & NOTES */}
+                  {merchantModalTab === 'requirements' && (
+                    <div className="space-y-6">
+                      {/* Add new requirement */}
+                      <form onSubmit={handleAddRequirement} className="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+                        <h4 className="font-bold text-white text-sm">Add Merchant Specific Requirement / Feature Request</h4>
+                        <p className="text-[11px] text-slate-400">Record custom requests (e.g. customized bKash token gateway, Steadfast custom label printer, specific catalog category demands).</p>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            required
+                            placeholder="e.g. Needs bulk barcode sticker printing format for 2-inch thermal printer..."
+                            value={newReqText}
+                            onChange={(e) => setNewReqText(e.target.value)}
+                            className="flex-1 px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs outline-none"
+                          />
+                          <button
+                            type="submit"
+                            disabled={savingSection === 'requirement'}
+                            className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold text-xs shadow-md transition flex items-center gap-1.5 shrink-0"
+                          >
+                            <Plus className="w-4 h-4" />
+                            <span>Add Requirement</span>
+                          </button>
+                        </div>
+                      </form>
+
+                      {/* Requirements List */}
+                      <div className="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+                        <h4 className="font-bold text-white text-sm">Active Merchant Requirements & Demands</h4>
+                        {(merchantData?.merchantProfile?.specialRequirements || []).length === 0 ? (
+                          <p className="text-xs text-slate-500 py-3">No active custom requirements noted for this merchant.</p>
+                        ) : (
+                          <div className="space-y-2">
+                            {merchantData.merchantProfile.specialRequirements.map((req: string, idx: number) => (
+                              <div
+                                key={idx}
+                                className="p-3.5 rounded-xl bg-slate-900 border border-slate-800/80 flex items-center justify-between gap-3 text-xs"
+                              >
+                                <div className="flex items-start gap-2.5">
+                                  <span className="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-400 font-bold flex items-center justify-center shrink-0 text-[10px] mt-0.5">
+                                    {idx + 1}
+                                  </span>
+                                  <span className="text-slate-200 leading-relaxed font-medium">{req}</span>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteRequirement(idx)}
+                                  className="text-slate-500 hover:text-rose-400 transition p-1 shrink-0"
+                                  title="Mark Fulfilled / Delete"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Super Admin Internal Notes */}
+                      <div className="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+                        <h4 className="font-bold text-white text-sm">Internal Super-Admin Management Notes</h4>
+                        <p className="text-[11px] text-slate-400">Private CRM notes visible only to platform administrators.</p>
+                        <textarea
+                          rows={3}
+                          value={merchantData?.merchantProfile?.adminInternalNotes || ''}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setMerchantData((prev: any) => ({
+                              ...prev,
+                              merchantProfile: { ...prev.merchantProfile, adminInternalNotes: val },
+                            }));
+                          }}
+                          placeholder="e.g. VIP merchant. Contract renewed annually. Special SLA for AC peak season..."
+                          className="w-full p-3 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs leading-relaxed outline-none"
+                        />
+                        <div className="flex justify-end">
+                          <button
+                            type="button"
+                            onClick={handleSaveProfile}
+                            className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold transition flex items-center gap-1.5"
+                          >
+                            <Save className="w-3.5 h-3.5" />
+                            <span>Save Internal Notes</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SaaS Official Printable Invoice & Tax Receipt Modal */}
+      <SaaSInvoiceModal
+        isOpen={showInvoiceModal}
+        onClose={() => {
+          setShowInvoiceModal(false);
+          setSelectedInvoice(null);
+        }}
+        invoice={selectedInvoice}
+        merchant={merchantData}
+      />
     </div>
   );
 }

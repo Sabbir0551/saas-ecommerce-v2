@@ -90,6 +90,20 @@ export const api = {
   createTenant: (data: any) => fetchWithTenant('/super-admin/tenants/create', { method: 'POST', body: JSON.stringify(data) }),
   toggleTenantStatus: (tenantId: string, isActive: boolean) => 
     fetchWithTenant(`/super-admin/tenants/${tenantId}/status`, { method: 'PATCH', body: JSON.stringify({ isActive }) }),
+  getMerchantProfile: (subdomain: string) => 
+    fetchWithTenant(`/super-admin/merchants/${subdomain}`),
+  updateMerchantSubscription: (subdomain: string, data: any) => 
+    fetchWithTenant(`/super-admin/merchants/${subdomain}/subscription`, { method: 'PUT', body: JSON.stringify(data) }),
+  updateMerchantFeatures: (subdomain: string, features: any) => 
+    fetchWithTenant(`/super-admin/merchants/${subdomain}/features`, { method: 'PUT', body: JSON.stringify(features) }),
+  updateMerchantProfileInfo: (subdomain: string, profile: any) => 
+    fetchWithTenant(`/super-admin/merchants/${subdomain}/profile`, { method: 'PUT', body: JSON.stringify(profile) }),
+  addMerchantRequirement: (subdomain: string, requirement: string) => 
+    fetchWithTenant(`/super-admin/merchants/${subdomain}/requirements`, { method: 'POST', body: JSON.stringify({ requirement }) }),
+  deleteMerchantRequirement: (subdomain: string, index: number) => 
+    fetchWithTenant(`/super-admin/merchants/${subdomain}/requirements/${index}`, { method: 'DELETE' }),
+  getTenantSubscription: (slug = 'fashion') => 
+    fetchWithTenant('/tenant/subscription', {}, slug),
   registerTenant: (data: any) => fetchWithTenant('/tenant/register', { method: 'POST', body: JSON.stringify(data) }),
   getTenantCategories: (slug = 'fashion') => fetchWithTenant('/tenant/categories', {}, slug),
   addCategory: (data: string | { name: string; promoSlogan?: string; bannerImage?: string }, slug = 'fashion') => {
@@ -135,6 +149,8 @@ export const api = {
     fetchWithTenant(`/orders/${orderId}/status`, { method: 'PATCH', body: JSON.stringify(data) }, slug),
   createManualOrder: (data: any, slug = 'fashion') => 
     fetchWithTenant('/orders/manual', { method: 'POST', body: JSON.stringify(data) }, slug),
+  dispatchOrderToCourier: (orderId: string, data: { courier?: string; codAmount?: number; note?: string } = {}, slug = 'fashion') => 
+    fetchWithTenant(`/orders/${orderId}/dispatch-courier`, { method: 'POST', body: JSON.stringify(data) }, slug),
   // Fraud Prevention & Customer Intelligence System
   getBlacklist: (slug = 'fashion') => 
     fetchWithTenant('/orders/blacklist', {}, slug),

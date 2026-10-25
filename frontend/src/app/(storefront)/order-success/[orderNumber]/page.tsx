@@ -7,6 +7,7 @@ import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { api } from '@/lib/api';
 import { CheckCircle, Printer, ArrowLeft, PackageCheck, Phone, MapPin, Calendar, Clock, Ticket } from 'lucide-react';
+import { trackPurchase } from '@/components/AnalyticsTracker';
 
 function OrderSuccessContent() {
   const params = useParams();
@@ -15,7 +16,18 @@ function OrderSuccessContent() {
   const tenantSlug = searchParams.get('tenant') || 'fashion';
 
   const [order, setOrder] = useState<any>(null);
+  const [tenant, setTenant] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadTenant() {
+      try {
+        const tRes = await api.getTenant(tenantSlug);
+        if (tRes?.success && tRes.data) setTenant(tRes.data);
+      } catch {}
+    }
+    loadTenant();
+  }, [tenantSlug]);
 
   useEffect(() => {
     async function loadOrder() {
@@ -23,9 +35,10 @@ function OrderSuccessContent() {
         const res = await api.trackOrder(orderNumber, tenantSlug);
         if (res?.success && res.data) {
           setOrder(res.data);
+          trackPurchase(res.data);
         } else {
           // Mock order for instant preview
-          setOrder({
+          const mockOrder = {
             orderNumber,
             customerName: 'Valued Customer',
             customerPhone: '+880 1711-XXXXXX',
@@ -47,7 +60,9 @@ function OrderSuccessContent() {
                 subtotal: 6500,
               },
             ],
-          });
+          };
+          setOrder(mockOrder);
+          trackPurchase(mockOrder);
         }
       } catch (err) {
         console.error(err);
@@ -134,7 +149,7 @@ function OrderSuccessContent() {
                     {item.variantTitle && <span className="text-[11px] text-slate-500 block">{item.variantTitle}</span>}
                     <span className="text-slate-500">Qty: {item.quantity}</span>
                   </div>
-                  <span className="font-bold text-slate-900">৳ {item.subtotal?.toLocaleString('en-US')}</span>
+                  <span className="font-bold text-slate-900">BDT {item.subtotal?.toLocaleString('en-US')}</span>
                 </div>
               ))}
             </div>
@@ -142,7 +157,7 @@ function OrderSuccessContent() {
             <div className="pt-4 flex justify-between items-center text-sm">
               <span className="font-bold text-slate-700">Total Payable:</span>
               <span className="text-xl font-extrabold text-rose-600">
-                ৳ {order?.totalAmount?.toLocaleString('en-US')}
+                BDT {order?.totalAmount?.toLocaleString('en-US')}
               </span>
             </div>
           </div>
@@ -168,7 +183,15 @@ function OrderSuccessContent() {
         </div>
       </main>
 
-      <Footer tenantSlug={tenantSlug} />
+      <Footer 
+        tenantSlug={tenantSlug} 
+        storeName={tenant?.name}
+        phone={tenant?.phone}
+        email={tenant?.email}
+        address={tenant?.address}
+        dbid={tenant?.settings?.dbidRegistrationNo}
+        tradeLicense={tenant?.settings?.tradeLicenseNo}
+      />
     </div>
   );
 }

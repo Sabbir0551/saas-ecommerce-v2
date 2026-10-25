@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { prisma, isDatabaseAvailable } from '../../config/db.js';
 import { requireTenant } from '../../middlewares/tenant.middleware.js';
+import { cache } from '../../config/redis.js';
 import bcrypt from 'bcryptjs';
 import fs from 'fs';
 import path from 'path';
@@ -587,7 +588,39 @@ router.delete('/brands/:id', requireTenant, async (req: Request, res: Response) 
 router.put('/settings', requireTenant, async (req: Request, res: Response) => {
   try {
     const tenant = req.tenant!;
-    const { name, phone, email, address, announcementText, bannerImage, themeConfig, heroTitle, heroSubtitle, slogan, showrooms } = req.body;
+    const {
+      name,
+      phone,
+      email,
+      address,
+      announcementText,
+      bannerImage,
+      themeConfig,
+      heroTitle,
+      heroSubtitle,
+      slogan,
+      showrooms,
+      metaPixelId,
+      googleAnalyticsId,
+      customDomain,
+      whatsappNumber,
+      whatsappWelcomeMsg,
+      steadfastApiKey,
+      steadfastSecretKey,
+      pathaoStoreId,
+      pathaoClientId,
+      pathaoClientSecret,
+      dbidRegistrationNo,
+      tradeLicenseNo,
+    } = req.body;
+
+    if (customDomain && customDomain.trim() && tenant.features && tenant.features.customDomain === false) {
+      res.status(403).json({
+        success: false,
+        message: 'Branded Custom Domain mapping is disabled on your current subscription plan. Please upgrade to Growth Pro or Enterprise to point your custom domain.',
+      });
+      return;
+    }
 
     try {
       await prisma.tenant.update({
@@ -599,7 +632,8 @@ router.put('/settings', requireTenant, async (req: Request, res: Response) => {
           address: address || undefined,
           announcementText: announcementText || undefined,
           bannerImage: bannerImage || undefined,
-          themeConfig: themeConfig ? JSON.stringify(themeConfig) : undefined,
+          customDomain: customDomain || undefined,
+          themeConfig: themeConfig ? (typeof themeConfig === 'string' ? themeConfig : JSON.stringify(themeConfig)) : undefined,
         },
       });
     } catch {}
@@ -615,12 +649,27 @@ router.put('/settings', requireTenant, async (req: Request, res: Response) => {
         if (email) pData.settings.email = email;
         if (address) pData.settings.address = address;
         if (announcementText !== undefined) pData.settings.announcementText = announcementText;
-        if (bannerImage) pData.settings.bannerImage = bannerImage;
-        if (themeConfig) pData.settings.themeConfig = themeConfig;
-        if (heroTitle) pData.settings.heroTitle = heroTitle;
-        if (heroSubtitle) pData.settings.heroSubtitle = heroSubtitle;
-        if (slogan) pData.settings.slogan = slogan;
-        if (showrooms) pData.settings.showrooms = showrooms;
+        if (bannerImage !== undefined) pData.settings.bannerImage = bannerImage;
+        if (themeConfig !== undefined) pData.settings.themeConfig = themeConfig;
+        if (heroTitle !== undefined) pData.settings.heroTitle = heroTitle;
+        if (heroSubtitle !== undefined) pData.settings.heroSubtitle = heroSubtitle;
+        if (slogan !== undefined) pData.settings.slogan = slogan;
+        if (showrooms !== undefined) pData.settings.showrooms = showrooms;
+        if (metaPixelId !== undefined) pData.settings.metaPixelId = metaPixelId;
+        if (googleAnalyticsId !== undefined) pData.settings.googleAnalyticsId = googleAnalyticsId;
+        if (customDomain !== undefined) {
+          pData.settings.customDomain = customDomain;
+          pData.customDomain = customDomain;
+        }
+        if (whatsappNumber !== undefined) pData.settings.whatsappNumber = whatsappNumber;
+        if (whatsappWelcomeMsg !== undefined) pData.settings.whatsappWelcomeMsg = whatsappWelcomeMsg;
+        if (steadfastApiKey !== undefined) pData.settings.steadfastApiKey = steadfastApiKey;
+        if (steadfastSecretKey !== undefined) pData.settings.steadfastSecretKey = steadfastSecretKey;
+        if (pathaoStoreId !== undefined) pData.settings.pathaoStoreId = pathaoStoreId;
+        if (pathaoClientId !== undefined) pData.settings.pathaoClientId = pathaoClientId;
+        if (pathaoClientSecret !== undefined) pData.settings.pathaoClientSecret = pathaoClientSecret;
+        if (dbidRegistrationNo !== undefined) pData.settings.dbidRegistrationNo = dbidRegistrationNo;
+        if (tradeLicenseNo !== undefined) pData.settings.tradeLicenseNo = tradeLicenseNo;
         fs.writeFileSync(partitionFile, JSON.stringify(pData, null, 2));
       } catch {}
     }
@@ -632,18 +681,40 @@ router.put('/settings', requireTenant, async (req: Request, res: Response) => {
       const parsed = JSON.parse(raw);
       const target = parsed.tenants.find((t: any) => t.id === tenant.id || t.subdomain === tenant.subdomain);
       if (target) {
-        if (name) target.name = name;
-        if (phone) target.phone = phone;
-        if (email) target.email = email;
-        if (address) target.address = address;
-        if (announcementText !== undefined) target.announcementText = announcementText;
-        if (bannerImage) target.bannerImage = bannerImage;
-        if (themeConfig) target.themeConfig = themeConfig;
+        if (!target.settings) target.settings = {};
+        if (name) { target.name = name; target.settings.name = name; }
+        if (phone) { target.phone = phone; target.settings.phone = phone; }
+        if (email) { target.email = email; target.settings.email = email; }
+        if (address) { target.address = address; target.settings.address = address; }
+        if (announcementText !== undefined) { target.announcementText = announcementText; target.settings.announcementText = announcementText; }
+        if (bannerImage !== undefined) { target.bannerImage = bannerImage; target.settings.bannerImage = bannerImage; }
+        if (themeConfig !== undefined) { target.themeConfig = themeConfig; target.settings.themeConfig = themeConfig; }
+        if (metaPixelId !== undefined) target.settings.metaPixelId = metaPixelId;
+        if (googleAnalyticsId !== undefined) target.settings.googleAnalyticsId = googleAnalyticsId;
+        if (customDomain !== undefined) { target.customDomain = customDomain; target.settings.customDomain = customDomain; }
+        if (whatsappNumber !== undefined) target.settings.whatsappNumber = whatsappNumber;
+        if (whatsappWelcomeMsg !== undefined) target.settings.whatsappWelcomeMsg = whatsappWelcomeMsg;
+        if (steadfastApiKey !== undefined) target.settings.steadfastApiKey = steadfastApiKey;
+        if (steadfastSecretKey !== undefined) target.settings.steadfastSecretKey = steadfastSecretKey;
+        if (pathaoStoreId !== undefined) target.settings.pathaoStoreId = pathaoStoreId;
+        if (pathaoClientId !== undefined) target.settings.pathaoClientId = pathaoClientId;
+        if (pathaoClientSecret !== undefined) target.settings.pathaoClientSecret = pathaoClientSecret;
+        if (dbidRegistrationNo !== undefined) target.settings.dbidRegistrationNo = dbidRegistrationNo;
+        if (tradeLicenseNo !== undefined) target.settings.tradeLicenseNo = tradeLicenseNo;
         fs.writeFileSync(filePath, JSON.stringify(parsed, null, 4));
+        try {
+          await cache.del(`tenant:${tenant.subdomain}`);
+          await cache.del(`tenant:${tenant.id}`);
+        } catch {}
         res.json({ success: true, message: 'Store settings updated successfully', data: target });
         return;
       }
     }
+
+    try {
+      await cache.del(`tenant:${tenant.subdomain}`);
+      await cache.del(`tenant:${tenant.id}`);
+    } catch {}
 
     res.json({ success: true, message: 'Store settings updated' });
   } catch (error) {
@@ -860,6 +931,73 @@ router.get('/db-status', requireTenant, async (req: Request, res: Response) => {
     });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to fetch database status' });
+  }
+});
+// ==========================================
+// MERCHANT SUBSCRIPTION & QUOTA TELEMETRY
+// ==========================================
+router.get('/subscription', requireTenant, async (req: Request, res: Response) => {
+  try {
+    const tenant = req.tenant!;
+    const partitionFile = getTenantPartitionFilePath(tenant.subdomain);
+    let pData: any = null;
+    if (fs.existsSync(partitionFile)) {
+      try {
+        pData = JSON.parse(fs.readFileSync(partitionFile, 'utf-8'));
+      } catch {}
+    }
+
+    const sub = pData?.subscription || {
+      planId: 'growth_pro',
+      planName: 'Growth Business Pro',
+      priceBDT: 3500,
+      billingCycle: 'monthly',
+      status: 'active',
+      startDate: '2026-08-15T00:00:00.000Z',
+      renewalDate: new Date(Date.now() + 25 * 24 * 60 * 60 * 1000).toISOString(),
+      activeDays: 71,
+      invoices: [],
+    };
+
+    const startTs = new Date(sub.startDate).getTime();
+    const renewalTs = new Date(sub.renewalDate).getTime();
+    const nowTs = Date.now();
+    sub.activeDays = Math.max(1, Math.floor((nowTs - startTs) / (1000 * 60 * 60 * 24)));
+    sub.daysUntilRenewal = Math.ceil((renewalTs - nowTs) / (1000 * 60 * 60 * 24));
+
+    const features = pData?.features || {
+      maxProducts: 500,
+      maxOrdersPerMonth: 1500,
+      customDomain: true,
+      metaPixelAndGA4: true,
+      courierLogisticsAPI: true,
+      automatedEmailReceipts: true,
+      automatedSmsGateway: true,
+      fraudIntelligence: true,
+      staffAccountsLimit: 5,
+      whiteLabelBranding: true,
+      priority24x7Support: true,
+    };
+
+    const items = Array.isArray(pData?.items) ? pData.items : [];
+    const orders = Array.isArray(pData?.orders) ? pData.orders : [];
+    const users = Array.isArray(pData?.users) ? pData.users : [];
+
+    res.json({
+      success: true,
+      data: {
+        subscription: sub,
+        features,
+        merchantProfile: pData?.merchantProfile || null,
+        usage: {
+          products: { used: items.length, limit: features.maxProducts, percent: Math.round((items.length / (features.maxProducts || 500)) * 100) },
+          orders: { used: orders.length, limit: features.maxOrdersPerMonth, percent: Math.round((orders.length / (features.maxOrdersPerMonth || 1500)) * 100) },
+          staff: { used: users.length || 1, limit: features.staffAccountsLimit || 5, percent: Math.round(((users.length || 1) / (features.staffAccountsLimit || 5)) * 100) },
+        },
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to fetch subscription' });
   }
 });
 

@@ -84,4 +84,100 @@ export const mailService = {
       preview: emailPayload,
     };
   },
+
+  async sendOrderConfirmationEmail(data: {
+    tenantName: string;
+    subdomain: string;
+    customerName: string;
+    customerEmail: string;
+    customerPhone: string;
+    orderNumber: string;
+    shippingAddress: string;
+    totalAmount: number;
+    deliveryCharge: number;
+    items: Array<{ title: string; quantity: number; price: number; variant?: string }>;
+    paymentMethod?: string;
+  }) {
+    const trackingUrl = `http://localhost:3000/order-success/${data.orderNumber}?tenant=${data.subdomain}`;
+    const itemsHtml = data.items.map((it) => `
+      <tr style="border-bottom: 1px solid #e2e8f0;">
+        <td style="padding: 10px 0; font-size: 13px; color: #1e293b;">
+          <strong>${it.title}</strong> ${it.variant ? `<span style="color:#64748b;">(${it.variant})</span>` : ''}
+        </td>
+        <td style="padding: 10px 0; text-align: center; font-size: 13px; color: #475569;">${it.quantity}</td>
+        <td style="padding: 10px 0; text-align: right; font-size: 13px; font-weight: bold; color: #0f172a;">BDT ${(it.price * it.quantity).toLocaleString()}</td>
+      </tr>
+    `).join('');
+
+    const emailPayload = {
+      from: `"${data.tenantName}" <orders@saasengine.com>`,
+      to: data.customerEmail,
+      subject: `✅ Order Confirmed: #${data.orderNumber} - ${data.tenantName}`,
+      sentAt: new Date().toISOString(),
+      html: `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #1e293b; max-width: 600px; margin: 0 auto; padding: 32px 24px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff;">
+          <div style="text-align: center; margin-bottom: 24px;">
+            <div style="display: inline-block; padding: 6px 14px; background-color: #ecfdf5; border-radius: 9999px; font-size: 12px; font-weight: bold; color: #059669; margin-bottom: 10px;">
+              ✓ ORDER RECEIVED & IN FULFILLMENT
+            </div>
+            <h1 style="color: #0f172a; margin: 0; font-size: 24px; font-weight: 800;">Thank You for Your Order!</h1>
+            <p style="color: #64748b; font-size: 13px; margin-top: 4px;">Order Tracking Code: <strong>${data.orderNumber}</strong></p>
+          </div>
+
+          <p>Dear <strong>${data.customerName}</strong>,</p>
+          <p>We have successfully registered your order at <strong>${data.tenantName}</strong>. Our fulfillment team is preparing your package for dispatch.</p>
+
+          <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px; margin: 20px 0;">
+            <h3 style="margin-top: 0; color: #0f172a; font-size: 14px; font-weight: 700; text-transform: uppercase;">📦 Order Manifest Summary</h3>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 8px;">
+              <thead>
+                <tr style="border-bottom: 2px solid #cbd5e1; font-size: 11px; text-transform: uppercase; color: #64748b; text-align: left;">
+                  <th style="padding-bottom: 6px;">Item Description</th>
+                  <th style="padding-bottom: 6px; text-align: center;">Qty</th>
+                  <th style="padding-bottom: 6px; text-align: right;">Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${itemsHtml}
+              </tbody>
+            </table>
+
+            <div style="margin-top: 14px; padding-top: 10px; border-top: 1px dashed #cbd5e1; font-size: 13px; text-align: right;">
+              <p style="margin: 2px 0; color: #64748b;">Delivery Charge: <strong>BDT ${data.deliveryCharge || 60}</strong></p>
+              <p style="margin: 4px 0; font-size: 16px; font-weight: 800; color: #e11d48;">Total Payable: BDT ${data.totalAmount.toLocaleString()}</p>
+              <p style="margin: 2px 0; font-size: 11px; color: #64748b;">Payment Method: <strong>${data.paymentMethod || 'Cash on Delivery (COD)'}</strong></p>
+            </div>
+          </div>
+
+          <div style="background-color: #f1f5f9; border-radius: 10px; padding: 14px; margin-bottom: 20px; font-size: 12px;">
+            <strong style="color: #0f172a;">📍 Delivery Destination:</strong>
+            <p style="margin: 4px 0; color: #475569;">${data.shippingAddress}</p>
+            <p style="margin: 2px 0; color: #475569;">Contact Phone: <strong>${data.customerPhone}</strong></p>
+          </div>
+
+          <div style="text-align: center; margin-top: 24px;">
+            <a href="${trackingUrl}" style="background-color: #0f172a; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 10px; font-weight: 700; font-size: 13px; display: inline-block;">
+              Track Live Order Status &rarr;
+            </a>
+          </div>
+
+          <hr style="margin-top: 30px; border: 0; border-top: 1px solid #e2e8f0;" />
+          <p style="font-size: 11px; color: #94a3b8; text-align: center; margin-bottom: 0;">
+            Authorized Transaction Dispatch · ${data.tenantName} · All Rights Reserved
+          </p>
+        </div>
+      `,
+    };
+
+    console.log(`\n📧 [EMAIL DISPATCHER] Order Confirmation Dispatched to ${data.customerEmail}:`);
+    console.log(`   Order: #${data.orderNumber} | Total: BDT ${data.totalAmount}`);
+    console.log(`   Tracking: ${trackingUrl}\n`);
+
+    return {
+      success: true,
+      messageId: `ord_mail_${Date.now()}`,
+      recipient: data.customerEmail,
+      preview: emailPayload,
+    };
+  },
 };

@@ -10,6 +10,7 @@ import {
   fulfillOrderStock,
   cancelOrderStock,
 } from '../inventory/inventory.service.js';
+import { mailService } from '../../services/mail.service.js';
 
 const router = Router();
 
@@ -346,7 +347,7 @@ function getInitialSeedOrders(tenant: any): any[] {
         businessCategory: 'real_estate',
         orderType: 'LEAD_GEN_REAL_ESTATE',
         propertyTitle: 'The Grand Regal Country Estate (10,000 sq ft)',
-        budget: '৳ 45,000,000',
+        budget: 'BDT 45,000,000',
         siteVisitDate: '2026-10-26',
         totalAmount: 0,
         paymentMethod: 'INQUIRY_ONLY',
@@ -626,7 +627,7 @@ router.post('/place', requireTenant, async (req: Request, res: Response) => {
     if (isCustomerBlocked) {
       res.status(403).json({
         success: false,
-        message: 'আপনার ফোন নম্বর বা আইপি সাময়িকভাবে স্থগিত (Blocked) করা হয়েছে। বিস্তারিত জানতে গ্রাহক সহায়তায় যোগাযোগ করুন।',
+        message: 'Your phone number or IP has been suspended (Blocked). Please contact customer support for assistance.',
       });
       return;
     }
@@ -871,6 +872,31 @@ router.post('/place', requireTenant, async (req: Request, res: Response) => {
           orderItemsToCreate
         );
       }
+
+      // Automated Transactional Notification: Order Confirmation Email & Invoice Summary
+      const targetEmail = customerEmail || req.tenant!.email;
+      if (targetEmail) {
+        mailService
+          .sendOrderConfirmationEmail({
+            tenantName: req.tenant!.name,
+            subdomain: req.tenant!.subdomain,
+            customerName,
+            customerEmail: targetEmail,
+            customerPhone,
+            orderNumber: orderRecord.orderNumber || orderNumber,
+            shippingAddress,
+            totalAmount,
+            deliveryCharge: serviceItemId ? 0 : deliveryCharge,
+            items: orderItemsToCreate.map((it: any) => ({
+              title: it.itemTitle,
+              quantity: it.quantity,
+              price: it.price,
+              variant: it.variantTitle,
+            })),
+            paymentMethod,
+          })
+          .catch((err) => console.warn('Non-blocking order email dispatch issue:', err));
+      }
     } catch (syncErr) {
       console.error('Failed to sync order to partition:', syncErr);
     }
@@ -937,7 +963,7 @@ router.post('/blacklist/block', requireTenant, async (req: Request, res: Respons
     });
 
     if (already) {
-      res.json({ success: true, message: 'কাস্টমার ইতিমধ্যে ব্লক তালিকায় যুক্ত আছেন।', data: already });
+      res.json({ success: true, message: 'Customer is already on the blacklist.', data: already });
       return;
     }
 
@@ -956,7 +982,7 @@ router.post('/blacklist/block', requireTenant, async (req: Request, res: Respons
 
     res.json({
       success: true,
-      message: 'কাস্টমারকে সফলভাবে ব্লক করা হয়েছে (Customer Blacklisted)',
+      message: 'Customer successfully blacklisted',
       data: newBlockEntry,
     });
   } catch (err) {
@@ -988,7 +1014,7 @@ router.post('/blacklist/unblock', requireTenant, async (req: Request, res: Respo
     });
 
     fs.writeFileSync(partitionFile, JSON.stringify(pData, null, 2));
-    res.json({ success: true, message: 'কাস্টমারকে সফলভাবে আনব্লক করা হয়েছে (Customer Unblocked)' });
+    res.json({ success: true, message: 'Customer successfully unblocked' });
   } catch {
     res.status(500).json({ success: false, message: 'Failed to unblock customer' });
   }
@@ -1581,6 +1607,117 @@ router.get('/:orderId/invoice', requireTenant, async (req: Request, res: Respons
     res.json({ success: true, data: order });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to fetch invoice' });
+  }
+});
+
+// ==========================================
+// MASTER COURIER CONSIGNMENT DISPATCH (Steadfast / Pathao)
+// ==========================================
+router.post('/:orderId/dispatch-courier', requireTenant, async (req: Request, res: Response) => {
+  try {
+    const tenant = req.tenant!;
+    const { orderId } = req.params;
+    const { courier = 'Steadfast Courier', codAmount, note = '' } = req.body;
+
+    if (tenant.features && tenant.features.courierLogisticsAPI === false) {
+      res.status(403).json({
+        success: false,
+        message: 'Automated Courier Logistics API is disabled on your current plan. Please upgrade to Growth Pro or Enterprise to enable 1-click dispatch.',
+      });
+      return;
+    }
+
+    const s = tenant.settings || {};
+    let order: any = null;
+
+    // 1. Locate Order
+    const partitionFile = getTenantPartitionFilePath(tenant.subdomain);
+    let pData: any = null;
+    if (fs.existsSync(partitionFile)) {
+      try {
+        pData = JSON.parse(fs.readFileSync(partitionFile, 'utf-8'));
+        order = pData.orders?.find((o: any) => o.id === orderId || o.orderNumber === orderId);
+      } catch {}
+    }
+
+    if (!order) {
+      try {
+        const dbOnline = await isDatabaseAvailable();
+        if (dbOnline) {
+          order = await prisma.order.findFirst({
+            where: {
+              tenantId: tenant.id,
+              OR: [{ id: orderId }, { orderNumber: orderId }],
+            },
+          });
+        }
+      } catch {}
+    }
+
+    if (!order) {
+      res.status(404).json({ success: false, message: 'Order not found for dispatch' });
+      return;
+    }
+
+    const finalCod = codAmount !== undefined ? Number(codAmount) : Number(order.totalAmount || 0);
+    const trackingPrefix = courier.toLowerCase().includes('pathao') ? 'PATH' : 'STEAD';
+    const generatedTrackingCode = `${trackingPrefix}-${Math.floor(100000 + Math.random() * 900000)}-${(order.city || 'BD').slice(0, 3).toUpperCase()}`;
+
+    // Update in partition
+    if (pData && pData.orders) {
+      const idx = pData.orders.findIndex((o: any) => o.id === order.id || o.orderNumber === order.orderNumber);
+      if (idx !== -1) {
+        pData.orders[idx].orderStatus = 'SHIPPED';
+        pData.orders[idx].courier = courier;
+        pData.orders[idx].trackingCode = generatedTrackingCode;
+        pData.orders[idx].shippedAt = new Date().toISOString();
+        fs.writeFileSync(partitionFile, JSON.stringify(pData, null, 2));
+      }
+    }
+
+    // Update in prisma if available
+    try {
+      const dbOnline = await isDatabaseAvailable();
+      if (dbOnline) {
+        await prisma.order.updateMany({
+          where: {
+            tenantId: tenant.id,
+            OR: [{ id: order.id }, { orderNumber: order.orderNumber }],
+          },
+          data: {
+            orderStatus: 'SHIPPED',
+          },
+        });
+      }
+    } catch {}
+
+    res.json({
+      success: true,
+      message: `Order #${order.orderNumber} dispatched to ${courier} successfully!`,
+      data: {
+        orderId: order.id,
+        orderNumber: order.orderNumber,
+        courier,
+        trackingCode: generatedTrackingCode,
+        orderStatus: 'SHIPPED',
+        codAmount: finalCod,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Courier dispatch failed' });
+  }
+});
+
+// ==========================================
+// COURIER WEBHOOK HANDLER
+// ==========================================
+router.post('/courier/webhook', async (req: Request, res: Response) => {
+  try {
+    const { status, consignment_id, tracking_code, invoice_id } = req.body;
+    console.log(`📦 [COURIER WEBHOOK] Received status update:`, { status, consignment_id, tracking_code, invoice_id });
+    res.json({ success: true, message: 'Courier webhook acknowledged' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Webhook processing error' });
   }
 });
 

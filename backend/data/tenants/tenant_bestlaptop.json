@@ -168,7 +168,7 @@
   "locations": [
     {
       "id": "loc_main",
-      "name": "Main Central Warehouse (ঢাকা কেন্দ্রীয় গুদাম)",
+      "name": "Main Central Warehouse (Dhaka Central WH)",
       "code": "WH-MAIN",
       "address": "Tejgaon Industrial Area, Dhaka",
       "bins": [

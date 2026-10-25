@@ -20,6 +20,9 @@ export interface TenantData {
   address: string | null;
   themeConfig: string | null;
   settings?: any;
+  subscription?: any;
+  features?: any;
+  merchantProfile?: any;
   isActive: boolean;
 }
 
@@ -117,7 +120,7 @@ export async function tenantMiddleware(req: Request, res: Response, next: NextFu
             id: pData.tenantId || cleanSub,
             name: s.name || pData.name || cleanSub,
             subdomain: pData.subdomain || cleanSub,
-            customDomain: null,
+            customDomain: s.customDomain || pData.customDomain || null,
             businessType: pData.businessType || s.businessType || (cleanSub === 'medicare' ? 'healthcare_service' : cleanSub === 'aebanproperty' ? 'real_estate' : 'fashion_clothing'),
             logo: s.logo || null,
             bannerImage: s.bannerImage || null,
@@ -128,7 +131,10 @@ export async function tenantMiddleware(req: Request, res: Response, next: NextFu
             address: s.address || null,
             themeConfig: s.themeConfig ? (typeof s.themeConfig === 'string' ? s.themeConfig : JSON.stringify(s.themeConfig)) : null,
             settings: s,
-            isActive: true,
+            subscription: pData.subscription || null,
+            features: pData.features || null,
+            merchantProfile: pData.merchantProfile || null,
+            isActive: pData.isActive !== undefined ? Boolean(pData.isActive) : true,
           };
         } catch {}
       }

@@ -70,19 +70,19 @@ export function DynamicFieldRenderer({
                 <span>{label}</span>
                 {field.required && (
                   <span className="text-[10px] text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded font-bold border border-rose-100">
-                    আবশ্যক
+                    Required
                   </span>
                 )}
                 {field.filterable && (
                   <span className="text-[10px] text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded font-bold border border-blue-100">
-                    ফিল্টার
+                    Filterable
                   </span>
                 )}
               </label>
 
               {field.unit && (
                 <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
-                  একক: {field.unit}
+                  Unit: {field.unit}
                 </span>
               )}
             </div>
@@ -95,7 +95,7 @@ export function DynamicFieldRenderer({
                   disabled={readOnly}
                   value={curValue}
                   onChange={(e) => onChange(field.key, e.target.value)}
-                  placeholder={helpText || `${label} লিখুন...`}
+                  placeholder={helpText || `Enter ${label}...`}
                   className="w-full text-xs font-semibold px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-950 placeholder:text-slate-400 placeholder:font-normal focus:bg-white focus:text-slate-950 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 outline-none transition shadow-sm"
                 />
               </div>
@@ -125,7 +125,7 @@ export function DynamicFieldRenderer({
                 disabled={readOnly}
                 value={curValue}
                 onChange={(e) => onChange(field.key, e.target.value)}
-                placeholder={helpText || `${label} বিস্তারিত লিখুন...`}
+                placeholder={helpText || `Enter detailed ${label}...`}
                 className="w-full text-xs font-semibold p-3 rounded-xl border border-slate-300 bg-white text-slate-950 placeholder:text-slate-400 placeholder:font-normal focus:bg-white focus:text-slate-950 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 outline-none transition shadow-sm"
               />
             )}
@@ -137,7 +137,7 @@ export function DynamicFieldRenderer({
                 onChange={(e) => onChange(field.key, e.target.value)}
                 className="w-full text-xs font-bold px-3 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-950 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 outline-none transition shadow-sm"
               >
-                <option value="" className="text-slate-500 font-normal">-- {label} নির্বাচন করুন --</option>
+                <option value="" className="text-slate-500 font-normal">-- Select {label} --</option>
                 {(field.options || []).map((opt) => (
                   <option key={opt} value={opt} className="text-slate-950 font-bold bg-white">
                     {opt}
@@ -174,7 +174,7 @@ export function DynamicFieldRenderer({
             {field.type === 'boolean' && (
               <div className="flex items-center justify-between pt-1">
                 <span className="text-xs text-slate-700 font-semibold">
-                  {curValue ? 'হ্যাঁ (অনুমোদিত/সক্রিয়)' : 'না (নিষ্ক্রিয়)'}
+                  {curValue ? 'Yes (Enabled/Active)' : 'No (Inactive)'}
                 </span>
                 <button
                   type="button"
@@ -189,12 +189,12 @@ export function DynamicFieldRenderer({
                   {curValue ? (
                     <>
                       <ToggleRight className="w-4 h-4" />
-                      <span>হ্যাঁ (YES)</span>
+                      <span>Yes</span>
                     </>
                   ) : (
                     <>
                       <ToggleLeft className="w-4 h-4 text-slate-500" />
-                      <span>না (NO)</span>
+                      <span>No</span>
                     </>
                   )}
                 </button>
@@ -221,12 +221,12 @@ export function DynamicFieldRenderer({
                     disabled={readOnly}
                     value={curValue}
                     onChange={(e) => onChange(field.key, e.target.value)}
-                    placeholder="ফাইলের URL বা লিংক দিন..."
+                    placeholder="Enter file URL or upload..."
                     className="flex-1 text-xs px-3 py-2 rounded-xl border border-slate-300 bg-white text-slate-950 placeholder:text-slate-400 outline-none font-semibold shadow-sm"
                   />
                   <label className="cursor-pointer px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold flex items-center gap-1 border border-slate-200">
                     <Upload className="w-3.5 h-3.5" />
-                    <span>আপলোড</span>
+                    <span>Upload</span>
                     <input
                       type="file"
                       className="hidden"
@@ -260,7 +260,7 @@ export function DynamicFieldRenderer({
 export function SpecificationsTable({
   customAttributes,
   fields,
-  lang = 'bn',
+  lang = 'en',
 }: {
   customAttributes: Record<string, any>;
   fields?: FieldDefinition[];
@@ -286,7 +286,7 @@ export function SpecificationsTable({
     <div className="rounded-2xl border border-slate-200/90 overflow-hidden shadow-sm bg-white divide-y divide-slate-100">
       <div className="bg-slate-900 text-white px-4 py-2.5 text-xs font-bold flex items-center gap-2">
         <Layers className="w-3.5 h-3.5 text-indigo-400" />
-        <span>বিস্তারিত স্পেসিফিকেশন ও ফিচারসমূহ (Specifications)</span>
+        <span>Detailed Specifications & Features</span>
       </div>
 
       <div className="divide-y divide-slate-100 text-xs">
@@ -297,7 +297,7 @@ export function SpecificationsTable({
 
           let displayVal = '';
           if (typeof val === 'boolean') {
-            displayVal = val ? 'হ্যাঁ (অন্তর্ভুক্ত)' : 'না';
+            displayVal = val ? 'Yes (Included)' : 'No';
           } else if (Array.isArray(val)) {
             displayVal = val.join(', ');
           } else {

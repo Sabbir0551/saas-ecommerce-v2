@@ -100,7 +100,15 @@
         "badge": "Open daily",
         "isActive": true
       }
-    ]
+    ],
+    "metaPixelId": "192837465019283",
+    "googleAnalyticsId": "G-SMARTVOLT01",
+    "customDomain": "store.smartvoltbd.com",
+    "whatsappNumber": "+8801812778899",
+    "steadfastApiKey": "stead_live_key_99182",
+    "steadfastSecretKey": "stead_secret_88127",
+    "dbidRegistrationNo": "DBID-2026-99120",
+    "tradeLicenseNo": "TRAD/DSCC/012984/2026"
   },
   "categories": [
     {
@@ -581,6 +589,54 @@
   ],
   "orders": [
     {
+      "id": "ord_1792931142268_975",
+      "orderNumber": "ORD-134229-9958",
+      "customerName": "Engr. Tanvir Ahmed",
+      "customerPhone": "01712345678",
+      "customerEmail": "",
+      "shippingAddress": "House 42, Road 11, Banani, Dhaka",
+      "city": "Dhaka Metro",
+      "businessCategory": "electronics",
+      "orderType": "STANDARD",
+      "customAttributes": {
+        "installation_required": true,
+        "preferred_delivery_slot": "Morning Slot (10:00 AM - 02:00 PM)"
+      },
+      "items": [
+        {
+          "itemId": "item_smartvolt_1792840511154",
+          "variantId": null,
+          "itemTitle": "Tuya Smart Gateway Siren Smart Home Product",
+          "variantTitle": null,
+          "price": 5000,
+          "quantity": 1,
+          "subtotal": 5000,
+          "customAttributes": {}
+        }
+      ],
+      "subtotal": 5000,
+      "deliveryCharge": 60,
+      "totalAmount": 5060,
+      "paymentMethod": "COD",
+      "orderStatus": "PENDING",
+      "courier": "Pending Assignment",
+      "trackingCode": "",
+      "ipAddress": "103.205.71.42",
+      "deviceType": "Desktop",
+      "browserName": "Chrome",
+      "osName": "Windows",
+      "ipCity": "Dhaka",
+      "ipCountry": "Bangladesh",
+      "ipLatitude": 23.8103,
+      "ipLongitude": 90.4125,
+      "addressDiscrepancy": false,
+      "appointmentDate": null,
+      "appointmentTime": null,
+      "serviceTitle": null,
+      "notes": "",
+      "createdAt": "2026-10-25T12:25:42.270Z"
+    },
+    {
       "id": "ord_volt_1",
       "orderNumber": "ORD-SV-301",
       "customerName": "Engr. Kamal Uddin",
@@ -663,7 +719,19 @@
       "createdAt": "2026-10-22T06:59:45.028Z"
     }
   ],
-  "stockReservations": [],
+  "stockReservations": [
+    {
+      "id": "resv_1792931142274_v3o50",
+      "orderId": "ord_1792931142268_975",
+      "orderNumber": "ORD-134229-9958",
+      "itemId": "item_smartvolt_1792840511154",
+      "itemTitle": "Tuya Smart Gateway Siren Smart Home Product",
+      "quantity": 1,
+      "status": "ACTIVE",
+      "expiresAt": "2026-10-27T12:25:42.274Z",
+      "createdAt": "2026-10-25T12:25:42.274Z"
+    }
+  ],
   "stockLedger": [
     {
       "id": "ldg_init_item_volt_1",
@@ -808,6 +876,24 @@
       "notes": "System Baseline Opening Stock",
       "performedBy": "System Auditor",
       "createdAt": "2026-10-22T10:04:08.766Z"
+    },
+    {
+      "id": "ldg_1792931142274_hpvy3",
+      "itemId": "item_smartvolt_1792840511154",
+      "sku": "SKU-ET5SH6",
+      "itemTitle": "Tuya Smart Gateway Siren Smart Home Product",
+      "locationId": "loc_main",
+      "locationName": "WH-MAIN (Tejgaon Central)",
+      "bin": "A-01-01",
+      "movementType": "RESERVATION_LOCK",
+      "qtyChange": 0,
+      "balanceAfter": 20,
+      "unitCost": 0,
+      "totalValue": 0,
+      "reference": "ORD-134229-9958",
+      "notes": "Stock reserved: 1 units locked for Order #ORD-134229-9958",
+      "performedBy": "Checkout Reservation Engine",
+      "createdAt": "2026-10-25T12:25:42.274Z"
     }
   ],
   "users": [
@@ -819,5 +905,71 @@
       "createdAt": "2026-10-22T06:59:45.028Z"
     }
   ],
-  "blacklist": []
+  "blacklist": [],
+  "customDomain": "store.smartvoltbd.com",
+  "subscription": {
+    "planId": "growth_pro",
+    "planName": "Growth Business Pro",
+    "priceBDT": 3500,
+    "billingCycle": "monthly",
+    "status": "active",
+    "startDate": "2026-08-15T00:00:00.000Z",
+    "renewalDate": "2026-11-15T00:00:00.000Z",
+    "activeDays": 71,
+    "invoices": [
+      {
+        "invoiceId": "INV-2026-001",
+        "date": "2026-08-15",
+        "amount": 3500,
+        "paymentMethod": "bKash Merchant",
+        "status": "PAID"
+      },
+      {
+        "invoiceId": "INV-2026-002",
+        "date": "2026-09-15",
+        "amount": 3500,
+        "paymentMethod": "bKash Merchant",
+        "status": "PAID"
+      },
+      {
+        "invoiceId": "INV-2026-003",
+        "date": "2026-10-15",
+        "amount": 3500,
+        "paymentMethod": "Bank Transfer",
+        "status": "PAID"
+      }
+    ],
+    "daysUntilRenewal": 21
+  },
+  "features": {
+    "maxProducts": 500,
+    "maxOrdersPerMonth": 1500,
+    "customDomain": true,
+    "metaPixelAndGA4": true,
+    "courierLogisticsAPI": true,
+    "automatedEmailReceipts": true,
+    "automatedSmsGateway": true,
+    "fraudIntelligence": true,
+    "staffAccountsLimit": 5,
+    "whiteLabelBranding": true,
+    "priority24x7Support": true
+  },
+  "merchantProfile": {
+    "ownerName": "Engr. Tanvir Ahmed",
+    "contactPhone": "+880 1812-778899",
+    "emergencyPhone": "+880 1711-223344",
+    "verifiedEmail": "info@smartvoltbd.com",
+    "nidOrPassport": "19922691234567890",
+    "tradeLicenseNo": "TRAD/DSCC/012984/2026",
+    "dbidRegistrationNo": "DBID-2026-99120",
+    "officeAddress": "Nawabpur Road Electrical Market, Dhaka",
+    "onboardingDate": "2026-08-15",
+    "specialRequirements": [
+      "Requested automated SMS confirmation via Greenweb Gateway",
+      "Requested custom thermal invoice printer template",
+      "Needs Steadfast bulk consignment barcode generator",
+      "Requested bKash direct merchant payment gateway integration"
+    ],
+    "adminInternalNotes": "High-value industrial electrical client. 12-month advance agreement signed."
+  }
 }

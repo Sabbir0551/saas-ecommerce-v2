@@ -5,9 +5,22 @@ import { ShieldCheck, PhoneCall, Mail, MapPin, Truck, RefreshCw, Headphones } fr
 interface FooterProps {
   tenantSlug?: string;
   storeName?: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  dbid?: string;
+  tradeLicense?: string;
 }
 
-export function Footer({ tenantSlug = 'fashion', storeName = 'Gulshan Fashion & Boutique' }: FooterProps) {
+export function Footer({ 
+  tenantSlug = 'fashion', 
+  storeName = 'Gulshan Fashion & Boutique',
+  phone = '+880 1812-778899',
+  email = 'support@saasengine.com',
+  address = 'Nawabpur Road Electrical Market, Dhaka',
+  dbid,
+  tradeLicense,
+}: FooterProps) {
   return (
     <footer className="bg-slate-900 text-slate-300 pt-16 pb-12 border-t border-slate-800 mt-auto">
       {/* 3 Pillars Banner */}
@@ -53,9 +66,17 @@ export function Footer({ tenantSlug = 'fashion', storeName = 'Gulshan Fashion & 
             <p className="text-xs text-slate-400 leading-relaxed">
               Committed to delivering authentic quality products, guaranteed slot schedules, and transparent customer service.
             </p>
-            <div className="flex items-center gap-2 text-xs text-emerald-400 font-semibold bg-emerald-950/40 border border-emerald-800/40 px-3 py-1.5 rounded-lg w-fit">
-              <ShieldCheck className="w-4 h-4" />
-              <span>Certified Digital Commerce Compliant</span>
+            <div className="flex flex-col gap-1.5">
+              <div className="flex items-center gap-2 text-xs text-emerald-400 font-semibold bg-emerald-950/40 border border-emerald-800/40 px-3 py-1.5 rounded-lg w-fit">
+                <ShieldCheck className="w-4 h-4" />
+                <span>Certified Digital Commerce Compliant</span>
+              </div>
+              {(dbid || tradeLicense) && (
+                <div className="text-[10px] text-slate-400 space-y-0.5 font-mono pt-1">
+                  {dbid && <div>DBID Reg: <span className="text-emerald-300 font-bold">{dbid}</span></div>}
+                  {tradeLicense && <div>Trade License: <span className="text-slate-300">{tradeLicense}</span></div>}
+                </div>
+              )}
             </div>
           </div>
 

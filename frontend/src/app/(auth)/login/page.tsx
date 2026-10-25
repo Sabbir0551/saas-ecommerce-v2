@@ -57,7 +57,7 @@ function LoginContent() {
           if (typeof window !== 'undefined') {
             localStorage.setItem('superadmin_auth', JSON.stringify(res.data));
           }
-          setSuccessMsg('সুপার অ্যাডমিন অনুমোদিত! রিডাইরেক্ট হচ্ছে...');
+          setSuccessMsg('Super Admin Authorized! Redirecting...');
           setTimeout(() => {
             router.push('/super-admin');
           }, 400);
@@ -86,7 +86,7 @@ function LoginContent() {
             localStorage.setItem(`admin_auth_${cleanSub}`, JSON.stringify(res.data));
             localStorage.setItem('admin_auth', JSON.stringify(res.data));
           }
-          setSuccessMsg(`স্টোর অ্যাডমিন অনুমোদিত (${res.data?.user?.tenantName || cleanSub})! ড্যাশবোর্ডে প্রবেশ হচ্ছে...`);
+          setSuccessMsg(`Store Admin Authorized (${res.data?.user?.tenantName || cleanSub})! Entering Dashboard...`);
           setTimeout(() => {
             router.push(`/admin/dashboard?tenant=${cleanSub}`);
           }, 400);

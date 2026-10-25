@@ -81,6 +81,7 @@ export function ElectronicsStorefront({
   const [activeEngineeringFeature, setActiveEngineeringFeature] = useState<number>(0);
   const [activeSpecTab, setActiveSpecTab] = useState<'specs' | 'warranty'>('specs');
   const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [activeCategoryFilter, setActiveCategoryFilter] = useState<string>('all');
   const [addedItemNotice, setAddedItemNotice] = useState<string | null>(null);
 
@@ -618,6 +619,32 @@ export function ElectronicsStorefront({
     setTimeout(() => setAddedItemNotice(null), 3500);
   };
 
+  // Top 5 live search suggestions for instant dropdown preview
+  const searchSuggestions = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    const q = searchQuery.toLowerCase().trim();
+    return liveProducts
+      .filter((p) => {
+        return (
+          p.title.toLowerCase().includes(q) ||
+          p.brand.toLowerCase().includes(q) ||
+          p.category.toLowerCase().includes(q) ||
+          (p.tags && p.tags.some((t: string) => t.toLowerCase().includes(q)))
+        );
+      })
+      .slice(0, 5);
+  }, [liveProducts, searchQuery]);
+
+  // Execute search and smooth scroll to catalog
+  const handleExecuteSearch = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setIsSearchFocused(false);
+    const el = document.getElementById('products');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   // Handle category click to filter and smooth-scroll
   const handleSelectCategory = (catId: string) => {
     setActiveCategoryFilter(catId);
@@ -638,95 +665,165 @@ export function ElectronicsStorefront({
           {/* Left: 24/7 Helpline */}
           <div className="flex items-center gap-3">
             <span className="font-bold text-white tracking-wide">
-              {tenant?.settings?.phone || '09606 111 777'}
+              {tenant?.settings?.phone || '+880 1812-778899'}
             </span>
             <span className="text-slate-400">
-              {tenant?.settings?.announcementText || tenant?.settings?.slogan || '24/7 helpline and certified technical support'}
+              {tenant?.settings?.announcementText || tenant?.settings?.slogan || 'Authorized Industrial & Smart Home Electrical Solutions with Fire-Safe Standards'}
             </span>
           </div>
 
-          {/* Right: Key Perks + Quick Admin Dashboard Link */}
-          <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-xs text-slate-300">
+          {/* Right: Key Customer Perks */}
+          <div className="flex flex-wrap items-center gap-3 sm:gap-6 text-xs text-slate-300">
             <span>Free nationwide express delivery and installation</span>
             <span className="text-slate-600 hidden sm:inline">•</span>
             <span>100% genuine official brand warranty</span>
             <span className="text-slate-600 hidden sm:inline">•</span>
             <span>0% interest EMI</span>
-
-            {/* Direct Link to Admin Dashboard */}
-            <Link
-              href={`/admin/dashboard?tenant=${tenantSlug}`}
-              className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold text-xs flex items-center gap-1.5 border border-slate-700 transition"
-              title="Open Merchant Inventory & Orders Dashboard"
-            >
-              <LayoutDashboard className="w-3.5 h-3.5" />
-              <span>Admin Dashboard</span>
-            </Link>
           </div>
         </div>
       </div>
 
       {/* 2. MAIN HEADER & BRAND NAVIGATION */}
       <header className="bg-white border-b border-slate-200/90 sticky top-0 z-40 shadow-[0_1px_3px_rgba(0,0,0,0.05)]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5">
-          <div className="flex items-center justify-between gap-4">
-            {/* Logo */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+          <div className="flex items-center justify-between gap-3 sm:gap-6">
+            {/* Brand Logo */}
             <Link href={`/?tenant=${tenantSlug}`} className="flex items-center gap-3 flex-shrink-0">
               <div className="w-10 h-10 rounded-xl bg-black flex items-center justify-center text-amber-400 shadow-sm">
                 <Zap className="w-5 h-5 fill-amber-400 text-amber-400" />
               </div>
               <div>
-                <span className="text-xl font-black tracking-tight text-slate-900 block leading-tight">
+                <span className="text-lg sm:text-xl font-black tracking-tight text-slate-900 block leading-tight">
                   {tenant?.name || tenant?.settings?.name || 'SmartVolt'}
                 </span>
-                <span className="text-[11px] text-slate-500 font-medium block">
+                <span className="text-[10px] sm:text-[11px] text-slate-500 font-medium block">
                   Electrical & Automation
                 </span>
               </div>
             </Link>
 
-            {/* Rounded Search Bar */}
-            <div className="flex-1 max-w-md hidden md:block">
-              <div className="relative">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  placeholder="Search AC, refrigerator, TV, MCB"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 rounded-full border border-slate-200 bg-slate-50/70 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-400 focus:bg-white transition"
-                />
-                {searchQuery && (
+            {/* 🔍 Responsive Search Box with Live Results Dropdown */}
+            <div className="flex-1 max-w-xl hidden sm:block relative">
+              <form onSubmit={handleExecuteSearch} className="relative w-full">
+                <div className="relative flex items-center">
+                  <div className="absolute left-3.5 pointer-events-none text-slate-400">
+                    <Search className="w-4 h-4 text-orange-500" />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Search by product, brand, or model (e.g. Inverter AC, MCB, TV)..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onFocus={() => setIsSearchFocused(true)}
+                    className="w-full pl-10 pr-24 py-2.5 text-xs sm:text-sm rounded-full border border-slate-300 bg-slate-50 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-orange-500 focus:bg-white focus:ring-2 focus:ring-orange-500/20 transition shadow-inner"
+                  />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSearchQuery('');
+                        setIsSearchFocused(false);
+                      }}
+                      className="absolute right-20 text-slate-400 hover:text-slate-600 p-1"
+                      title="Clear search"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
                   <button
-                    onClick={() => setSearchQuery('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    type="submit"
+                    className="absolute right-1.5 px-3.5 py-1.5 bg-orange-600 hover:bg-orange-700 text-white rounded-full text-xs font-bold transition shadow-sm flex items-center gap-1 active:scale-95"
                   >
-                    <X className="w-3.5 h-3.5" />
+                    <span>Search</span>
                   </button>
-                )}
-              </div>
+                </div>
+              </form>
+
+              {/* Instant Search Suggestions Dropdown */}
+              {isSearchFocused && searchQuery.trim().length > 0 && (
+                <>
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setIsSearchFocused(false)}
+                  />
+                  <div className="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-slate-200 z-50 overflow-hidden divide-y divide-slate-100">
+                    <div className="px-4 py-2.5 bg-slate-50 flex items-center justify-between text-xs font-semibold text-slate-600">
+                      <span>Search suggestions for &ldquo;{searchQuery}&rdquo;</span>
+                      <span className="text-orange-600 font-bold">{searchSuggestions.length} found</span>
+                    </div>
+
+                    {searchSuggestions.length === 0 ? (
+                      <div className="p-4 text-center text-xs text-slate-500">
+                        No products found matching &ldquo;{searchQuery}&rdquo;. Try another search term.
+                      </div>
+                    ) : (
+                      <div className="max-h-80 overflow-y-auto divide-y divide-slate-100">
+                        {searchSuggestions.map((product) => (
+                          <Link
+                            key={product.id}
+                            href={`/products/${product.slug}?tenant=${tenantSlug}`}
+                            onClick={() => setIsSearchFocused(false)}
+                            className="flex items-center gap-3 p-3 hover:bg-orange-50/70 transition group"
+                          >
+                            <img
+                              src={product.images?.[0] || 'https://images.unsplash.com/photo-1550009158-9ebf69173e03?auto=format&fit=crop&w=200&q=80'}
+                              alt={product.title}
+                              className="w-12 h-12 rounded-lg object-cover bg-slate-100 border border-slate-200 shrink-0 group-hover:scale-105 transition"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-xs font-bold text-slate-900 truncate group-hover:text-orange-600 transition">
+                                {product.title}
+                              </h4>
+                              <div className="flex items-center gap-2 mt-0.5 text-[11px] text-slate-500">
+                                <span className="px-1.5 py-0.2 rounded bg-slate-100 text-slate-700 font-medium">
+                                  {product.category}
+                                </span>
+                                <span>•</span>
+                                <span>{product.brand}</span>
+                              </div>
+                            </div>
+                            <div className="text-right shrink-0">
+                              <div className="text-xs font-black text-slate-900">
+                                BDT {product.price.toLocaleString()}
+                              </div>
+                              {product.discount && (
+                                <div className="text-[10px] text-emerald-600 font-bold">
+                                  {product.discount}
+                                </div>
+                              )}
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+
+                    <div className="p-2.5 bg-slate-50 text-center">
+                      <button
+                        type="button"
+                        onClick={handleExecuteSearch}
+                        className="w-full py-1.5 text-xs font-bold text-orange-600 hover:text-orange-700 hover:bg-orange-100/60 rounded-xl transition"
+                      >
+                        View All in Catalog &darr;
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
 
-            {/* Actions: Showrooms, Admin & Cart */}
-            <div className="flex items-center gap-4 flex-shrink-0">
+            {/* Actions: Showrooms & Cart */}
+            <div className="flex items-center gap-3 sm:gap-5 flex-shrink-0">
               <a
                 href="#showrooms"
-                className="text-xs sm:text-sm font-semibold text-slate-700 hover:text-black transition"
+                className="text-xs sm:text-sm font-semibold text-slate-700 hover:text-orange-600 transition flex items-center gap-1.5"
               >
-                Showrooms
+                <MapPin className="w-4 h-4 text-slate-500" />
+                <span className="hidden xs:inline">Showrooms</span>
               </a>
 
               <Link
-                href={`/admin/dashboard?tenant=${tenantSlug}`}
-                className="hidden lg:flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-slate-700 hover:text-orange-600 transition"
-              >
-                <LayoutDashboard className="w-4 h-4 text-slate-500" />
-                <span>Inventory & Orders</span>
-              </Link>
-
-              <Link
                 href={`/checkout?tenant=${tenantSlug}`}
-                className="bg-black hover:bg-slate-800 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 shadow-sm transition active:scale-95"
+                className="bg-black hover:bg-slate-800 text-white px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 shadow-sm transition active:scale-95"
               >
                 <ShoppingCart className="w-4 h-4 text-white" />
                 <span>Cart</span>
@@ -737,18 +834,36 @@ export function ElectronicsStorefront({
             </div>
           </div>
 
-          {/* Mobile search input */}
-          <div className="mt-3 md:hidden">
-            <div className="relative">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="Search AC, refrigerator, TV, MCB"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 rounded-full border border-slate-200 bg-slate-50 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-400 transition"
-              />
-            </div>
+          {/* Mobile Dedicated Responsive Search Bar */}
+          <div className="mt-3 sm:hidden relative">
+            <form onSubmit={handleExecuteSearch} className="relative w-full">
+              <div className="relative flex items-center">
+                <Search className="w-4 h-4 text-orange-500 absolute left-3.5 pointer-events-none" />
+                  <input
+                    type="text"
+                    placeholder="Search products or models (AC, TV, MCB)..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onFocus={() => setIsSearchFocused(true)}
+                    className="w-full pl-10 pr-20 py-2 rounded-full border border-slate-300 bg-slate-50 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-orange-500 focus:bg-white focus:ring-2 focus:ring-orange-500/20 transition"
+                  />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-16 text-slate-400 hover:text-slate-600 p-1"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+                <button
+                  type="submit"
+                  className="absolute right-1 px-3 py-1 bg-orange-600 hover:bg-orange-700 text-white rounded-full text-xs font-bold transition shadow-sm active:scale-95"
+                >
+                  Search
+                </button>
+              </div>
+            </form>
           </div>
         </div>
 
@@ -1597,6 +1712,16 @@ export function ElectronicsStorefront({
               <div className="font-bold text-white pt-1">
                 Helpline: {tenant?.settings?.phone || '09606 111 777'}
               </div>
+              {(tenant?.settings?.dbidRegistrationNo || tenant?.settings?.tradeLicenseNo) && (
+                <div className="text-[11px] text-slate-400 space-y-0.5 font-mono pt-1">
+                  {tenant?.settings?.dbidRegistrationNo && (
+                    <div>DBID Reg: <span className="text-emerald-400 font-bold">{tenant.settings.dbidRegistrationNo}</span></div>
+                  )}
+                  {tenant?.settings?.tradeLicenseNo && (
+                    <div>Trade License: <span className="text-slate-300">{tenant.settings.tradeLicenseNo}</span></div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Col 2 */}
@@ -1656,12 +1781,24 @@ export function ElectronicsStorefront({
 
           <div className="flex flex-col sm:flex-row items-center justify-between text-slate-500 text-xs gap-3">
             <div>© {new Date().getFullYear()} {tenant?.name || tenant?.settings?.name || 'SmartVolt Electrical & Automation'}. All rights reserved.</div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 flex-wrap">
+              <Link href={`/policies/terms?tenant=${tenantSlug}`} className="hover:text-slate-300 underline">
+                Terms of Service
+              </Link>
+              <span>•</span>
+              <Link href={`/policies/privacy?tenant=${tenantSlug}`} className="hover:text-slate-300 underline">
+                Privacy Policy
+              </Link>
+              <span>•</span>
+              <Link href={`/policies/refund-policy?tenant=${tenantSlug}`} className="hover:text-slate-300 underline">
+                Refund Policy
+              </Link>
+              <span>•</span>
               <Link href={`/admin/dashboard?tenant=${tenantSlug}`} className="hover:text-slate-300 underline">
                 Merchant Portal
               </Link>
               <span>•</span>
-              <span>Secure checkout · 100% genuine seal</span>
+              <span>100% genuine seal</span>
             </div>
           </div>
         </div>
