@@ -58,6 +58,7 @@ function getFallbackData(tenantIdentifier: string) {
               slug: c.slug,
               promoSlogan: c.promoSlogan,
               bannerImage: c.bannerImage,
+              parentId: c.parentId || null,
               _count: { items: 0 },
             })),
             brands: pData.brands || [],
@@ -126,7 +127,7 @@ function getFallbackData(tenantIdentifier: string) {
 // List products / services for the current tenant
 router.get('/items', requireTenant, async (req: Request, res: Response) => {
   const tenant = req.tenant!;
-  const { category, type, featured, search, limit = '20', page = '1' } = req.query;
+  const { category, type, featured, search, limit = '100', page = '1' } = req.query;
   const take = parseInt(limit as string, 10);
   const skip = (parseInt(page as string, 10) - 1) * take;
 

@@ -25,28 +25,10 @@ import {
   Minus,
   ChevronLeft,
   ChevronRight,
-  Film,
   ExternalLink,
   Eye,
   Phone,
 } from 'lucide-react';
-
-function getEmbedUrl(url?: string): string | null {
-  if (!url) return null;
-  if (url.includes('youtube.com/embed/')) return url;
-  if (url.includes('youtube.com/watch?v=')) {
-    const v = url.split('v=')[1]?.split('&')[0];
-    return v ? `https://www.youtube.com/embed/${v}` : url;
-  }
-  if (url.includes('youtu.be/')) {
-    const v = url.split('youtu.be/')[1]?.split('?')[0];
-    return v ? `https://www.youtube.com/embed/${v}` : url;
-  }
-  if (url.includes('facebook.com')) {
-    return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&width=734`;
-  }
-  return url;
-}
 
 function ProductDetailContent() {
   const params = useParams();
@@ -206,29 +188,6 @@ function ProductDetailContent() {
     : (item.images ? [item.images] : ['https://images.unsplash.com/photo-1550009158-9ebf69173e03?auto=format&fit=crop&w=800&q=80']);
 
   const currentDisplayImg = imageList[activeImageIndex] || imageList[0];
-
-  const videoToShow = (() => {
-    if (item.videoUrl) {
-      return {
-        title: item.title + ' - Official Product Review',
-        type: item.videoUrl.includes('facebook') ? 'FACEBOOK' : 'YOUTUBE',
-        embedUrl: getEmbedUrl(item.videoUrl),
-        url: item.videoUrl,
-        description: 'Official product unboxing video, feature walkthrough, and user guide.',
-      };
-    }
-    const related = mediaList.find((m) =>
-      (m.type === 'YOUTUBE' || m.type === 'FACEBOOK') &&
-      (m.categoryId === item.categoryId || m.categoryName?.toLowerCase() === item.category?.name?.toLowerCase() || m.categoryId === 'all')
-    );
-    if (related) {
-      return {
-        ...related,
-        embedUrl: getEmbedUrl(related.embedUrl || related.url),
-      };
-    }
-    return null;
-  })();
 
   // Separate Sidebar Related Products (Same category first) & Bottom More Products
   const sameCategoryProducts = relatedProducts.filter((p: any) => {
@@ -601,38 +560,22 @@ function ProductDetailContent() {
               )}
             </div>
 
-            {/* 3. Dedicated Video Walkthrough if Available */}
-            {videoToShow && (
-              <section id="product-video-section" className="bg-slate-950 text-white rounded-3xl p-6 sm:p-8 border border-slate-800 shadow-xl space-y-5">
-                <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                  <div>
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
-                      <Play className="w-3 h-3 fill-amber-400" />
-                      <span>Video Review & Demonstration</span>
-                    </span>
-                    <h3 className="text-lg font-black text-white mt-1">
-                      {videoToShow.title}
-                    </h3>
-                  </div>
-                  <span className="px-3 py-1 rounded-full text-[10px] font-extrabold bg-slate-800 text-slate-300 border border-slate-700">
-                    {videoToShow.type || 'HD VIDEO'}
+            {/* Product Overview & Rich Description */}
+            {(item.description || item.shortDescription) && (
+              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-sm space-y-4">
+                <div className="border-b border-slate-100 pb-3">
+                  <span className="text-[11px] font-black uppercase tracking-wider text-indigo-600 block">
+                    Product Overview & Information
                   </span>
+                  <h3 className="text-lg font-black text-slate-950 mt-0.5">
+                    Detailed Product Description
+                  </h3>
                 </div>
-
-                <div className="relative aspect-video max-w-3xl mx-auto rounded-2xl overflow-hidden shadow-2xl border border-slate-800 bg-black">
-                  {videoToShow.embedUrl ? (
-                    <iframe
-                      src={videoToShow.embedUrl}
-                      title={videoToShow.title || 'Product Video'}
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                      className="w-full h-full border-0"
-                    />
-                  ) : (
-                    <video src={videoToShow.url} controls className="w-full h-full object-cover" />
-                  )}
-                </div>
-              </section>
+                <div 
+                  className="prose prose-slate max-w-none text-xs sm:text-sm text-slate-700 leading-relaxed space-y-3 [&>ul]:list-disc [&>ul]:pl-5 [&>ol]:list-decimal [&>ol]:pl-5 [&>blockquote]:border-l-4 [&>blockquote]:border-indigo-500 [&>blockquote]:pl-3 [&>blockquote]:italic [&>h1]:text-xl [&>h1]:font-black [&>h2]:text-lg [&>h2]:font-bold [&>h3]:text-base [&>h3]:font-bold [&>img]:rounded-xl [&>img]:shadow-md"
+                  dangerouslySetInnerHTML={{ __html: item.description || item.shortDescription }}
+                />
+              </div>
             )}
           </div>
 

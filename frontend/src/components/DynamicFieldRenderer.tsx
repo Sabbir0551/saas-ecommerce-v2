@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { HelpCircle, Check, Upload, Calendar, Hash, Type, ToggleLeft, ToggleRight, List, Layers } from 'lucide-react';
+import RichTextEditor from './RichTextEditor';
 
 export interface FieldDefinition {
   key: string;
@@ -120,13 +121,11 @@ export function DynamicFieldRenderer({
             )}
 
             {field.type === 'textarea' && (
-              <textarea
-                rows={3}
-                disabled={readOnly}
-                value={curValue}
-                onChange={(e) => onChange(field.key, e.target.value)}
+              <RichTextEditor
+                value={curValue || ''}
+                onChange={(val) => onChange(field.key, val)}
                 placeholder={helpText || `Enter detailed ${label}...`}
-                className="w-full text-xs font-semibold p-3 rounded-xl border border-slate-300 bg-white text-slate-950 placeholder:text-slate-400 placeholder:font-normal focus:bg-white focus:text-slate-950 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 outline-none transition shadow-sm"
+                label={label}
               />
             )}
 

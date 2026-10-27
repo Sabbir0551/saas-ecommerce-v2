@@ -328,11 +328,11 @@ router.get('/categories', requireTenant, async (req: Request, res: Response) => 
   }
 });
 
-// Add Category
+// Add Category (Supports Subcategories via parentId)
 router.post('/categories', requireTenant, async (req: Request, res: Response) => {
   try {
     const tenant = req.tenant!;
-    const { name, promoSlogan, bannerImage } = req.body;
+    const { name, promoSlogan, bannerImage, parentId } = req.body;
     if (!name) {
       res.status(400).json({ success: false, message: 'Category name is required' });
       return;
@@ -344,6 +344,7 @@ router.post('/categories', requireTenant, async (req: Request, res: Response) =>
       slug,
       promoSlogan: promoSlogan || null,
       bannerImage: bannerImage || null,
+      parentId: parentId || null,
     };
 
     try {
@@ -352,6 +353,7 @@ router.post('/categories', requireTenant, async (req: Request, res: Response) =>
           tenantId: tenant.id,
           name,
           slug,
+          parentId: parentId || null,
         },
       });
     } catch {}
@@ -396,6 +398,95 @@ router.post('/categories', requireTenant, async (req: Request, res: Response) =>
   }
 });
 
+// Update Category (Edit Name, Slogan, Banner, Parent Category)
+router.put('/categories/:id', requireTenant, async (req: Request, res: Response) => {
+  try {
+    const tenant = req.tenant!;
+    const { id } = req.params;
+    const { name, promoSlogan, bannerImage, parentId } = req.body;
+
+    if (!name) {
+      res.status(400).json({ success: false, message: 'Category name is required' });
+      return;
+    }
+    const slug = name.toLowerCase().replace(/[^a-z0-9]/g, '-');
+
+    try {
+      await prisma.category.updateMany({
+        where: { id, tenantId: tenant.id },
+        data: {
+          name,
+          slug,
+          parentId: parentId !== undefined ? (parentId || null) : undefined,
+        },
+      });
+    } catch {}
+
+    let updatedCat: any = null;
+
+    // Sync to dedicated tenant partition
+    const partitionFile = getTenantPartitionFilePath(tenant.subdomain);
+    if (fs.existsSync(partitionFile)) {
+      try {
+        const pData = JSON.parse(fs.readFileSync(partitionFile, 'utf-8'));
+        if (pData.categories) {
+          const idx = pData.categories.findIndex((c: any) => c.id === id || c.slug === id);
+          if (idx !== -1) {
+            pData.categories[idx] = {
+              ...pData.categories[idx],
+              name,
+              slug,
+              promoSlogan: promoSlogan !== undefined ? (promoSlogan || null) : pData.categories[idx].promoSlogan,
+              bannerImage: bannerImage !== undefined ? (bannerImage || null) : pData.categories[idx].bannerImage,
+              parentId: parentId !== undefined ? (parentId || null) : pData.categories[idx].parentId,
+            };
+            updatedCat = pData.categories[idx];
+            fs.writeFileSync(partitionFile, JSON.stringify(pData, null, 2));
+          }
+        }
+      } catch {}
+    }
+
+    // Fallback in json
+    const filePath = getFallbackDataFilePath();
+    if (fs.existsSync(filePath)) {
+      const raw = fs.readFileSync(filePath, 'utf-8');
+      const parsed = JSON.parse(raw);
+      const target = parsed.tenants.find((t: any) => t.id === tenant.id || t.subdomain === tenant.subdomain);
+      if (target && target.categories) {
+        const idx = target.categories.findIndex((c: any) => c.id === id || c.slug === id);
+        if (idx !== -1) {
+          target.categories[idx] = {
+            ...target.categories[idx],
+            name,
+            slug,
+            promoSlogan: promoSlogan !== undefined ? (promoSlogan || null) : target.categories[idx].promoSlogan,
+            bannerImage: bannerImage !== undefined ? (bannerImage || null) : target.categories[idx].bannerImage,
+            parentId: parentId !== undefined ? (parentId || null) : target.categories[idx].parentId,
+          };
+          if (!updatedCat) updatedCat = target.categories[idx];
+          fs.writeFileSync(filePath, JSON.stringify(parsed, null, 4));
+        }
+      }
+    }
+
+    if (!updatedCat) {
+      updatedCat = {
+        id,
+        name,
+        slug,
+        promoSlogan: promoSlogan || null,
+        bannerImage: bannerImage || null,
+        parentId: parentId || null,
+      };
+    }
+
+    res.json({ success: true, data: updatedCat, message: 'Category updated successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to update category' });
+  }
+});
+
 // Delete Category
 router.delete('/categories/:id', requireTenant, async (req: Request, res: Response) => {
   try {
@@ -403,6 +494,11 @@ router.delete('/categories/:id', requireTenant, async (req: Request, res: Respon
     const { id } = req.params;
 
     try {
+      // First disconnect children if any
+      await prisma.category.updateMany({
+        where: { parentId: id, tenantId: tenant.id },
+        data: { parentId: null },
+      });
       await prisma.category.deleteMany({
         where: { id, tenantId: tenant.id },
       });
@@ -413,7 +509,10 @@ router.delete('/categories/:id', requireTenant, async (req: Request, res: Respon
       try {
         const pData = JSON.parse(fs.readFileSync(partitionFile, 'utf-8'));
         if (pData.categories) {
-          pData.categories = pData.categories.filter((c: any) => c.id !== id && c.slug !== id);
+          // Reset children parentId
+          pData.categories = pData.categories
+            .map((c: any) => (c.parentId === id ? { ...c, parentId: null } : c))
+            .filter((c: any) => c.id !== id && c.slug !== id);
           fs.writeFileSync(partitionFile, JSON.stringify(pData, null, 2));
         }
       } catch {}
@@ -425,7 +524,9 @@ router.delete('/categories/:id', requireTenant, async (req: Request, res: Respon
       const parsed = JSON.parse(raw);
       const target = parsed.tenants.find((t: any) => t.id === tenant.id || t.subdomain === tenant.subdomain);
       if (target && target.categories) {
-        target.categories = target.categories.filter((c: any) => c.id !== id && c.slug !== id);
+        target.categories = target.categories
+          .map((c: any) => (c.parentId === id ? { ...c, parentId: null } : c))
+          .filter((c: any) => c.id !== id && c.slug !== id);
         fs.writeFileSync(filePath, JSON.stringify(parsed, null, 4));
       }
     }
@@ -493,13 +594,14 @@ router.get('/brands', requireTenant, async (req: Request, res: Response) => {
 router.post('/brands', requireTenant, async (req: Request, res: Response) => {
   try {
     const tenant = req.tenant!;
-    const { name, logo } = req.body;
+    const { name, logo, isVisible } = req.body;
     if (!name) {
       res.status(400).json({ success: false, message: 'Brand name is required' });
       return;
     }
     const slug = name.toLowerCase().replace(/[^a-z0-9]/g, '-');
-    const newBrand = { id: `brand_${Date.now()}`, name, slug, logo: logo || null };
+    const isVisibleBool = isVisible !== undefined ? Boolean(isVisible) : true;
+    const newBrand = { id: `brand_${Date.now()}`, name, slug, logo: logo || null, isVisible: isVisibleBool };
 
     try {
       await prisma.brand.create({
@@ -539,6 +641,95 @@ router.post('/brands', requireTenant, async (req: Request, res: Response) => {
     res.status(201).json({ success: true, data: newBrand });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to create brand' });
+  }
+});
+
+// Update Brand
+router.put('/brands/:id', requireTenant, async (req: Request, res: Response) => {
+  try {
+    const tenant = req.tenant!;
+    const { id } = req.params;
+    const { name, logo, isVisible } = req.body;
+
+    if (!name && logo === undefined && isVisible === undefined) {
+      res.status(400).json({ success: false, message: 'No brand update fields provided' });
+      return;
+    }
+    const slug = name ? name.toLowerCase().replace(/[^a-z0-9]/g, '-') : undefined;
+
+    try {
+      const updateData: any = {};
+      if (name) {
+        updateData.name = name;
+        updateData.slug = slug;
+      }
+      if (logo !== undefined) {
+        updateData.logo = logo || null;
+      }
+      if (Object.keys(updateData).length > 0) {
+        await prisma.brand.updateMany({
+          where: { id, tenantId: tenant.id },
+          data: updateData,
+        });
+      }
+    } catch {}
+
+    let updatedBrand: any = null;
+
+    // Sync to dedicated tenant partition
+    const partitionFile = getTenantPartitionFilePath(tenant.subdomain);
+    if (fs.existsSync(partitionFile)) {
+      try {
+        const pData = JSON.parse(fs.readFileSync(partitionFile, 'utf-8'));
+        if (pData.brands) {
+          const idx = pData.brands.findIndex((b: any) => b.id === id || b.slug === id);
+          if (idx !== -1) {
+            pData.brands[idx] = {
+              ...pData.brands[idx],
+              ...(name ? { name, slug } : {}),
+              ...(logo !== undefined ? { logo: logo || null } : {}),
+              ...(isVisible !== undefined ? { isVisible: Boolean(isVisible) } : {}),
+            };
+            updatedBrand = pData.brands[idx];
+            fs.writeFileSync(partitionFile, JSON.stringify(pData, null, 2));
+          }
+        }
+      } catch {}
+    }
+
+    // Fallback file persistence
+    const filePath = getFallbackDataFilePath();
+    if (fs.existsSync(filePath)) {
+      const raw = fs.readFileSync(filePath, 'utf-8');
+      const parsed = JSON.parse(raw);
+      const target = parsed.tenants.find((t: any) => t.id === tenant.id || t.subdomain === tenant.subdomain);
+      if (target && target.brands) {
+        const idx = target.brands.findIndex((b: any) => b.id === id || b.slug === id);
+        if (idx !== -1) {
+          target.brands[idx] = {
+            ...target.brands[idx],
+            ...(name ? { name, slug } : {}),
+            ...(logo !== undefined ? { logo: logo || null } : {}),
+            ...(isVisible !== undefined ? { isVisible: Boolean(isVisible) } : {}),
+          };
+          if (!updatedBrand) updatedBrand = target.brands[idx];
+          fs.writeFileSync(filePath, JSON.stringify(parsed, null, 4));
+        }
+      }
+    }
+
+    if (!updatedBrand) {
+      updatedBrand = {
+        id,
+        ...(name ? { name, slug } : { name: 'Brand' }),
+        logo: logo !== undefined ? (logo || null) : null,
+        isVisible: isVisible !== undefined ? Boolean(isVisible) : true,
+      };
+    }
+
+    res.json({ success: true, data: updatedBrand, message: 'Brand updated successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to update brand' });
   }
 });
 
@@ -670,6 +861,10 @@ router.put('/settings', requireTenant, async (req: Request, res: Response) => {
         if (pathaoClientSecret !== undefined) pData.settings.pathaoClientSecret = pathaoClientSecret;
         if (dbidRegistrationNo !== undefined) pData.settings.dbidRegistrationNo = dbidRegistrationNo;
         if (tradeLicenseNo !== undefined) pData.settings.tradeLicenseNo = tradeLicenseNo;
+        if (req.body.accessories !== undefined) {
+          pData.settings.accessories = req.body.accessories;
+          pData.accessories = req.body.accessories;
+        }
         fs.writeFileSync(partitionFile, JSON.stringify(pData, null, 2));
       } catch {}
     }
@@ -701,6 +896,9 @@ router.put('/settings', requireTenant, async (req: Request, res: Response) => {
         if (pathaoClientSecret !== undefined) target.settings.pathaoClientSecret = pathaoClientSecret;
         if (dbidRegistrationNo !== undefined) target.settings.dbidRegistrationNo = dbidRegistrationNo;
         if (tradeLicenseNo !== undefined) target.settings.tradeLicenseNo = tradeLicenseNo;
+        if (req.body.accessories !== undefined) {
+          target.settings.accessories = req.body.accessories;
+        }
         fs.writeFileSync(filePath, JSON.stringify(parsed, null, 4));
         try {
           await cache.del(`tenant:${tenant.subdomain}`);
@@ -719,6 +917,62 @@ router.put('/settings', requireTenant, async (req: Request, res: Response) => {
     res.json({ success: true, message: 'Store settings updated' });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to update store settings' });
+  }
+});
+
+// ==========================================
+// ELECTRONICS ACCESSORIES HUB & TAXONOMY
+// ==========================================
+
+router.get('/accessories', requireTenant, async (req: Request, res: Response) => {
+  try {
+    const tenant = req.tenant!;
+    const partitionFile = getTenantPartitionFilePath(tenant.subdomain);
+    let accessories: any[] = [];
+    if (fs.existsSync(partitionFile)) {
+      try {
+        const pData = JSON.parse(fs.readFileSync(partitionFile, 'utf-8'));
+        if (pData.settings?.accessories && Array.isArray(pData.settings.accessories)) {
+          accessories = pData.settings.accessories;
+        } else if (pData.accessories && Array.isArray(pData.accessories)) {
+          accessories = pData.accessories;
+        }
+      } catch {}
+    }
+    res.json({ success: true, data: accessories });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to fetch accessories' });
+  }
+});
+
+router.put('/accessories', requireTenant, async (req: Request, res: Response) => {
+  try {
+    const tenant = req.tenant!;
+    const { accessories } = req.body;
+    if (!Array.isArray(accessories)) {
+      res.status(400).json({ success: false, message: 'Accessories must be an array' });
+      return;
+    }
+
+    const partitionFile = getTenantPartitionFilePath(tenant.subdomain);
+    if (fs.existsSync(partitionFile)) {
+      try {
+        const pData = JSON.parse(fs.readFileSync(partitionFile, 'utf-8'));
+        if (!pData.settings) pData.settings = {};
+        pData.settings.accessories = accessories;
+        pData.accessories = accessories;
+        fs.writeFileSync(partitionFile, JSON.stringify(pData, null, 2));
+      } catch {}
+    }
+
+    try {
+      await cache.del(`tenant:${tenant.subdomain}`);
+      await cache.del(`tenant:${tenant.id}`);
+    } catch {}
+
+    res.json({ success: true, message: 'Accessories updated successfully', data: accessories });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to update accessories' });
   }
 });
 

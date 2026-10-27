@@ -14,6 +14,7 @@ function CheckoutContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const tenantSlug = searchParams.get('tenant') || 'fashion';
+  const isElectronics = tenantSlug === 'smartvolt';
 
   const { items, removeFromCart, updateQuantity, subtotal, clearCart } = useCart();
 
@@ -30,6 +31,48 @@ function CheckoutContent() {
 
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const draftIdRef = React.useRef<string | null>(null);
+
+  // Background auto-capture of incomplete draft when customer enters name or mobile number
+  React.useEffect(() => {
+    if (items.length === 0) return;
+    if ((!customerPhone || customerPhone.trim().length < 6) && (!customerName || customerName.trim().length < 3)) {
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      try {
+        const draftPayload = {
+          draftId: draftIdRef.current,
+          customerName: customerName.trim(),
+          customerPhone: customerPhone.trim(),
+          customerEmail: customerEmail.trim(),
+          shippingAddress: shippingAddress.trim(),
+          city,
+          notes,
+          paymentMethod,
+          items: items.map((i) => ({
+            id: i.id,
+            itemId: i.id,
+            variantId: i.variantId,
+            title: i.title,
+            variantTitle: i.variantTitle,
+            price: i.price,
+            quantity: i.quantity,
+            image: i.image,
+          })),
+        };
+        const res = await api.saveDraftOrder(draftPayload, tenantSlug);
+        if (res?.success && res.data?.id) {
+          draftIdRef.current = res.data.id;
+        }
+      } catch (err) {
+        // Non-blocking draft auto-capture
+      }
+    }, 1200);
+
+    return () => clearTimeout(timer);
+  }, [customerName, customerPhone, customerEmail, shippingAddress, city, notes, paymentMethod, items, tenantSlug]);
 
   React.useEffect(() => {
     async function loadTenantSchema() {
@@ -128,12 +171,12 @@ function CheckoutContent() {
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
-      <Navbar tenantSlug={tenantSlug} />
+      <Navbar tenantSlug={tenantSlug} storeName={tenant?.name || tenant?.settings?.name || (tenantSlug === 'smartvolt' ? 'SmartVolt Electrical & Automation' : undefined)} />
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex-1 w-full">
         <div className="mb-8 pb-4 border-b border-slate-200">
           <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
-            <ShoppingBag className="w-7 h-7 text-rose-600" />
+            <ShoppingBag className={`w-7 h-7 ${isElectronics ? 'text-orange-600' : 'text-rose-600'}`} />
             <span>Secure Checkout & Order Placement</span>
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
@@ -153,7 +196,7 @@ function CheckoutContent() {
           <div className="lg:col-span-7 space-y-6">
             <div className="p-6 sm:p-8 rounded-3xl bg-white border border-slate-200/90 shadow-sm space-y-5">
               <h3 className="font-bold text-slate-900 text-lg flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-rose-600" />
+                <MapPin className={`w-5 h-5 ${isElectronics ? 'text-orange-600' : 'text-rose-600'}`} />
                 <span>1. Shipping & Contact Information</span>
               </h3>
 
@@ -459,14 +502,18 @@ function CheckoutContent() {
                 </div>
                 <div className="flex justify-between text-base font-extrabold text-slate-900 pt-2 border-t border-slate-200">
                   <span>Total Payable</span>
-                  <span className="text-rose-600 text-lg">BDT {netTotal.toLocaleString()}</span>
+                  <span className={`${isElectronics ? 'text-orange-600' : 'text-rose-600'} text-lg`}>BDT {netTotal.toLocaleString()}</span>
                 </div>
               </div>
 
               <button
                 type="submit"
                 disabled={submitting || items.length === 0}
-                className="w-full py-4 rounded-2xl bg-rose-600 hover:bg-rose-500 disabled:opacity-50 text-white font-extrabold text-sm shadow-xl shadow-rose-600/25 transition active:scale-95"
+                className={`w-full py-4 rounded-2xl ${
+                  isElectronics
+                    ? 'bg-orange-600 hover:bg-orange-700 shadow-orange-600/25'
+                    : 'bg-rose-600 hover:bg-rose-500 shadow-rose-600/25'
+                } disabled:opacity-50 text-white font-extrabold text-sm shadow-xl transition active:scale-95`}
               >
                 {submitting ? 'Processing Order...' : 'Confirm Order'}
               </button>

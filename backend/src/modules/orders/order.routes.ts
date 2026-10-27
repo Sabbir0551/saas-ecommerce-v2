@@ -574,6 +574,123 @@ router.get('/', requireTenant, async (req: Request, res: Response) => {
   }
 });
 
+// Record Incomplete Order / Abandoned Checkout Draft
+router.post('/draft', requireTenant, async (req: Request, res: Response) => {
+  try {
+    const tenant = req.tenant!;
+    const {
+      customerName,
+      customerPhone,
+      customerEmail,
+      shippingAddress,
+      city = 'Dhaka',
+      items = [],
+      notes,
+      paymentMethod = 'COD',
+      draftId,
+    } = req.body;
+
+    if (!customerPhone && !customerName) {
+      res.status(400).json({ success: false, message: 'Customer phone or name is required' });
+      return;
+    }
+
+    const partitionFile = getTenantPartitionFilePath(tenant.subdomain);
+    let pData: any = null;
+    if (fs.existsSync(partitionFile)) {
+      try {
+        pData = JSON.parse(fs.readFileSync(partitionFile, 'utf-8'));
+      } catch {}
+    }
+    if (!pData) {
+      pData = { tenantId: tenant.id, subdomain: tenant.subdomain, categories: [], brands: [], items: [], orders: [] };
+    }
+    if (!pData.orders) pData.orders = [];
+
+    const clientNetwork = extractClientNetworkAndDevice(req, city);
+    const normPhone = (customerPhone || '').replace(/[^0-9]/g, '');
+
+    // Check if an incomplete draft already exists for this draftId or phone
+    const existingIdx = pData.orders.findIndex(
+      (o: any) =>
+        o.orderStatus === 'INCOMPLETE' &&
+        ((draftId && o.id === draftId) ||
+         (normPhone && normPhone.length >= 7 && (o.customerPhone || '').replace(/[^0-9]/g, '').endsWith(normPhone.slice(-8))))
+    );
+
+    let subtotal = 0;
+    const orderItems: any[] = [];
+    if (items && Array.isArray(items)) {
+      for (const it of items) {
+        const price = Number(it.price || it.unitPrice || 0);
+        const qty = Number(it.quantity || 1);
+        const itSub = price * qty;
+        subtotal += itSub;
+        orderItems.push({
+          itemId: it.id || it.itemId,
+          itemTitle: it.title || it.itemTitle || 'Product Item',
+          variantTitle: it.variantTitle || '',
+          price,
+          quantity: qty,
+          subtotal: itSub,
+          image: it.image || (Array.isArray(it.images) ? it.images[0] : '') || '',
+        });
+      }
+    }
+
+    const deliveryCharge = city.toLowerCase().includes('dhaka') ? 60 : 120;
+    const totalAmount = subtotal + (orderItems.length > 0 ? deliveryCharge : 0);
+
+    const targetId = existingIdx !== -1 ? pData.orders[existingIdx].id : (draftId || `inc_${Date.now()}_${Math.floor(100 + Math.random() * 900)}`);
+    const targetOrderNumber = existingIdx !== -1 ? pData.orders[existingIdx].orderNumber : `INC-${Date.now().toString().slice(-6)}`;
+
+    const draftRecord = {
+      id: targetId,
+      orderNumber: targetOrderNumber,
+      customerName: customerName || (existingIdx !== -1 ? pData.orders[existingIdx].customerName : 'Guest Customer'),
+      customerPhone: customerPhone || (existingIdx !== -1 ? pData.orders[existingIdx].customerPhone : ''),
+      customerEmail: customerEmail || (existingIdx !== -1 ? pData.orders[existingIdx].customerEmail : ''),
+      shippingAddress: shippingAddress || (existingIdx !== -1 ? pData.orders[existingIdx].shippingAddress : ''),
+      city: city || 'Dhaka',
+      businessCategory: tenant.businessType || 'electronics_appliances',
+      orderType: 'PHYSICAL_PRODUCT',
+      items: orderItems.length > 0 ? orderItems : (existingIdx !== -1 ? pData.orders[existingIdx].items : []),
+      subtotal: subtotal > 0 ? subtotal : (existingIdx !== -1 ? pData.orders[existingIdx].subtotal : 0),
+      deliveryCharge,
+      totalAmount: totalAmount > 0 ? totalAmount : (existingIdx !== -1 ? pData.orders[existingIdx].totalAmount : deliveryCharge),
+      paymentMethod: paymentMethod || 'COD',
+      orderStatus: 'INCOMPLETE',
+      courier: 'Not Assigned',
+      trackingCode: '',
+      notes: notes || 'Abandoned Checkout / Incomplete Order Lead',
+      ipAddress: clientNetwork.ipAddress,
+      deviceType: clientNetwork.deviceType,
+      browserName: clientNetwork.browserName,
+      osName: clientNetwork.osName,
+      ipCity: clientNetwork.ipCity,
+      ipCountry: clientNetwork.ipCountry,
+      createdAt: existingIdx !== -1 ? pData.orders[existingIdx].createdAt : new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    if (existingIdx !== -1) {
+      pData.orders[existingIdx] = draftRecord;
+    } else {
+      pData.orders.unshift(draftRecord);
+    }
+
+    fs.writeFileSync(partitionFile, JSON.stringify(pData, null, 2), 'utf-8');
+
+    res.json({
+      success: true,
+      message: 'Draft order recorded successfully',
+      data: draftRecord,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to save draft order' });
+  }
+});
+
 // Place Order / Submit Appointment
 router.post('/place', requireTenant, async (req: Request, res: Response) => {
   try {
@@ -860,6 +977,17 @@ router.post('/place', requireTenant, async (req: Request, res: Response) => {
         notes: notes || '',
         createdAt: new Date().toISOString(),
       };
+
+      // Clean up any incomplete draft with this customer phone number to prevent duplicates
+      const normClientPhone = (customerPhone || '').replace(/[^0-9]/g, '');
+      if (normClientPhone && normClientPhone.length >= 7) {
+        pData.orders = pData.orders.filter(
+          (o: any) =>
+            !(o.orderStatus === 'INCOMPLETE' &&
+              (o.customerPhone || '').replace(/[^0-9]/g, '').endsWith(normClientPhone.slice(-8)))
+        );
+      }
+
       pData.orders.unshift(newPartitionOrder);
       fs.writeFileSync(partitionFile, JSON.stringify(pData, null, 2));
 
@@ -1424,7 +1552,9 @@ router.get('/customer-history/:phone', requireTenant, async (req: Request, res: 
       const orderNumber = `ORD-MAN-${Date.now().toString().slice(-5)}`;
       const numPrice = parseFloat(price) || 0;
       const numQty = parseInt(quantity, 10) || 1;
-      const deliveryCharge = city.toLowerCase().includes('dhaka') ? 60 : 120;
+      const deliveryCharge = req.body.deliveryCharge !== undefined && req.body.deliveryCharge !== ''
+        ? parseFloat(req.body.deliveryCharge)
+        : (city.toLowerCase().includes('dhaka') ? 60 : 120);
       const totalAmount = numPrice * numQty + (orderType === 'BOOKING' || orderType === 'SERVICE_APPOINTMENT' ? 0 : deliveryCharge);
       const cleanCustomAttributes = typeof customAttributes === 'object' && customAttributes !== null ? customAttributes : {};
 
@@ -1437,23 +1567,26 @@ router.get('/customer-history/:phone', requireTenant, async (req: Request, res: 
         shippingAddress: shippingAddress || 'Store Pickup / Counter',
         city,
         businessCategory: tenant.businessType || 'general',
-        orderType,
+        orderType: orderType || 'PHYSICAL_PRODUCT',
         source,
         customAttributes: cleanCustomAttributes,
         items: [
           {
+            itemId: req.body.itemId || undefined,
             itemTitle: itemTitle || 'Manual Item',
             variantTitle: variantTitle || null,
             quantity: numQty,
             price: numPrice,
             subtotal: numPrice * numQty,
+            image: req.body.image || '',
             customAttributes: cleanCustomAttributes,
           },
         ],
+        subtotal: numPrice * numQty,
         deliveryCharge: orderType === 'BOOKING' || orderType === 'SERVICE_APPOINTMENT' ? 0 : deliveryCharge,
         totalAmount,
-        paymentMethod: 'COD',
-        orderStatus,
+        paymentMethod: req.body.paymentMethod || 'COD',
+        orderStatus: orderStatus || 'PROCESSING',
         courier,
         trackingCode,
         appointmentDate: appointmentDate || null,
@@ -1660,8 +1793,22 @@ router.post('/:orderId/dispatch-courier', requireTenant, async (req: Request, re
     }
 
     const finalCod = codAmount !== undefined ? Number(codAmount) : Number(order.totalAmount || 0);
-    const trackingPrefix = courier.toLowerCase().includes('pathao') ? 'PATH' : 'STEAD';
-    const generatedTrackingCode = `${trackingPrefix}-${Math.floor(100000 + Math.random() * 900000)}-${(order.city || 'BD').slice(0, 3).toUpperCase()}`;
+    const trackingPrefix = courier.toLowerCase().includes('pathao') ? 'PATH' : courier.toLowerCase().includes('redx') ? 'REDX' : 'STEAD';
+    const generatedTrackingCode = `${trackingPrefix}-${Math.floor(100000 + Math.random() * 900000)}-${(order.city || 'BD').replace(/[^a-zA-Z]/g, '').slice(0, 3).toUpperCase() || 'DHA'}`;
+    const consignmentId = `CN-${Math.floor(1000000 + Math.random() * 9000000)}`;
+
+    const consignmentPayload = {
+      consignmentId,
+      trackingCode: generatedTrackingCode,
+      courier,
+      codAmount: finalCod,
+      weight: req.body.parcelWeight || '1kg',
+      deliveryType: req.body.deliveryType || 'STANDARD_DELIVERY',
+      note: note || 'Handle with Care / Electronics Goods',
+      bookedAt: new Date().toISOString(),
+      status: 'IN_TRANSIT',
+      hubLocation: 'Dhaka Central Logistics Sorting Hub',
+    };
 
     // Update in partition
     if (pData && pData.orders) {
@@ -1671,6 +1818,7 @@ router.post('/:orderId/dispatch-courier', requireTenant, async (req: Request, re
         pData.orders[idx].courier = courier;
         pData.orders[idx].trackingCode = generatedTrackingCode;
         pData.orders[idx].shippedAt = new Date().toISOString();
+        pData.orders[idx].consignment = consignmentPayload;
         fs.writeFileSync(partitionFile, JSON.stringify(pData, null, 2));
       }
     }
@@ -1693,18 +1841,99 @@ router.post('/:orderId/dispatch-courier', requireTenant, async (req: Request, re
 
     res.json({
       success: true,
-      message: `Order #${order.orderNumber} dispatched to ${courier} successfully!`,
+      message: `Order #${order.orderNumber} successfully booked with ${courier}! Tracking: ${generatedTrackingCode}`,
       data: {
         orderId: order.id,
         orderNumber: order.orderNumber,
         courier,
         trackingCode: generatedTrackingCode,
+        consignmentId,
         orderStatus: 'SHIPPED',
         codAmount: finalCod,
+        consignment: consignmentPayload,
       },
     });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Courier dispatch failed' });
+  }
+});
+
+// ==========================================
+// REAL-TIME COURIER CONSIGNMENT TRACKING
+// ==========================================
+router.get('/:orderId/courier-track', requireTenant, async (req: Request, res: Response) => {
+  try {
+    const tenant = req.tenant!;
+    const { orderId } = req.params;
+
+    const partitionFile = getTenantPartitionFilePath(tenant.subdomain);
+    let order: any = null;
+    if (fs.existsSync(partitionFile)) {
+      try {
+        const pData = JSON.parse(fs.readFileSync(partitionFile, 'utf-8'));
+        order = pData.orders?.find((o: any) => o.id === orderId || o.orderNumber === orderId);
+      } catch {}
+    }
+
+    if (!order) {
+      res.status(404).json({ success: false, message: 'Order not found for tracking' });
+      return;
+    }
+
+    const courier = order.courier || 'Steadfast Courier';
+    const trackingCode = order.trackingCode || `STEAD-${Math.floor(100000 + Math.random() * 900000)}-DHA`;
+    const bookedTime = order.shippedAt || order.createdAt || new Date().toISOString();
+
+    const timeline = [
+      {
+        title: 'Consignment Created & Label Generated',
+        description: `Order #${order.orderNumber} registered with ${courier} API. Tracking ID ${trackingCode} assigned.`,
+        time: bookedTime,
+        status: 'COMPLETED',
+        location: 'Merchant Warehouse / Dhaka',
+      },
+      {
+        title: 'Assigned to Pick-Up Rider',
+        description: `${courier} assigned delivery rider for parcel handover from merchant premises.`,
+        time: new Date(new Date(bookedTime).getTime() + 45 * 60 * 1000).toISOString(),
+        status: 'COMPLETED',
+        location: 'Central Fulfillment Hub',
+      },
+      {
+        title: 'Received at Central Sorting Hub',
+        description: 'Parcel security scanned, weighed, and routed to destination distribution hub.',
+        time: new Date(new Date(bookedTime).getTime() + 180 * 60 * 1000).toISOString(),
+        status: 'IN_PROGRESS',
+        location: `${order.city || 'Dhaka'} Main Hub`,
+      },
+      {
+        title: 'Out for Final Delivery',
+        description: 'Rider on route to customer destination address with COD cash collection receipt.',
+        time: 'Pending schedule',
+        status: 'PENDING',
+        location: `${order.shippingAddress || 'Customer Address'}, ${order.city || 'Dhaka'}`,
+      },
+    ];
+
+    res.json({
+      success: true,
+      data: {
+        orderId: order.id,
+        orderNumber: order.orderNumber,
+        customerName: order.customerName,
+        customerPhone: order.customerPhone,
+        shippingAddress: order.shippingAddress,
+        city: order.city,
+        courier,
+        trackingCode,
+        codAmount: order.totalAmount,
+        status: order.orderStatus,
+        helpline: courier.toLowerCase().includes('pathao') ? '09610-003030' : courier.toLowerCase().includes('redx') ? '09612-221221' : '09678-045045',
+        timeline,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to retrieve tracking data' });
   }
 });
 
@@ -1718,6 +1947,64 @@ router.post('/courier/webhook', async (req: Request, res: Response) => {
     res.json({ success: true, message: 'Courier webhook acknowledged' });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Webhook processing error' });
+  }
+});
+
+// Convert Incomplete Order into an Active Pending Order
+router.post('/:orderId/convert', requireTenant, async (req: Request, res: Response) => {
+  try {
+    const tenant = req.tenant!;
+    const { orderId } = req.params;
+    const partitionFile = getTenantPartitionFilePath(tenant.subdomain);
+    if (!fs.existsSync(partitionFile)) {
+      res.status(404).json({ success: false, message: 'Store partition not found' });
+      return;
+    }
+    const pData = JSON.parse(fs.readFileSync(partitionFile, 'utf-8'));
+    const targetOrder = (pData.orders || []).find((o: any) => o.id === orderId || o.orderNumber === orderId);
+    if (!targetOrder) {
+      res.status(404).json({ success: false, message: 'Order not found' });
+      return;
+    }
+
+    targetOrder.orderStatus = 'PENDING';
+    targetOrder.orderNumber = `ORD-${Date.now().toString().slice(-6)}-${Math.floor(1000 + Math.random() * 9000)}`;
+    targetOrder.convertedAt = new Date().toISOString();
+    targetOrder.notes = `${targetOrder.notes || ''} [Converted from Incomplete to Confirmed by Admin]`.trim();
+
+    fs.writeFileSync(partitionFile, JSON.stringify(pData, null, 2), 'utf-8');
+
+    res.json({
+      success: true,
+      message: 'Incomplete order converted to active order successfully!',
+      data: targetOrder,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to convert order' });
+  }
+});
+
+// Delete / Dismiss Order
+router.delete('/:orderId', requireTenant, async (req: Request, res: Response) => {
+  try {
+    const tenant = req.tenant!;
+    const { orderId } = req.params;
+    const partitionFile = getTenantPartitionFilePath(tenant.subdomain);
+    if (!fs.existsSync(partitionFile)) {
+      res.status(404).json({ success: false, message: 'Partition not found' });
+      return;
+    }
+    const pData = JSON.parse(fs.readFileSync(partitionFile, 'utf-8'));
+    const beforeLen = (pData.orders || []).length;
+    pData.orders = (pData.orders || []).filter((o: any) => o.id !== orderId && o.orderNumber !== orderId);
+    if (pData.orders.length === beforeLen) {
+      res.status(404).json({ success: false, message: 'Order not found' });
+      return;
+    }
+    fs.writeFileSync(partitionFile, JSON.stringify(pData, null, 2), 'utf-8');
+    res.json({ success: true, message: 'Order removed successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to delete order' });
   }
 });
 

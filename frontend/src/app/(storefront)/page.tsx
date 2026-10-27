@@ -8,7 +8,7 @@ import { Footer } from '@/components/Footer';
 import { PlatformLanding } from '@/components/PlatformLanding';
 import { api } from '@/lib/api';
 import { useCart } from '@/lib/cart-context';
-import { ShoppingBag, ArrowRight, Star, Clock, CheckCircle2, Sparkles, Calendar, Tag, ShieldCheck, Play, Video, Eye, X, Plus, Minus, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ShoppingBag, ArrowRight, Star, Clock, CheckCircle2, Sparkles, Calendar, Tag, ShieldCheck, Eye, X, Plus, Minus, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
 import { BUSINESS_CATEGORIES } from '@/lib/categories';
 import { ElectronicsStorefront } from '@/components/ElectronicsStorefront';
 
@@ -25,6 +25,7 @@ function StorefrontContent({ tenantSlug }: { tenantSlug: string }) {
 
   // Media & Video Showcase state
   const [mediaList, setMediaList] = useState<any[]>([]);
+  const [brands, setBrands] = useState<any[]>([]);
 
   // Product Detail Modal state
   const [selectedProductForModal, setSelectedProductForModal] = useState<any | null>(null);
@@ -35,11 +36,12 @@ function StorefrontContent({ tenantSlug }: { tenantSlug: string }) {
     async function loadData() {
       setLoading(true);
       try {
-        const [tenantRes, itemsRes, catRes, mediaRes] = await Promise.all([
+        const [tenantRes, itemsRes, catRes, mediaRes, brandRes] = await Promise.all([
           api.getTenant(tenantSlug),
           api.getItems({}, tenantSlug),
           api.getTenantCategories(tenantSlug),
           api.getMedia({}, tenantSlug),
+          api.getBrands(tenantSlug),
         ]);
 
         if (tenantRes?.success) {
@@ -55,6 +57,10 @@ function StorefrontContent({ tenantSlug }: { tenantSlug: string }) {
 
         if (catRes?.success && Array.isArray(catRes.data)) {
           setCategories(catRes.data);
+        }
+
+        if (brandRes?.success && Array.isArray(brandRes.data)) {
+          setBrands(brandRes.data);
         }
 
         if (mediaRes?.success && Array.isArray(mediaRes.data)) {
@@ -202,6 +208,7 @@ function StorefrontContent({ tenantSlug }: { tenantSlug: string }) {
         tenantSlug={tenantSlug}
         items={items}
         categories={categories}
+        brands={brands}
       />
     );
   }
@@ -621,112 +628,7 @@ function StorefrontContent({ tenantSlug }: { tenantSlug: string }) {
       {/* ============================================================== */}
       {/* SECTION: CATEGORY VIDEO & MEDIA SHOWCASE (YouTube & Facebook) */}
       {/* ============================================================== */}
-      {mediaList.length > 0 && (() => {
-        const filteredMedia = mediaList.filter((m) => {
-          if (selectedCategory === 'all') return true;
-          return m.categoryId === selectedCategory || m.categoryId === 'all';
-        });
-
-        if (filteredMedia.length === 0) return null;
-
-        return (
-          <section className="py-16 sm:py-20 bg-slate-950 text-white border-t border-slate-900">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10 pb-4 border-b border-slate-800">
-                <div>
-                  <span className="text-xs font-bold uppercase tracking-widest text-indigo-400 block mb-1">
-                    Video Reviews & Visual Highlights
-                  </span>
-                  <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-                    Category Media & Video Showcase
-                  </h2>
-                </div>
-                <span className="text-xs text-slate-400 font-medium">
-                  Watch real unboxing, craftsmanship & quality tests
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {filteredMedia.map((m) => (
-                  <div
-                    key={m.id}
-                    className="rounded-3xl bg-slate-900 border border-slate-800 overflow-hidden shadow-xl hover:border-indigo-500/50 transition flex flex-col justify-between"
-                  >
-                    <div className="relative aspect-video bg-slate-950">
-                      {m.type === 'YOUTUBE' && m.embedUrl ? (
-                        <iframe
-                          src={m.embedUrl}
-                          title={m.title}
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                          allowFullScreen
-                          className="w-full h-full border-0"
-                        />
-                      ) : m.type === 'FACEBOOK' && m.embedUrl ? (
-                        <iframe
-                          src={m.embedUrl}
-                          title={m.title}
-                          allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-                          allowFullScreen
-                          className="w-full h-full border-0"
-                        />
-                      ) : (
-                        <img
-                          src={m.thumbnail || m.url}
-                          alt={m.title}
-                          className="w-full h-full object-cover"
-                        />
-                      )}
-                      <span
-                        className={`absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-extrabold text-white shadow-md flex items-center gap-1 ${
-                          m.type === 'YOUTUBE'
-                            ? 'bg-red-600'
-                            : m.type === 'FACEBOOK'
-                            ? 'bg-blue-600'
-                            : 'bg-emerald-600'
-                        }`}
-                      >
-                        <Play className="w-3 h-3 fill-white" />
-                        <span>{m.type}</span>
-                      </span>
-                    </div>
-
-                    <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
-                      <div>
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-400/20">
-                          {m.categoryName || 'Showcase'}
-                        </span>
-                        <h4 className="font-bold text-white text-base mt-2 leading-snug">
-                          {m.title}
-                        </h4>
-                        {m.description && (
-                          <p className="text-xs text-slate-400 mt-1 line-clamp-2">
-                            {m.description}
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="pt-3 border-t border-slate-800 flex items-center justify-between">
-                        <span className="text-[11px] text-slate-500 font-medium">
-                          Verified Media
-                        </span>
-                        <a
-                          href={m.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs font-bold text-indigo-400 hover:text-indigo-300 flex items-center gap-1"
-                        >
-                          <span>Watch Full</span>
-                          <ExternalLink className="w-3.5 h-3.5" />
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-        );
-      })()}
+      {/* Category Media & Video Showcase Removed upon user request */}
 
       {/* ============================================================== */}
       {/* MODAL: PRODUCT DETAILS QUICK VIEW */}
@@ -752,12 +654,6 @@ function StorefrontContent({ tenantSlug }: { tenantSlug: string }) {
           : [];
 
         const chosenVariant = selectedVariants[modalItem.id] || (variantList.length > 0 ? variantList[0] : null);
-
-        // Find any related video (YouTube/Facebook) for this product or category
-        const relatedVideo = mediaList.find((m) => 
-          (m.type === 'YOUTUBE' || m.type === 'FACEBOOK') &&
-          (m.categoryId === modalItem.categoryId || m.categoryName?.toLowerCase() === modalItem.category?.name?.toLowerCase() || m.categoryId === 'all')
-        );
 
         return (
           <div className="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
@@ -995,27 +891,6 @@ function StorefrontContent({ tenantSlug }: { tenantSlug: string }) {
                 </div>
               </div>
 
-              {/* Embedded Video Showcase (Dedicated Full-Width Section) */}
-              {relatedVideo && relatedVideo.embedUrl && (
-                <div className="pt-4 border-t border-slate-100 space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold uppercase tracking-wider text-rose-600 flex items-center gap-1.5">
-                      <Play className="w-3.5 h-3.5 fill-rose-600" />
-                      <span>Video Demonstration & Review ({relatedVideo.type})</span>
-                    </span>
-                    <span className="text-xs text-slate-500 font-medium truncate max-w-sm">{relatedVideo.title}</span>
-                  </div>
-                  <div className="relative aspect-video rounded-2xl overflow-hidden bg-slate-950 border border-slate-200 shadow-md">
-                    <iframe
-                      src={relatedVideo.embedUrl}
-                      title={relatedVideo.title}
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                      className="w-full h-full border-0"
-                    />
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         );

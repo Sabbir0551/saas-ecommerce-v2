@@ -104,11 +104,6 @@ export function Footer({
                   Merchant Control Dashboard
                 </Link>
               </li>
-              <li>
-                <Link href="/super-admin" className="hover:text-rose-400 transition text-rose-400 font-semibold flex items-center gap-1">
-                  <span>⚡ Central Super-Admin</span>
-                </Link>
-              </li>
             </ul>
           </div>
 

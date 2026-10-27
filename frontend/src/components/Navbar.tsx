@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { ShoppingBag, Calendar, ShieldAlert, Sparkles, Menu, X, ArrowRight, Store, Settings } from 'lucide-react';
+import { ShoppingBag, Calendar, ShieldAlert, Sparkles, Menu, X, ArrowRight, Store, Settings, Zap } from 'lucide-react';
 import { useCart } from '@/lib/cart-context';
 
 interface NavbarProps {
@@ -10,23 +10,27 @@ interface NavbarProps {
   storeName?: string;
 }
 
-export function Navbar({ tenantSlug = 'fashion', storeName = 'Gulshan Fashion & Boutique' }: NavbarProps) {
+export function Navbar({ tenantSlug = 'fashion', storeName }: NavbarProps) {
   const { totalItems } = useCart();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const isMedical = tenantSlug === 'medicare';
+  const isElectronics = tenantSlug === 'smartvolt';
+  const resolvedStoreName = storeName || (isElectronics ? 'SmartVolt Electrical & Automation' : 'Gulshan Fashion & Boutique');
   const isDemoTenant = ['fashion', 'medicare', 'aebanproperty', 'bestlaptop'].includes(tenantSlug);
 
   return (
     <header className="sticky top-0 z-50 glass-panel border-b border-slate-200/80 shadow-sm transition-all">
       {/* Top Announcement Bar */}
       <div className={`py-1.5 px-4 text-xs font-medium text-white text-center flex items-center justify-center gap-2 ${
-        isMedical ? 'bg-emerald-600' : 'bg-rose-600'
+        isMedical ? 'bg-emerald-600' : isElectronics ? 'bg-[#0b0f19] text-orange-400' : 'bg-rose-600'
       }`}>
-        <Sparkles className="w-3.5 h-3.5 animate-pulse" />
+        <Sparkles className="w-3.5 h-3.5 animate-pulse text-orange-400" />
         <span>
           {isMedical 
             ? '🏥 Senior doctor consultations: Guaranteed 1-hour confirmed time slot booking'
+            : isElectronics
+            ? '⚡ 0% EMI across 28 Banks & Free AC Installation Nationwide'
             : '🎉 Special Launch Offer! Free express delivery across the country on all orders'}
         </span>
       </div>
@@ -37,16 +41,20 @@ export function Navbar({ tenantSlug = 'fashion', storeName = 'Gulshan Fashion & 
           <div className="flex items-center gap-4">
             <Link href={`/?tenant=${tenantSlug}`} className="flex items-center gap-2.5 group">
               <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold shadow-md transition-transform group-hover:scale-105 ${
-                isMedical ? 'bg-emerald-600 shadow-emerald-200' : 'bg-rose-600 shadow-rose-200'
+                isMedical ? 'bg-emerald-600 shadow-emerald-200' : isElectronics ? 'bg-orange-600 shadow-orange-500/20' : 'bg-rose-600 shadow-rose-200'
               }`}>
-                {storeName.slice(0, 2).toUpperCase()}
+                {isElectronics ? (
+                  <Zap className="w-5 h-5 fill-white text-white" />
+                ) : (
+                  resolvedStoreName.slice(0, 2).toUpperCase()
+                )}
               </div>
               <div>
                 <span className="font-extrabold text-slate-900 tracking-tight text-lg sm:text-xl block">
-                  {storeName}
+                  {resolvedStoreName}
                 </span>
                 <span className="text-[11px] text-slate-500 font-medium block">
-                  {isMedical ? 'Specialized Healthcare Clinic' : 'Verified Storefront'}
+                  {isMedical ? 'Specialized Healthcare Clinic' : isElectronics ? 'Electrical & Automation Store' : 'Verified Storefront'}
                 </span>
               </div>
             </Link>

@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NexStore SaaS - Daily Engineering & Architecture Report</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap');
+
+    @page {
+      size: A4;
+      margin: 10mm 12mm 10mm 12mm;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: #0f172a;
+      background: #ffffff;
+      line-height: 1.45;
+      font-size: 10pt;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .report-container {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 4px 0;
+    }
+
+    /* Header */
+    .header {
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 12px;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-badge {
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg, #e11d48, #4f46e5);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-weight: 900;
+      font-size: 18px;
+      box-shadow: 0 4px 10px rgba(225, 29, 72, 0.2);
+    }
+
+    .title-group h1 {
+      font-size: 16pt;
+      font-weight: 900;
+      color: #0f172a;
+      letter-spacing: -0.5px;
+    }
+
+    .title-group p {
+      font-size: 8.5pt;
+      color: #64748b;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .meta-box {
+      text-align: right;
+      font-size: 8pt;
+      color: #475569;
+    }
+
+    .meta-box strong {
+      color: #0f172a;
+    }
+
+    .status-badge {
+      display: inline-block;
+      background: #ecfdf5;
+      color: #047857;
+      border: 1px solid #a7f3d0;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 7.5pt;
+      font-weight: 700;
+      margin-bottom: 3px;
+    }
+
+    /* Executive KPI Grid */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .kpi-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 10px 12px;
+    }
+
+    .kpi-label {
+      font-size: 7pt;
+      color: #64748b;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 3px;
+    }
+
+    .kpi-value {
+      font-size: 13pt;
+      font-weight: 900;
+      color: #0f172a;
+    }
+
+    .kpi-sub {
+      font-size: 7pt;
+      color: #059669;
+      font-weight: 600;
+      margin-top: 1px;
+    }
+
+    /* Section Styling */
+    .section {
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: 10.5pt;
+      font-weight: 800;
+      color: #0f172a;
+      border-bottom: 1.5px solid #e2e8f0;
+      padding-bottom: 3px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .section-title span.number {
+      background: #4f46e5;
+      color: #ffffff;
+      font-size: 7pt;
+      padding: 1.5px 5px;
+      border-radius: 4px;
+      font-weight: 700;
+    }
+
+    p.section-desc {
+      font-size: 8.5pt;
+      color: #334155;
+      margin-bottom: 6px;
+      line-height: 1.4;
+    }
+
+    /* Cards & Lists */
+    .feature-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 8px 10px;
+      margin-bottom: 6px;
+    }
+
+    .feature-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 3px;
+    }
+
+    .feature-title {
+      font-size: 9pt;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .feature-tag {
+      font-size: 6.5pt;
+      font-weight: 700;
+      padding: 1.5px 6px;
+      border-radius: 8px;
+      background: #eef2ff;
+      color: #4338ca;
+    }
+
+    ul.bullet-list {
+      list-style-type: none;
+      padding-left: 0;
+      font-size: 8pt;
+      color: #334155;
+    }
+
+    ul.bullet-list li {
+      position: relative;
+      padding-left: 12px;
+      margin-bottom: 2.5px;
+      line-height: 1.35;
+    }
+
+    ul.bullet-list li::before {
+      content: "•";
+      color: #4f46e5;
+      font-weight: bold;
+      position: absolute;
+      left: 2px;
+    }
+
+    /* Tables */
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 8pt;
+      margin: 8px 0 12px 0;
+      background: #ffffff;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid #e2e8f0;
+    }
+
+    table.data-table th {
+      background: #0f172a;
+      color: #ffffff;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 6px 8px;
+      text-align: left;
+      font-size: 7pt;
+      letter-spacing: 0.5px;
+    }
+
+    table.data-table td {
+      padding: 6px 8px;
+      border-bottom: 1px solid #f1f5f9;
+      color: #1e293b;
+    }
+
+    table.data-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .code-pill {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 7.2pt;
+      background: #f1f5f9;
+      color: #0f172a;
+      padding: 1.5px 5px;
+      border-radius: 4px;
+      font-weight: 600;
+      border: 1px solid #e2e8f0;
+    }
+
+    /* Footer */
+    .footer {
+      border-top: 1.5px solid #e2e8f0;
+      padding-top: 10px;
+      margin-top: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 7.5pt;
+      color: #64748b;
+    }
+
+    .page-break {
+      page-break-before: always;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="report-container">
+
+    <!-- Header -->
+    <header class="header">
+      <div class="logo-section">
+        <div class="logo-badge">⚡</div>
+        <div class="title-group">
+          <h1>NexStore SaaS Platform</h1>
+          <p>Multi-Tenant E-Commerce Engineering & Architecture Report</p>
+        </div>
+      </div>
+      <div class="meta-box">
+        <div class="status-badge">RELEASE STATUS: PRODUCTION READY</div>
+        <div>Date: <strong>October 25, 2026</strong></div>
+        <div>Branch: <strong>main (commit 5c586f0)</strong></div>
+        <div>Target: <strong>Enterprise Multi-Tenant SaaS</strong></div>
+      </div>
+    </header>
+
+    <!-- Executive KPI Grid -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Active Tenants</div>
+        <div class="kpi-value">28 Stores</div>
+        <div class="kpi-sub">100% Operational Isolation</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Monthly Run Rate (MRR)</div>
+        <div class="kpi-value">BDT 98,000</div>
+        <div class="kpi-sub">Growth Pro Tier Primary</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Annual Run Rate (ARR)</div>
+        <div class="kpi-value">BDT 1.17M</div>
+        <div class="kpi-sub">100% Retained Revenue</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Government Compliance</div>
+        <div class="kpi-value">DBID & NBR</div>
+        <div class="kpi-sub">Verified Tax Invoice Engine</div>
+      </div>
+    </div>
+
+    <!-- Section 1 -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="number">01</span>
+        <span>Dedicated Merchant Profiles & Deep-Dive Command Modal</span>
+      </h2>
+      <p class="section-desc">
+        A multi-tabbed command interface was implemented inside the Super-Admin Command Portal allowing granular, store-by-store management across all 28 registered tenant merchants.
+      </p>
+
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Management Tab</th>
+            <th>Features & Architectural Capabilities</th>
+            <th>Primary Controls & Fields</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>1. Subscription & Billing</strong></td>
+            <td>Real-time active days counter, renewal countdown, plan tier switching, payment ledger.</td>
+            <td>Starter (1.5k), Growth Pro (3.5k), Enterprise (8.5k), Add Invoice Form, Status toggle.</td>
+          </tr>
+          <tr>
+            <td><strong>2. Feature Gates & Quotas</strong></td>
+            <td>Architectural switches and capacity constraints per tenant instance.</td>
+            <td>Max Products (500), Max Orders (1500), Staff limit (5), CNAME Custom Domain, Courier API.</td>
+          </tr>
+          <tr>
+            <td><strong>3. KYC & Legal Verification</strong></td>
+            <td>Statutory e-commerce compliance conforming to Bangladesh Ministry of Commerce guidelines.</td>
+            <td>DBID Registration No, Municipal Trade License, Owner NID/Passport, Commercial Address.</td>
+          </tr>
+          <tr>
+            <td><strong>4. Demands & Notes</strong></td>
+            <td>Custom feature demand queue & private internal administrator CRM notes.</td>
+            <td>Feature request logger, Mark fulfilled/delete, Private CRM notes with encrypted storage.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Section 2 -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="number">02</span>
+        <span>Merchant Self-Service "Subscription & Limits" Portal</span>
+      </h2>
+      <p class="section-desc">
+        Merchants can now monitor their platform quotas and billing transparency directly from the merchant dashboard (<span class="code-pill">/admin/dashboard?tenant=smartvolt</span>).
+      </p>
+
+      <div class="feature-card">
+        <div class="feature-header">
+          <div class="feature-title">Live Usage & Quota Telemetry Meters</div>
+          <span class="feature-tag">REAL-TIME DB SYNC</span>
+        </div>
+        <ul class="bullet-list">
+          <li><strong>Product Catalog Meter:</strong> Displays active products vs allowed quota (e.g., 9 / 500 items used on Growth Pro).</li>
+          <li><strong>Monthly Order Meter:</strong> Tracks volume against plan allowances (e.g., 2 / 1,500 monthly transactions).</li>
+          <li><strong>Staff Access Meter:</strong> Monitors provisioned team logins against plan caps (e.g., 1 / 5 staff members).</li>
+          <li><strong>Database Partition:</strong> Visualizes isolated PostgreSQL JSON schema partition health for high throughput.</li>
+          <li><strong>Feature Entitlements Checklist:</strong> Visual green badges for active entitlements and lock badges for restricted features.</li>
+          <li><strong>Upgrade Request Channel:</strong> Merchants can directly submit custom feature demands to Super-Admin.</li>
+        </ul>
+      </div>
+    </section>
+
+    <div class="page-break"></div>
+
+    <!-- Section 3 -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="number">03</span>
+        <span>Backend Architectural Security Gates & Quota Enforcement</span>
+      </h2>
+      <p class="section-desc">
+        Server-side validation checks were introduced to prevent unauthorized API utilization, resource exhaustion, and suspended account activity.
+      </p>
+
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Module & Route</th>
+            <th>Enforcement Condition</th>
+            <th>Error / Restriction Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="code-pill">catalog.routes.ts</span></td>
+            <td>Subscription status is <em>suspended</em> or current product count &ge; <span class="code-pill">features.maxProducts</span></td>
+            <td>Returns <span class="code-pill">403 Forbidden</span> preventing new catalog additions.</td>
+          </tr>
+          <tr>
+            <td><span class="code-pill">order.routes.ts</span></td>
+            <td>Consignment dispatch called when <span class="code-pill">features.courierLogisticsAPI === false</span></td>
+            <td>Blocks Steadfast / Pathao API dispatch and prompts merchant to upgrade plan.</td>
+          </tr>
+          <tr>
+            <td><span class="code-pill">tenant.routes.ts</span></td>
+            <td>Custom CNAME domain assigned when <span class="code-pill">features.customDomain === false</span></td>
+            <td>Restricts branded domain pointing and preserves fallback subdomain.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Section 4 -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="number">04</span>
+        <span>Super-Admin Financial & MRR Telemetry Engine</span>
+      </h2>
+      <p class="section-desc">
+        The Super-Admin Central Command Center was enriched with dynamic recurring revenue analytics and retention tracking.
+      </p>
+
+      <div class="kpi-grid" style="margin-bottom: 12px;">
+        <div class="kpi-card">
+          <div class="kpi-label">Monthly MRR</div>
+          <div class="kpi-value" style="font-size: 12pt;">BDT 98,000</div>
+          <div class="kpi-sub">Dynamic Sum</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Annual ARR</div>
+          <div class="kpi-value" style="font-size: 12pt;">BDT 1,176,000</div>
+          <div class="kpi-sub">12x Multiplier</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Paying Stores</div>
+          <div class="kpi-value" style="font-size: 12pt;">28 Stores</div>
+          <div class="kpi-sub">Growth Pro Tier</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Upcoming Due</div>
+          <div class="kpi-value" style="font-size: 12pt;">30-Day Alert</div>
+          <div class="kpi-sub">Direct Manage</div>
+        </div>
+      </div>
+
+      <ul class="bullet-list">
+        <li><strong>Automated MRR Aggregation:</strong> Calculates real-time recurring sales across all active tenant partitions.</li>
+        <li><strong>Tier Penetration Visualizer:</strong> Tracks customer concentration across Starter, Growth Pro, and Enterprise packages.</li>
+        <li><strong>Renewal Pipeline:</strong> Renders an actionable queue of stores sorted by renewal proximity (e.g., SmartVolt renewing in 21 days) with 1-click management shortcuts.</li>
+      </ul>
+    </section>
+
+    <!-- Section 5 -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="number">05</span>
+        <span>Official Printable SaaS Invoices & NBR Tax Receipts</span>
+      </h2>
+      <p class="section-desc">
+        A reusable, print-ready corporate invoice modal (<span class="code-pill">SaaSInvoiceModal.tsx</span>) was constructed for regulatory compliance and audit documentation.
+      </p>
+
+      <div class="feature-card">
+        <div class="feature-header">
+          <div class="feature-title">Statutory Receipt Specifications</div>
+          <span class="feature-tag">NBR COMPLIANT</span>
+        </div>
+        <ul class="bullet-list">
+          <li><strong>Platform Provider Header:</strong> Silicon Tower, Gulshan-2, Dhaka with Central Helpline <span class="code-pill">09606 111 777</span> and official VAT/BIN ID <span class="code-pill">9928172948-0201</span>.</li>
+          <li><strong>Merchant Verification:</strong> Billed-to card featuring Store Name, Subdomain, Principal Owner, and Verified DBID registration number.</li>
+          <li><strong>Itemized Financial Breakdown:</strong> Cloud hosting, PostgreSQL partitioned database, anti-fraud engine, and SLA guarantees itemized at BDT 3,500.</li>
+          <li><strong>Verification Seal:</strong> Green electronic "PAYMENT RECEIVED & VERIFIED" badge with clearing method (bKash Merchant / Bank Wire).</li>
+          <li><strong>Print Engine:</strong> Embedded <span class="code-pill">@media print</span> rules supporting instant A4 paper printing and vector PDF export.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Section 6 -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="number">06</span>
+        <span>Storefront Consumer Protection & SEO Infrastructure</span>
+      </h2>
+      <ul class="bullet-list">
+        <li><strong>Consumer Rights Policies:</strong> 3 distinct statutory pages (<span class="code-pill">/privacy-policy</span>, <span class="code-pill">/refund-policy</span>, <span class="code-pill">/terms-and-conditions</span>) ensuring full compliance with national e-commerce guidelines.</li>
+        <li><strong>SEO Infrastructure:</strong> Dynamic <span class="code-pill">sitemap.ts</span> and <span class="code-pill">robots.ts</span> with priority crawl instructions for rapid search indexing.</li>
+        <li><strong>Customer Engagement:</strong> Floating WhatsApp assistance widget with contextual messages and centralized hotline support.</li>
+        <li><strong>Localization Cleanup:</strong> English standardization completed across all storefront footers, checkout manifests, and admin forms.</li>
+      </ul>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div>NexStore SaaS Cloud Infrastructure • Confidential Engineering Document</div>
+      <div>Repository: <span class="code-pill">github.com/Sabbir0551/saas-ecommerce-v2</span> • Branch: main</div>
+    </footer>
+
+  </div>
+
+</body>
+</html>

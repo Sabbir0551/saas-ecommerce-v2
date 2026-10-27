@@ -38,3 +38,4 @@ Thumbs.db
 # Scratch & temp folders
 scratch/
 *.tmp
+*.tsbuildinfo

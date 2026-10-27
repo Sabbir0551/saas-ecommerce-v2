@@ -48,12 +48,14 @@ export async function fetchWithTenant(endpoint: string, options: RequestInit = {
 
 export const api = {
   getTenant: (slug = 'fashion') => fetchWithTenant('/tenant/current', {}, slug),
-  getItems: (params?: { category?: string; type?: string; featured?: boolean; search?: string }, slug = 'fashion') => {
+  getItems: (params?: { category?: string; type?: string; featured?: boolean; search?: string; limit?: number; page?: number }, slug = 'fashion') => {
     const query = new URLSearchParams();
     if (params?.category) query.set('category', params.category);
     if (params?.type) query.set('type', params.type);
     if (params?.featured) query.set('featured', 'true');
     if (params?.search) query.set('search', params.search);
+    query.set('limit', params?.limit ? String(params.limit) : '100');
+    if (params?.page) query.set('page', String(params.page));
     return fetchWithTenant(`/catalog/items?${query.toString()}`, {}, slug);
   },
   getItemBySlug: (itemSlug: string, slug = 'fashion') => fetchWithTenant(`/catalog/items/${itemSlug}`, {}, slug),
@@ -64,8 +66,16 @@ export const api = {
     fetchWithTenant(`/bookings/available-slots?date=${date}&itemId=${itemId}`, {}, slug),
   placeOrder: (orderData: any, slug = 'fashion') => 
     fetchWithTenant('/orders/place', { method: 'POST', body: JSON.stringify(orderData) }, slug),
+  saveDraftOrder: (draftData: any, slug = 'fashion') => 
+    fetchWithTenant('/orders/draft', { method: 'POST', body: JSON.stringify(draftData) }, slug),
+  convertIncompleteOrder: (orderId: string, slug = 'fashion') => 
+    fetchWithTenant(`/orders/${orderId}/convert`, { method: 'POST' }, slug),
+  deleteOrder: (orderId: string, slug = 'fashion') => 
+    fetchWithTenant(`/orders/${orderId}`, { method: 'DELETE' }, slug),
   trackOrder: (orderNumber: string, slug = 'fashion') => 
     fetchWithTenant(`/orders/track/${orderNumber}`, {}, slug),
+  trackCourierConsignment: (orderId: string, slug = 'fashion') => 
+    fetchWithTenant(`/orders/${orderId}/courier-track`, {}, slug),
   getPolicy: (type: 'terms' | 'privacy' | 'refund-policy', slug = 'fashion') => 
     fetchWithTenant(`/compliance/policies/${type}`, {}, slug),
   submitDispute: (data: any, slug = 'fashion') => 
@@ -106,19 +116,26 @@ export const api = {
     fetchWithTenant('/tenant/subscription', {}, slug),
   registerTenant: (data: any) => fetchWithTenant('/tenant/register', { method: 'POST', body: JSON.stringify(data) }),
   getTenantCategories: (slug = 'fashion') => fetchWithTenant('/tenant/categories', {}, slug),
-  addCategory: (data: string | { name: string; promoSlogan?: string; bannerImage?: string }, slug = 'fashion') => {
+  addCategory: (data: string | { name: string; promoSlogan?: string; bannerImage?: string; parentId?: string | null }, slug = 'fashion') => {
     const body = typeof data === 'string' ? { name: data } : data;
     return fetchWithTenant('/tenant/categories', { method: 'POST', body: JSON.stringify(body) }, slug);
   },
+  updateCategory: (id: string, data: { name?: string; promoSlogan?: string; bannerImage?: string; parentId?: string | null }, slug = 'fashion') => 
+    fetchWithTenant(`/tenant/categories/${id}`, { method: 'PUT', body: JSON.stringify(data) }, slug),
   deleteCategory: (id: string, slug = 'fashion') => 
     fetchWithTenant(`/tenant/categories/${id}`, { method: 'DELETE' }, slug),
   getBrands: (slug = 'fashion') => fetchWithTenant('/tenant/brands', {}, slug),
-  addBrand: (data: { name: string; logo?: string }, slug = 'fashion') => 
+  addBrand: (data: { name: string; logo?: string; isVisible?: boolean }, slug = 'fashion') => 
     fetchWithTenant('/tenant/brands', { method: 'POST', body: JSON.stringify(data) }, slug),
+  updateBrand: (id: string, data: { name?: string; logo?: string; isVisible?: boolean }, slug = 'fashion') => 
+    fetchWithTenant(`/tenant/brands/${id}`, { method: 'PUT', body: JSON.stringify(data) }, slug),
   deleteBrand: (id: string, slug = 'fashion') => 
     fetchWithTenant(`/tenant/brands/${id}`, { method: 'DELETE' }, slug),
   updateStoreSettings: (data: any, slug = 'fashion') => 
     fetchWithTenant('/tenant/settings', { method: 'PUT', body: JSON.stringify(data) }, slug),
+  getAccessories: (slug = 'smartvolt') => fetchWithTenant('/tenant/accessories', {}, slug),
+  updateAccessories: (accessories: any[], slug = 'smartvolt') => 
+    fetchWithTenant('/tenant/accessories', { method: 'PUT', body: JSON.stringify({ accessories }) }, slug),
   getTenantDbStatus: (slug = 'fashion') => fetchWithTenant('/tenant/db-status', {}, slug),
   addItem: (data: any, slug = 'fashion') => 
     fetchWithTenant('/catalog/items', { method: 'POST', body: JSON.stringify(data) }, slug),
@@ -149,7 +166,7 @@ export const api = {
     fetchWithTenant(`/orders/${orderId}/status`, { method: 'PATCH', body: JSON.stringify(data) }, slug),
   createManualOrder: (data: any, slug = 'fashion') => 
     fetchWithTenant('/orders/manual', { method: 'POST', body: JSON.stringify(data) }, slug),
-  dispatchOrderToCourier: (orderId: string, data: { courier?: string; codAmount?: number; note?: string } = {}, slug = 'fashion') => 
+  dispatchOrderToCourier: (orderId: string, data: any = {}, slug = 'fashion') => 
     fetchWithTenant(`/orders/${orderId}/dispatch-courier`, { method: 'POST', body: JSON.stringify(data) }, slug),
   // Fraud Prevention & Customer Intelligence System
   getBlacklist: (slug = 'fashion') => 
