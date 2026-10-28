@@ -332,13 +332,21 @@ export function PlatformLanding() {
                 </div>
               </div>
 
-              <div className="mt-6 pt-4 border-t border-slate-800 flex items-center justify-between">
+              <div className="mt-6 pt-4 border-t border-slate-800 flex items-center justify-between gap-2">
+                <Link
+                  href={`/?category=${cat.id}`}
+                  className="text-xs font-bold text-emerald-400 hover:text-emerald-300 flex items-center gap-1 bg-emerald-500/10 hover:bg-emerald-500/20 px-3 py-1.5 rounded-xl border border-emerald-500/30 transition"
+                >
+                  <span>Open Store</span>
+                  <ExternalLink className="w-3 h-3" />
+                </Link>
+
                 <Link
                   href={`/register?category=${cat.id}`}
-                  className="text-xs font-bold text-rose-400 hover:text-rose-300 flex items-center gap-1"
+                  className="text-xs font-bold text-rose-400 hover:text-rose-300 flex items-center gap-1 bg-rose-500/10 hover:bg-rose-500/20 px-3 py-1.5 rounded-xl border border-rose-500/30 transition"
                 >
-                  <span>Deploy This Template</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <span>Deploy</span>
+                  <ArrowRight className="w-3 h-3" />
                 </Link>
               </div>
             </div>

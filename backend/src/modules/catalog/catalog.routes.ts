@@ -45,8 +45,43 @@ function getFallbackData(tenantIdentifier: string) {
   try {
     const cleanSub = tenantIdentifier.toLowerCase().replace(/[^a-z0-9_]/g, '');
 
+    const CATEGORY_MAP: Record<string, string> = {
+      electronics: 'smartvolt',
+      electric: 'smartvolt',
+      electrical: 'smartvolt',
+      laptop_computers: 'bestlaptop',
+      laptop_computer: 'bestlaptop',
+      laptops: 'bestlaptop',
+      healthcare_service: 'medicare',
+      healthcare: 'medicare',
+      clinic: 'medicare',
+      dental: 'medicare',
+      real_estate: 'aebanproperty',
+      property: 'aebanproperty',
+      fashion_clothing: 'fashion',
+      fashion: 'fashion',
+      luxury_watches: 'apexwatches',
+      watches: 'apexwatches',
+      jewelry: 'royaldiamond',
+      restaurant_cafe: 'chillibite',
+      restaurant: 'chillibite',
+      food: 'chillibite',
+      pharmacy: 'pharmaexpress',
+      pet_care: 'petshopbd',
+      beauty_salon: 'makeover',
+      agriculture_dairy: 'greenagro',
+      furniture_decor: 'luxewood',
+      software_saas: 'devnexus',
+      education_coaching: 'eduexcel',
+      consulting_firm: 'advisorypro',
+    };
+
+    const targetSub = (!fs.existsSync(getTenantPartitionFilePath(cleanSub)) && CATEGORY_MAP[cleanSub]) 
+      ? CATEGORY_MAP[cleanSub] 
+      : cleanSub;
+
     // 1. Check dedicated tenant partition first
-    const partitionFile = getTenantPartitionFilePath(cleanSub);
+    const partitionFile = getTenantPartitionFilePath(targetSub);
     if (fs.existsSync(partitionFile)) {
       try {
         const pData = JSON.parse(fs.readFileSync(partitionFile, 'utf-8'));

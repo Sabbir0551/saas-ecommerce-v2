@@ -109,19 +109,78 @@ export async function tenantMiddleware(req: Request, res: Response, next: NextFu
       } catch {}
     }
 
+    const CATEGORY_MAP: Record<string, string> = {
+      electronics: 'smartvolt',
+      electric: 'smartvolt',
+      electrical: 'smartvolt',
+      laptop_computers: 'bestlaptop',
+      laptop_computer: 'bestlaptop',
+      laptops: 'bestlaptop',
+      healthcare_service: 'medicare',
+      healthcare: 'medicare',
+      clinic: 'medicare',
+      dental: 'medicare',
+      real_estate: 'aebanproperty',
+      property: 'aebanproperty',
+      villa: 'aebanproperty',
+      fashion_clothing: 'fashion',
+      fashion: 'fashion',
+      clothing: 'fashion',
+      luxury_watches: 'apexwatches',
+      watches: 'apexwatches',
+      jewelry: 'royaldiamond',
+      restaurant_cafe: 'chillibite',
+      restaurant: 'chillibite',
+      food: 'chillibite',
+      pharmacy: 'pharmaexpress',
+      medicine: 'pharmaexpress',
+      pet_care: 'petshopbd',
+      pet_food: 'petshopbd',
+      beauty_salon: 'makeover',
+      salon: 'makeover',
+      agriculture_dairy: 'greenagro',
+      agro: 'greenagro',
+      furniture_decor: 'luxewood',
+      furniture: 'luxewood',
+      software_saas: 'devnexus',
+      education_coaching: 'eduexcel',
+      consulting_firm: 'advisorypro',
+    };
+
+    const targetSub = (!fs.existsSync(getTenantPartitionFilePath(cleanSub)) && CATEGORY_MAP[cleanSub]) 
+      ? CATEGORY_MAP[cleanSub] 
+      : cleanSub;
+
     // 2. Check dedicated tenant partition file (fast, self-contained)
     if (!tenant) {
-      const partitionFile = getTenantPartitionFilePath(cleanSub);
+      const partitionFile = getTenantPartitionFilePath(targetSub);
       if (fs.existsSync(partitionFile)) {
         try {
           const pData = JSON.parse(fs.readFileSync(partitionFile, 'utf-8'));
           const s = pData.settings || {};
+          const resolvedBusinessType = pData.businessType || s.businessType || (
+            targetSub === 'medicare' ? 'healthcare_service' :
+            targetSub === 'aebanproperty' ? 'real_estate' :
+            targetSub === 'smartvolt' || targetSub.includes('electric') ? 'electronics' :
+            targetSub === 'bestlaptop' ? 'laptop_computer' :
+            targetSub === 'apexwatches' ? 'luxury_watches' :
+            targetSub === 'royaldiamond' ? 'jewelry' :
+            targetSub === 'petshopbd' ? 'pet_care' :
+            targetSub === 'chillibite' ? 'restaurant_cafe' :
+            targetSub === 'pharmaexpress' ? 'pharmacy' :
+            targetSub === 'makeover' ? 'beauty_salon' :
+            targetSub === 'greenagro' ? 'agriculture_dairy' :
+            targetSub === 'luxewood' ? 'furniture_decor' :
+            targetSub === 'devnexus' ? 'software_saas' :
+            'fashion_clothing'
+          );
+
           tenant = {
             id: pData.tenantId || cleanSub,
             name: s.name || pData.name || cleanSub,
-            subdomain: pData.subdomain || cleanSub,
+            subdomain: cleanSub,
             customDomain: s.customDomain || pData.customDomain || null,
-            businessType: pData.businessType || s.businessType || (cleanSub === 'medicare' ? 'healthcare_service' : cleanSub === 'aebanproperty' ? 'real_estate' : 'fashion_clothing'),
+            businessType: resolvedBusinessType,
             logo: s.logo || null,
             bannerImage: s.bannerImage || null,
             announcementText: s.announcementText || null,

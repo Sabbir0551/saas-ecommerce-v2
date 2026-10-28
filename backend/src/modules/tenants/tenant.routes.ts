@@ -74,7 +74,7 @@ router.get('/current', requireTenant, async (req: Request, res: Response) => {
 // Central Tenant Registration & Auto-provisioning
 router.post('/register', async (req: Request, res: Response) => {
   try {
-    const { name, subdomain, businessType = 'fashion_clothing', adminName, email, password, phone } = req.body;
+    const { name, subdomain, businessType = 'fashion_clothing', adminName, email, password, phone, subcategories, primarySubcategory } = req.body;
 
     if (!name || !subdomain || !email || !password) {
       res.status(400).json({ success: false, message: 'Please provide all required fields' });
@@ -85,6 +85,9 @@ router.post('/register', async (req: Request, res: Response) => {
     const { getCategoryDefinition } = await import('../../config/categories.js');
     const { mailService } = await import('../../services/mail.service.js');
     const categoryDef = getCategoryDefinition(businessType);
+    const selectedSubcats: string[] = (Array.isArray(subcategories) && subcategories.length > 0)
+      ? subcategories
+      : categoryDef.defaultCategories;
 
     const hashedPassword = await bcrypt.hash(password, 10);
     let createdTenant: any = null;
@@ -130,7 +133,7 @@ router.post('/register', async (req: Request, res: Response) => {
 
         // Seed category-specific default categories
         await tx.category.createMany({
-          data: categoryDef.defaultCategories.map((catName, idx) => ({
+          data: selectedSubcats.map((catName, idx) => ({
             tenantId: newTenant.id,
             name: catName,
             slug: catName.toLowerCase().replace(/[^a-z0-9]/g, '-'),
@@ -167,7 +170,8 @@ router.post('/register', async (req: Request, res: Response) => {
         domains: [`${cleanSubdomain}.localhost`],
         phone,
         email,
-        categories: categoryDef.defaultCategories.map((c, i) => ({ id: `cat_${i+1}`, name: c, slug: c.toLowerCase().replace(/[^a-z0-9]/g, '-') })),
+        primarySubcategory: primarySubcategory || selectedSubcats[0] || null,
+        categories: selectedSubcats.map((c, i) => ({ id: `cat_${i+1}`, name: c, slug: c.toLowerCase().replace(/[^a-z0-9]/g, '-') })),
         brands: categoryDef.id === 'luxury_watches'
           ? [
               { id: 'brand_1', name: 'Rolex', slug: 'rolex', logo: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=120&q=80' },
@@ -205,7 +209,7 @@ router.post('/register', async (req: Request, res: Response) => {
       createdTenant = newEntry;
     }
 
-    const initialCategories = categoryDef.defaultCategories.map((c, i) => ({ id: `cat_${i+1}`, name: c, slug: c.toLowerCase().replace(/[^a-z0-9]/g, '-') }));
+    const initialCategories = selectedSubcats.map((c: string, i: number) => ({ id: `cat_${i+1}`, name: c, slug: c.toLowerCase().replace(/[^a-z0-9]/g, '-') }));
     const initialBrands = categoryDef.id === 'luxury_watches'
       ? [
           { id: 'brand_1', name: 'Rolex', slug: 'rolex', logo: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=120&q=80' },
@@ -230,6 +234,8 @@ router.post('/register', async (req: Request, res: Response) => {
       cleanSubdomain,
       createdTenant.id || cleanSubdomain,
       {
+        businessType: categoryDef.id,
+        archetype: categoryDef.archetype,
         categories: initialCategories,
         brands: initialBrands,
         items: createdTenant.items || [],
@@ -238,10 +244,23 @@ router.post('/register', async (req: Request, res: Response) => {
           phone,
           email,
           currency: 'BDT',
-          theme: 'modern_slate',
+          theme: categoryDef.id === 'electronics' ? 'amber_industrial' : 'modern_slate',
+          businessType: categoryDef.id,
+          primarySubcategory: primarySubcategory || selectedSubcats[0] || null,
+          themeConfig: {
+            primaryColor: categoryDef.id === 'electronics' ? '#f59e0b' : '#0ea5e9',
+            fontFamily: 'Inter',
+            heroTitle: categoryDef.heroTitle,
+            heroSubtitle: categoryDef.heroSubtitle,
+          },
+          heroTitle: categoryDef.heroTitle,
+          heroSubtitle: categoryDef.heroSubtitle,
         },
       }
     );
+
+    // Invalidate any cached tenant state
+    await cache.del(`tenant:${cleanSubdomain}`);
 
     // 2. Dispatch Official Welcome Email with credentials and dedicated DB info
     const emailResult = await mailService.sendTenantWelcomeEmail({

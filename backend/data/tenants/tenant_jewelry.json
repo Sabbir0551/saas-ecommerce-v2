@@ -1,0 +1,31 @@
+{
+  "tenantId": "royaldiamond",
+  "subdomain": "jewelry",
+  "categories": [],
+  "brands": [],
+  "items": [],
+  "media": [
+    {
+      "id": "med_1793178853389_1",
+      "title": "Exclusive Designer Collection & Fabric Review",
+      "categoryId": "all",
+      "categoryName": "Featured Collection",
+      "type": "YOUTUBE",
+      "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "embedUrl": "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?rel=0",
+      "thumbnail": "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=800&q=80",
+      "createdAt": "2026-10-28T09:14:13.389Z"
+    },
+    {
+      "id": "med_1793178853389_2",
+      "title": "Customer Unboxing & Genuine Quality Review Live Video",
+      "categoryId": "all",
+      "categoryName": "General Highlights",
+      "type": "FACEBOOK",
+      "url": "https://www.facebook.com/facebook/videos/10153231379946729/",
+      "embedUrl": "https://www.facebook.com/plugins/video.php?height=314&href=https%3A%2F%2Fwww.facebook.com%2Ffacebook%2Fvideos%2F10153231379946729%2F&show_text=false&width=560",
+      "thumbnail": "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=800&q=80",
+      "createdAt": "2026-10-28T09:14:13.389Z"
+    }
+  ]
+}

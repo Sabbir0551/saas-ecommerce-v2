@@ -1,0 +1,216 @@
+{
+  "tenantId": "mejanelectric",
+  "subdomain": "mejanelectric",
+  "dbName": "tenant_mejanelectric",
+  "createdAt": "2026-10-28T08:57:05.446Z",
+  "businessType": "electronics",
+  "archetype": "PHYSICAL_STORE",
+  "categories": [
+    {
+      "id": "cat_1",
+      "name": "Smart Home Automation",
+      "slug": "smart-home-automation"
+    },
+    {
+      "id": "cat_2",
+      "name": "Circuit Breakers & Panels",
+      "slug": "circuit-breakers---panels"
+    },
+    {
+      "id": "cat_3",
+      "name": "Wiring & Cables",
+      "slug": "wiring---cables"
+    },
+    {
+      "id": "cat_4",
+      "name": "LED Lighting",
+      "slug": "led-lighting"
+    },
+    {
+      "id": "cat_5",
+      "name": "Power Inverters & UPS",
+      "slug": "power-inverters---ups"
+    }
+  ],
+  "brands": [
+    {
+      "id": "brand_1",
+      "name": "Official Certified",
+      "slug": "official-certified",
+      "logo": null
+    },
+    {
+      "id": "brand_2",
+      "name": "Signature Collection",
+      "slug": "signature-collection",
+      "logo": null
+    }
+  ],
+  "items": [
+    {
+      "id": "item_mejanelectric_1",
+      "title": "Smart WiFi Touch Switch Panel (4 Gang)",
+      "slug": "smart-wifi-touch-switch-4-gang",
+      "shortDescription": "Tempered glass touch control with Alexa and Google Home voice control integration.",
+      "description": "<p>Tempered glass touch control with Alexa and Google Home voice control integration.</p>",
+      "price": 3200,
+      "comparePrice": 3800,
+      "stockQuantity": 20,
+      "itemType": "PHYSICAL_PRODUCT",
+      "images": [
+        "https://images.unsplash.com/photo-1558002038-1055907df827?auto=format&fit=crop&w=800&q=80"
+      ]
+    }
+  ],
+  "orders": [
+    {
+      "id": "ord_1793178682594_1",
+      "orderNumber": "VOLT-98101",
+      "customerName": "Engr. Mahmudul Hasan",
+      "customerPhone": "+880 1711-554433",
+      "customerEmail": "mahmud.engr@gmail.com",
+      "shippingAddress": "House 14, Road 7, Sector 3, Uttara",
+      "city": "Dhaka",
+      "businessCategory": "electronics",
+      "orderType": "PHYSICAL_PRODUCT",
+      "ipAddress": "103.205.71.42",
+      "deviceType": "Mobile",
+      "osName": "Android 14",
+      "browserName": "Chrome Mobile",
+      "ipCity": "Dhaka",
+      "ipCountry": "Bangladesh",
+      "ipLatitude": 23.8759,
+      "ipLongitude": 90.3795,
+      "addressDiscrepancy": false,
+      "items": [
+        {
+          "itemTitle": "Gree Lomo-S 2.0 Ton Dual Inverter AC (GP-24LM)",
+          "variantTitle": "2.0 Ton (R32 Eco Gas)",
+          "quantity": 1,
+          "price": 84500,
+          "subtotal": 84500
+        }
+      ],
+      "deliveryCharge": 0,
+      "totalAmount": 84500,
+      "paymentMethod": "COD",
+      "orderStatus": "DELIVERED",
+      "courier": "Steadfast Courier",
+      "trackingCode": "STEAD-84500-DHK",
+      "notes": "Call before delivery. 12-year compressor warranty certificate requested.",
+      "createdAt": "2026-10-26T09:11:22.594Z"
+    },
+    {
+      "id": "ord_1793178682594_2",
+      "orderNumber": "VOLT-98102",
+      "customerName": "Tanvir Ahmed",
+      "customerPhone": "+880 1819-332211",
+      "customerEmail": "tanvir.ahmed@yahoo.com",
+      "shippingAddress": "GEC Circle, Nasirabad",
+      "city": "Chattogram",
+      "businessCategory": "electronics",
+      "orderType": "PHYSICAL_PRODUCT",
+      "ipAddress": "103.145.118.9",
+      "deviceType": "Desktop",
+      "osName": "Windows 11",
+      "browserName": "Microsoft Edge",
+      "ipCity": "Chattogram",
+      "ipCountry": "Bangladesh",
+      "ipLatitude": 22.3569,
+      "ipLongitude": 91.7832,
+      "addressDiscrepancy": false,
+      "items": [
+        {
+          "itemTitle": "Schneider Acti9 32A Double Pole MCB Breaker",
+          "variantTitle": "32A Double Pole",
+          "quantity": 4,
+          "price": 1850,
+          "subtotal": 7400
+        }
+      ],
+      "deliveryCharge": 120,
+      "totalAmount": 7520,
+      "paymentMethod": "COD",
+      "orderStatus": "PROCESSING",
+      "courier": "Pathao Courier",
+      "trackingCode": "PATH-7520-CTG",
+      "notes": "Deliver during daytime business hours.",
+      "createdAt": "2026-10-28T06:11:22.594Z"
+    },
+    {
+      "id": "ord_1793178682594_3",
+      "orderNumber": "VOLT-98103",
+      "customerName": "Shamsul Alam (Suspected Fake)",
+      "customerPhone": "+880 1912-001122",
+      "customerEmail": "fake.user99@trashmail.com",
+      "shippingAddress": "Zindabazar Commercial Area",
+      "city": "Sylhet",
+      "businessCategory": "electronics",
+      "orderType": "PHYSICAL_PRODUCT",
+      "ipAddress": "103.88.22.14",
+      "deviceType": "Mobile",
+      "osName": "iOS 17",
+      "browserName": "Mobile Safari",
+      "ipCity": "Dhaka",
+      "ipCountry": "Bangladesh",
+      "ipLatitude": 23.8103,
+      "ipLongitude": 90.4125,
+      "addressDiscrepancy": true,
+      "items": [
+        {
+          "itemTitle": "Hisense 55-Inch Frameless 4K UHD Google Smart TV",
+          "variantTitle": "55-inch 4K UHD",
+          "quantity": 1,
+          "price": 54900,
+          "subtotal": 54900
+        }
+      ],
+      "deliveryCharge": 150,
+      "totalAmount": 55050,
+      "paymentMethod": "COD",
+      "orderStatus": "PENDING",
+      "courier": "Pending Verification",
+      "trackingCode": "",
+      "notes": "⚠️ High fraud alert: IP location (Dhaka) does not match shipping city (Sylhet). Customer has high return history.",
+      "createdAt": "2026-10-28T09:11:22.594Z"
+    }
+  ],
+  "settings": {
+    "name": "Mejan Electric",
+    "businessType": "electronics",
+    "phone": "01700000000",
+    "email": "mejan@example.com",
+    "currency": "BDT",
+    "theme": "amber_industrial",
+    "themeConfig": {
+      "primaryColor": "#f59e0b",
+      "accentColor": "#ea580c"
+    },
+    "heroTitle": "Smart Home Electronics & Premium Electrical Gear",
+    "heroSubtitle": "Heavy-duty wiring, smart automated switches, inverters, and high-efficiency home electrical solutions."
+  },
+  "media": [
+    {
+      "id": "med_1793178622103_1",
+      "title": "Exclusive Designer Collection & Fabric Review",
+      "categoryId": "all",
+      "categoryName": "Featured Collection",
+      "type": "YOUTUBE",
+      "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "embedUrl": "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?rel=0",
+      "thumbnail": "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=800&q=80",
+      "createdAt": "2026-10-28T09:10:22.103Z"
+    },
+    {
+      "id": "med_1793178622103_2",
+      "title": "Customer Unboxing & Genuine Quality Review Live Video",
+      "categoryId": "all",
+      "categoryName": "General Highlights",
+      "type": "FACEBOOK",
+      "url": "https://www.facebook.com/facebook/videos/10153231379946729/",
+      "embedUrl": "https://www.facebook.com/plugins/video.php?height=314&href=https%3A%2F%2Fwww.facebook.com%2Ffacebook%2Fvideos%2F10153231379946729%2F&show_text=false&width=560",
+      "thumbnail": "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=800&q=80",
+      "createdAt": "2026-10-28T09:10:22.103Z"
+    }
+  ]
+}

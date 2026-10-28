@@ -23,6 +23,8 @@ export const dbProvisionService = {
     subdomain: string,
     tenantId: string,
     initialData?: {
+      businessType?: string;
+      archetype?: string;
       categories?: any[];
       brands?: any[];
       items?: any[];
@@ -76,18 +78,24 @@ export const dbProvisionService = {
 
     const tenantStoreFile = path.join(tenantDataDir, `${dbName}.json`);
     if (!fs.existsSync(tenantStoreFile)) {
+      const bType = initialData?.businessType || initialData?.settings?.businessType || 'fashion_clothing';
+      const aType = initialData?.archetype || 'PHYSICAL_STORE';
       const initialStoreData = {
         tenantId,
         subdomain: cleanSub,
         dbName,
         createdAt: new Date().toISOString(),
+        businessType: bType,
+        archetype: aType,
         categories: initialData?.categories || [],
         brands: initialData?.brands || [],
         items: initialData?.items || [],
         orders: [],
-        settings: initialData?.settings || {
+        settings: {
           currency: 'BDT',
           theme: 'modern_slate',
+          ...(initialData?.settings || {}),
+          businessType: bType,
         },
       };
       fs.writeFileSync(tenantStoreFile, JSON.stringify(initialStoreData, null, 2));

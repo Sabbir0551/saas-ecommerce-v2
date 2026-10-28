@@ -44,23 +44,43 @@ function StorefrontContent({ tenantSlug }: { tenantSlug: string }) {
           api.getBrands(tenantSlug),
         ]);
 
+        const resolvedCat = BUSINESS_CATEGORIES.find(
+          (c) => c.demoSlug === tenantSlug || c.id === tenantSlug || tenantSlug?.toLowerCase().includes(c.id)
+        );
+
         if (tenantRes?.success) {
           setTenant(tenantRes.data);
         } else {
           setTenant({
-            name: tenantSlug === 'medicare' ? 'MediCare Specialized Health Clinic' : 'Gulshan Fashion & Boutique',
-            businessType: tenantSlug === 'medicare' ? 'healthcare_service' : 'fashion_clothing',
+            name: resolvedCat ? resolvedCat.name : (tenantSlug === 'medicare' ? 'MediCare Specialized Health Clinic' : 'Gulshan Fashion & Boutique'),
+            businessType: resolvedCat ? resolvedCat.id : (tenantSlug === 'medicare' ? 'healthcare_service' : 'fashion_clothing'),
             subdomain: tenantSlug,
             currency: 'BDT',
           });
         }
 
-        if (catRes?.success && Array.isArray(catRes.data)) {
+        if (catRes?.success && Array.isArray(catRes.data) && catRes.data.length > 0) {
           setCategories(catRes.data);
+        } else if (resolvedCat?.defaultCategories) {
+          setCategories(
+            resolvedCat.defaultCategories.map((c, i) => ({
+              id: `cat_${i + 1}`,
+              name: c,
+              slug: c.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+            }))
+          );
         }
 
         if (brandRes?.success && Array.isArray(brandRes.data)) {
           setBrands(brandRes.data);
+        } else if (resolvedCat?.popularBrands) {
+          setBrands(
+            resolvedCat.popularBrands.map((b, i) => ({
+              id: `brand_${i + 1}`,
+              name: b,
+              slug: b.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+            }))
+          );
         }
 
         if (mediaRes?.success && Array.isArray(mediaRes.data)) {
@@ -69,58 +89,58 @@ function StorefrontContent({ tenantSlug }: { tenantSlug: string }) {
 
         if (itemsRes?.success && itemsRes.data?.length > 0) {
           setItems(itemsRes.data);
+        } else if (resolvedCat?.sampleItems && resolvedCat.sampleItems.length > 0) {
+          setItems(
+            resolvedCat.sampleItems.map((item, i) => ({
+              id: `${tenantSlug}_sample_${i + 1}`,
+              title: item.title,
+              slug: item.slug,
+              shortDescription: item.shortDesc,
+              itemType: item.itemType,
+              price: item.price,
+              comparePrice: item.comparePrice || null,
+              images: [item.image],
+            }))
+          );
+        } else if (tenantSlug === 'medicare') {
+          setItems([
+            {
+              id: 'med-1',
+              title: 'Senior Dental Consultation & Full OPG Screening',
+              slug: 'senior-dental-consultation',
+              shortDescription: 'Comprehensive oral examination by FCPS dental surgeon with digital panoramic X-ray.',
+              itemType: 'SERVICE_APPOINTMENT',
+              price: 500,
+              comparePrice: 800,
+              durationMinutes: 60,
+              images: ['https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=800&q=80'],
+            },
+            {
+              id: 'med-2',
+              title: 'Laser Teeth Whitening & Ultrasonic Scaling',
+              slug: 'laser-teeth-whitening',
+              shortDescription: 'Advanced ultrasonic plaque removal and painless dental enamel brightening.',
+              itemType: 'SERVICE_APPOINTMENT',
+              price: 2500,
+              comparePrice: 3500,
+              durationMinutes: 60,
+              images: ['https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&w=800&q=80'],
+            },
+          ]);
         } else {
-          if (tenantSlug === 'medicare') {
-            setItems([
-              {
-                id: 'med-1',
-                title: 'Senior Dental Consultation & Full OPG Screening',
-                slug: 'senior-dental-consultation',
-                shortDescription: 'Comprehensive oral examination by FCPS dental surgeon with digital panoramic X-ray.',
-                itemType: 'SERVICE_APPOINTMENT',
-                price: 500,
-                comparePrice: 800,
-                durationMinutes: 60,
-                images: ['https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=800&q=80'],
-              },
-              {
-                id: 'med-2',
-                title: 'Laser Teeth Whitening & Ultrasonic Scaling',
-                slug: 'laser-teeth-whitening',
-                shortDescription: 'Advanced ultrasonic plaque removal and painless dental enamel brightening.',
-                itemType: 'SERVICE_APPOINTMENT',
-                price: 2500,
-                comparePrice: 3500,
-                durationMinutes: 60,
-                images: ['https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&w=800&q=80'],
-              },
-            ]);
-          } else {
-            setItems([
-              {
-                id: 'fsh-1',
-                title: 'Handcrafted Royal Dhakai Jamdani Saree (84 Count)',
-                slug: 'royal-jamdani-saree',
-                shortDescription: 'Pure combed cotton with gold zari handwoven by master craftsmen.',
-                itemType: 'PHYSICAL_PRODUCT',
-                price: 6500,
-                comparePrice: 8500,
-                stockQuantity: 15,
-                images: ['https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80'],
-              },
-              {
-                id: 'fsh-2',
-                title: 'Platinum Cotton Exclusive Semi-Long Panjabi',
-                slug: 'platinum-cotton-panjabi',
-                shortDescription: '100% fine cotton tailored with subtle minimalist embroidery.',
-                itemType: 'PHYSICAL_PRODUCT',
-                price: 2850,
-                comparePrice: 3500,
-                stockQuantity: 40,
-                images: ['https://images.unsplash.com/photo-1597983073493-88cd35cf93b0?auto=format&fit=crop&w=800&q=80'],
-              },
-            ]);
-          }
+          setItems([
+            {
+              id: 'fsh-1',
+              title: 'Handcrafted Royal Dhakai Jamdani Saree (84 Count)',
+              slug: 'royal-jamdani-saree',
+              shortDescription: 'Pure combed cotton with gold zari handwoven by master craftsmen.',
+              itemType: 'PHYSICAL_PRODUCT',
+              price: 6500,
+              comparePrice: 8500,
+              stockQuantity: 15,
+              images: ['https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80'],
+            },
+          ]);
         }
       } catch (err) {
         console.error(err);
@@ -132,12 +152,12 @@ function StorefrontContent({ tenantSlug }: { tenantSlug: string }) {
   }, [tenantSlug]);
 
   const matchedCategory = BUSINESS_CATEGORIES.find(
-    (c) => c.id === tenant?.businessType || c.id === tenantSlug
+    (c) => c.id === tenant?.businessType || c.id === tenantSlug || tenantSlug?.toLowerCase().includes(c.id) || (tenant?.businessType && c.id.includes(tenant.businessType))
   );
 
   const isMedical = tenant?.businessType === 'healthcare_service' || tenantSlug === 'medicare' || tenantSlug === 'meradenralcare' || matchedCategory?.archetype === 'APPOINTMENT_BOOKING';
   const isRealEstate = tenant?.businessType === 'real_estate' || tenantSlug === 'aebanproperty' || matchedCategory?.archetype === 'LEAD_GEN_REAL_ESTATE';
-  const isElectronics = tenant?.businessType === 'electronics' || tenantSlug === 'bestlaptop' || tenantSlug === 'gadgethub' || tenant?.businessType === 'laptop_computer' || tenantSlug === 'smartvolt';
+  const isElectronics = tenant?.businessType === 'electronics' || tenantSlug === 'bestlaptop' || tenantSlug === 'gadgethub' || tenant?.businessType === 'laptop_computer' || tenantSlug === 'smartvolt' || tenantSlug === 'electronics' || tenantSlug?.toLowerCase().includes('electric');
   const isPet = tenantSlug === 'petshopbd' || tenant?.businessType === 'pet_food';
 
   const getStoreBadge = () => {
@@ -911,7 +931,7 @@ function StorefrontContent({ tenantSlug }: { tenantSlug: string }) {
 
 function MainRootContent() {
   const searchParams = useSearchParams();
-  const tenantSlug = searchParams.get('tenant');
+  const tenantSlug = searchParams.get('tenant') || searchParams.get('category') || searchParams.get('store');
 
   // If visiting root with no tenant parameter -> Display Central SaaS Platform Landing
   if (!tenantSlug) {

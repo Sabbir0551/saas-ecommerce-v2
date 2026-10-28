@@ -2,6 +2,145 @@
     "exportedAt": "2026-10-20T07:25:57+00:00",
     "tenants": [
         {
+            "id": "arifelectric",
+            "name": "Arif Electric",
+            "subdomain": "arifelectric",
+            "businessType": "electronics",
+            "archetype": "PHYSICAL_STORE",
+            "domains": [
+                "arifelectric.localhost"
+            ],
+            "phone": "01855225588",
+            "email": "merchant@arifelectric.com",
+            "primarySubcategory": "Smart Home Automation",
+            "categories": [
+                {
+                    "id": "cat_1",
+                    "name": "Smart Home Automation",
+                    "slug": "smart-home-automation"
+                },
+                {
+                    "id": "cat_2",
+                    "name": "Circuit Breakers & Panels",
+                    "slug": "circuit-breakers---panels"
+                },
+                {
+                    "id": "cat_3",
+                    "name": "Wiring & Cables",
+                    "slug": "wiring---cables"
+                },
+                {
+                    "id": "cat_4",
+                    "name": "LED Lighting",
+                    "slug": "led-lighting"
+                },
+                {
+                    "id": "cat_5",
+                    "name": "Power Inverters & UPS",
+                    "slug": "power-inverters---ups"
+                }
+            ],
+            "brands": [
+                {
+                    "id": "brand_1",
+                    "name": "Official Certified",
+                    "slug": "official-certified",
+                    "logo": null
+                },
+                {
+                    "id": "brand_2",
+                    "name": "Signature Collection",
+                    "slug": "signature-collection",
+                    "logo": null
+                }
+            ],
+            "items": [
+                {
+                    "id": "item_arifelectric_1",
+                    "title": "Smart WiFi Touch Switch Panel (4 Gang)",
+                    "slug": "smart-wifi-touch-switch-4-gang",
+                    "shortDescription": "Tempered glass touch control with Alexa and Google Home voice control integration.",
+                    "description": "<p>Tempered glass touch control with Alexa and Google Home voice control integration.</p>",
+                    "price": 3200,
+                    "comparePrice": 3800,
+                    "stockQuantity": 20,
+                    "itemType": "PHYSICAL_PRODUCT",
+                    "images": [
+                        "https://images.unsplash.com/photo-1558002038-1055907df827?auto=format&fit=crop&w=800&q=80"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "mejanelectric",
+            "name": "Mejan Electric",
+            "subdomain": "mejanelectric",
+            "businessType": "electronics",
+            "archetype": "PHYSICAL_STORE",
+            "domains": [
+                "mejanelectric.localhost"
+            ],
+            "phone": "01700000000",
+            "email": "mejan@example.com",
+            "categories": [
+                {
+                    "id": "cat_1",
+                    "name": "Smart Home Automation",
+                    "slug": "smart-home-automation"
+                },
+                {
+                    "id": "cat_2",
+                    "name": "Circuit Breakers & Panels",
+                    "slug": "circuit-breakers---panels"
+                },
+                {
+                    "id": "cat_3",
+                    "name": "Wiring & Cables",
+                    "slug": "wiring---cables"
+                },
+                {
+                    "id": "cat_4",
+                    "name": "LED Lighting",
+                    "slug": "led-lighting"
+                },
+                {
+                    "id": "cat_5",
+                    "name": "Power Inverters & UPS",
+                    "slug": "power-inverters---ups"
+                }
+            ],
+            "brands": [
+                {
+                    "id": "brand_1",
+                    "name": "Official Certified",
+                    "slug": "official-certified",
+                    "logo": null
+                },
+                {
+                    "id": "brand_2",
+                    "name": "Signature Collection",
+                    "slug": "signature-collection",
+                    "logo": null
+                }
+            ],
+            "items": [
+                {
+                    "id": "item_mejanelectric_1",
+                    "title": "Smart WiFi Touch Switch Panel (4 Gang)",
+                    "slug": "smart-wifi-touch-switch-4-gang",
+                    "shortDescription": "Tempered glass touch control with Alexa and Google Home voice control integration.",
+                    "description": "<p>Tempered glass touch control with Alexa and Google Home voice control integration.</p>",
+                    "price": 3200,
+                    "comparePrice": 3800,
+                    "stockQuantity": 20,
+                    "itemType": "PHYSICAL_PRODUCT",
+                    "images": [
+                        "https://images.unsplash.com/photo-1558002038-1055907df827?auto=format&fit=crop&w=800&q=80"
+                    ]
+                }
+            ]
+        },
+        {
             "id": "makeover",
             "name": "Makeover",
             "subdomain": "makeover",

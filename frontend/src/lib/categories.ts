@@ -1,13 +1,18 @@
 export interface BusinessCategoryDefinition {
   id: string;
   name: string;
-  group: 'retail' | 'services' | 'food' | 'real_estate' | 'professional';
+  group: 'retail' | 'services' | 'food' | 'real_estate' | 'professional' | 'tech';
   icon: string;
   shortDesc: string;
   archetype: 'PHYSICAL_STORE' | 'APPOINTMENT_BOOKING' | 'LEAD_GEN_REAL_ESTATE' | 'FOOD_MENU' | 'DIGITAL_DOWNLOAD' | 'PORTFOLIO';
   badge: string;
   heroTitle: string;
   heroSubtitle: string;
+  demoSlug?: string;
+  keywords?: string[];
+  features?: string[];
+  color?: string;
+  popularBrands?: string[];
   defaultCategories: string[];
   sampleItems: {
     title: string;
@@ -31,13 +36,23 @@ export const BUSINESS_CATEGORIES: BusinessCategoryDefinition[] = [
   {
     id: 'mobile_store',
     name: 'Mobile & Smartphone Store',
-    group: 'retail',
+    group: 'tech',
     icon: 'Smartphone',
     shortDesc: 'Sell latest smartphones, flagships, smartwatches, and original accessories.',
     archetype: 'PHYSICAL_STORE',
     badge: 'Official Mobile & Smartphone Hub',
     heroTitle: 'Latest Flagship Smartphones & Authentic Accessories',
     heroSubtitle: 'Explore genuine warranty-backed smartphones, fast chargers, and smart wearable gear with doorstep express delivery.',
+    demoSlug: 'smartvolt',
+    color: 'blue',
+    keywords: ['mobile', 'phone', 'smartphone', 'iphone', 'samsung', 'charger', 'case', 'airpods', 'gadget', 'xiaomi', 'pixel'],
+    features: [
+      'IMEI & Official BTRC Clearance Badges',
+      'RAM / Storage & Color Variant Picker',
+      'Doorstep Cash on Delivery (COD) & Tracking',
+      '72-Hour Consumer Protection Support',
+    ],
+    popularBrands: ['Apple', 'Samsung', 'Google Pixel', 'Xiaomi', 'Anker'],
     defaultCategories: ['Smartphones', 'Tablets', 'Chargers & Cables', 'Audio & Earbuds', 'Protective Cases'],
     sampleItems: [
       {
@@ -66,13 +81,23 @@ export const BUSINESS_CATEGORIES: BusinessCategoryDefinition[] = [
   {
     id: 'laptop_computers',
     name: 'Laptop & Computer Systems',
-    group: 'retail',
+    group: 'tech',
     icon: 'Laptop',
     shortDesc: 'Workstations, gaming rigs, ultrabooks, and desktop accessories.',
     archetype: 'PHYSICAL_STORE',
     badge: 'Premier Computing & PC Gallery',
     heroTitle: 'Cutting-Edge Laptops, Ultrabooks & Workstations',
     heroSubtitle: 'Enterprise laptops, custom desktop setups, and high-performance computing hardware backed by official warranty.',
+    demoSlug: 'bestlaptop',
+    color: 'indigo',
+    keywords: ['laptop', 'computer', 'macbook', 'gaming', 'pc', 'ram', 'ssd', 'intel', 'ryzen', 'monitor', 'asus', 'dell', 'lenovo', 'hp'],
+    features: [
+      'Official Distributor Warranty Certificate',
+      'Processor, GPU & RAM Configurator',
+      'Instant POS Invoice Slip with Serial No.',
+      'Corporate Purchase Orders & Bulk Pricing',
+    ],
+    popularBrands: ['Apple MacBook', 'ASUS ROG', 'Lenovo ThinkPad', 'Dell Latitude', 'HP Spectre'],
     defaultCategories: ['Business Laptops', 'Gaming Laptops', 'Desktop Components', 'Monitors & Displays', 'Keyboards & Mice'],
     sampleItems: [
       {
@@ -101,13 +126,23 @@ export const BUSINESS_CATEGORIES: BusinessCategoryDefinition[] = [
   {
     id: 'electronics',
     name: 'Electric & Electronics Business',
-    group: 'retail',
+    group: 'tech',
     icon: 'Zap',
     shortDesc: 'Smart home appliances, circuit components, wiring, and electronics.',
     archetype: 'PHYSICAL_STORE',
     badge: 'Certified Electrical & Smart Home Gear',
     heroTitle: 'Smart Home Electronics & Premium Electrical Gear',
     heroSubtitle: 'Heavy-duty wiring, smart automated switches, inverters, and high-efficiency home electrical solutions.',
+    demoSlug: 'smartvolt',
+    color: 'amber',
+    keywords: ['electric', 'electronics', 'switch', 'wiring', 'cable', 'breaker', 'ac', 'tv', 'socket', 'inverter', 'led', 'schneider', 'gree', 'walton', 'mcb'],
+    features: [
+      'Compressor & Parts Warranty Tracking System',
+      'Technical Specs (Voltage, Amperage, Wattage)',
+      'High-Risk Fraud & Shipping Discrepancy Detection',
+      'Thermal Receipt & Barcode POS Generation',
+    ],
+    popularBrands: ['Schneider Electric', 'Gree', 'Walton', 'Siemens', 'ABB', 'Hisense'],
     defaultCategories: ['Smart Home Automation', 'Circuit Breakers & Panels', 'Wiring & Cables', 'LED Lighting', 'Power Inverters & UPS'],
     sampleItems: [
       {
@@ -134,6 +169,16 @@ export const BUSINESS_CATEGORIES: BusinessCategoryDefinition[] = [
     badge: 'Certified Luxury Jewelry & Gold Craft',
     heroTitle: 'Timeless Elegance in Gold, Diamond & Bridal Jewelry',
     heroSubtitle: 'Hallmarked 22K gold, certified solitaires, and mastercrafted bridal ornaments crafted for eternity.',
+    demoSlug: 'royaldiamond',
+    color: 'yellow',
+    keywords: ['jewelry', 'gold', 'diamond', 'necklace', 'ring', 'bridal', 'bangle', 'hallmark', 'earrings', 'gemstone'],
+    features: [
+      '22K/24K Hallmark Certified Badges',
+      'Daily Gold Price & Carat Purity Calculator',
+      'VIP In-Store Viewing Appointment Booking',
+      'Insured Security Transit & Packaging',
+    ],
+    popularBrands: ['Cartier', 'Tanishq', 'Tiffany & Co.', 'Apan Jewellers'],
     defaultCategories: ['Bridal Sets', 'Gold Necklaces', 'Diamond Rings', 'Bangles & Bracelets', 'Earrings'],
     sampleItems: [
       {
@@ -160,6 +205,16 @@ export const BUSINESS_CATEGORIES: BusinessCategoryDefinition[] = [
     badge: 'Certified Luxury Horology & Swiss Craft',
     heroTitle: 'Masterpieces of Precision, Craftsmanship & Timeless Heritage',
     heroSubtitle: 'Explore certified authentic Swiss chronographs, perpetual calendars, diver timepieces, and bespoke horological accessories.',
+    demoSlug: 'apexwatches',
+    color: 'cyan',
+    keywords: ['watch', 'watches', 'rolex', 'omega', 'patek', 'chronograph', 'horology', 'swiss', 'timepiece', 'tag heuer'],
+    features: [
+      'Movement Calibre & Case Material Display',
+      'Original Authenticity Guarantee Card',
+      'VIP Private Showroom Viewing Appointments',
+      'Serial & Movement Authentication Registry',
+    ],
+    popularBrands: ['Rolex', 'Omega', 'Patek Philippe', 'Audemars Piguet', 'TAG Heuer'],
     defaultCategories: [
       'Automatic Chronographs',
       'Swiss Luxury Timepieces',
@@ -210,6 +265,16 @@ export const BUSINESS_CATEGORIES: BusinessCategoryDefinition[] = [
     badge: 'Exclusive Designer Fashion & Couture',
     heroTitle: 'Modern Elegance Meets Traditional Heritage',
     heroSubtitle: '100% authentic handwoven Jamdani, designer panjabis, festive bridal sarees, and contemporary apparel.',
+    demoSlug: 'fashion',
+    color: 'rose',
+    keywords: ['fashion', 'clothing', 'saree', 'panjabi', 'dress', 'apparel', 'jamdani', 'boutique', 'kurti', 'shirt'],
+    features: [
+      'Multi-Variant Matrix (Size, Color, Fabric)',
+      'High-Converting One-Page Cash on Delivery',
+      'Barcode Shipping Consignment Generator',
+      '72-Hour Government Dispute & Return Portal',
+    ],
+    popularBrands: ['Aarong', 'Yellow', 'Cats Eye', 'Sailor', 'Richman'],
     defaultCategories: ['Jamdani Sarees', 'Designer Panjabis', 'Party Wear', 'Casual Menswear', 'Kids Collection'],
     sampleItems: [
       {
@@ -225,17 +290,27 @@ export const BUSINESS_CATEGORIES: BusinessCategoryDefinition[] = [
     defaultModules: { appointmentBooking: false, productReviews: true, disputeSystem: true, digitalDownloads: false },
   },
 
-  // 6. Pharmacy & Medicine
+  // 7. Pharmacy & Medicine Store
   {
     id: 'pharmacy_medicine',
     name: 'Pharmacy & Medicine Store',
-    group: 'retail',
+    group: 'services',
     icon: 'Pill',
     shortDesc: 'Prescription medicines, healthcare equipment, and baby care.',
     archetype: 'PHYSICAL_STORE',
     badge: 'Licensed Pharmacy & Medical Supplies',
     heroTitle: 'Genuine Prescription Medicines & Diagnostic Devices',
     heroSubtitle: 'DGDA-approved authentic pharmaceuticals, digital BP monitors, glucometers, and fast delivery.',
+    demoSlug: 'pharmaexpress',
+    color: 'emerald',
+    keywords: ['pharmacy', 'medicine', 'prescription', 'health', 'tablet', 'syrup', 'bp monitor', 'omron', 'insulin'],
+    features: [
+      'DGDA Drug License & Verification Badges',
+      'Prescription Photo Upload with Pharmacist Verification',
+      'Expiry Batch & Cold-Chain Storage Tracking',
+      'Urgent Express 2-Hour Delivery Dispatch',
+    ],
+    popularBrands: ['Square Pharmaceuticals', 'Beximco Pharma', 'Incepta', 'Omron Healthcare', 'Accu-Chek'],
     defaultCategories: ['Prescription Medicines', 'OTC Healthcare', 'Diagnostic Devices', 'Vitamins & Supplements', 'Baby Health'],
     sampleItems: [
       {
@@ -251,7 +326,7 @@ export const BUSINESS_CATEGORIES: BusinessCategoryDefinition[] = [
     defaultModules: { appointmentBooking: true, productReviews: true, disputeSystem: true, digitalDownloads: false },
   },
 
-  // 7. Travel Agency & Tour Packages
+  // 8. Travel Agency & Tour Packages
   {
     id: 'travel_agency',
     name: 'Travel Agency & Tour Packages',
@@ -262,6 +337,16 @@ export const BUSINESS_CATEGORIES: BusinessCategoryDefinition[] = [
     badge: 'Authorized Travel & International Tour Partner',
     heroTitle: 'Explore The World with Tailored Tour Packages',
     heroSubtitle: 'All-inclusive international vacations, seamless visa processing, customized honeymoon trips, and flight booking.',
+    demoSlug: 'flybangla',
+    color: 'sky',
+    keywords: ['travel', 'tour', 'flight', 'visa', 'umrah', 'maldives', 'ticket', 'hotel', 'holiday', 'package'],
+    features: [
+      'Interactive Flight & Package Date Customizer',
+      'Instant Visa Requirement & Document Checklist',
+      'Secure Deposit & Installment Milestone Payments',
+      '24/7 International Concierge & WhatsApp Travel Support',
+    ],
+    popularBrands: ['Biman Bangladesh', 'Emirates', 'Qatar Airways', 'Singapore Airlines', 'Fly Dubai'],
     defaultCategories: ['International Holidays', 'Domestic Getaways', 'Visa Assistance', 'Hajj & Umrah Packages', 'Air Tickets'],
     sampleItems: [
       {
@@ -277,7 +362,7 @@ export const BUSINESS_CATEGORIES: BusinessCategoryDefinition[] = [
     defaultModules: { appointmentBooking: true, productReviews: true, disputeSystem: true, digitalDownloads: false },
   },
 
-  // 8. Water Treatment & Water Filter
+  // 9. Water Treatment & Water Filter
   {
     id: 'water_treatment',
     name: 'Water Treatment & Filter Business',
@@ -288,6 +373,16 @@ export const BUSINESS_CATEGORIES: BusinessCategoryDefinition[] = [
     badge: 'Certified Clean Water & RO Filtration',
     heroTitle: 'Pure, Safe & Mineral-Rich Drinking Water Systems',
     heroSubtitle: 'Advanced 6-stage reverse osmosis purifiers, alkaline boosters, UV sterilisers, and expert installation.',
+    demoSlug: 'aquapure',
+    color: 'cyan',
+    keywords: ['water', 'filter', 'ro', 'purifier', 'alkaline', 'membrane', 'wtp', 'arsenic', 'iron'],
+    features: [
+      'TDS Meter & Water Quality Comparison Calculator',
+      'Doorstep Free Water Sample Testing Booking',
+      'Automated 6-Month Filter Cartridge Replacement Reminder',
+      'Heavy-Duty Industrial WTP Blueprint Consultation',
+    ],
+    popularBrands: ['Aquafresh', 'Kent RO', 'Pureit', 'Lan Shan', 'Hero Pure'],
     defaultCategories: ['Home RO Purifiers', 'Commercial Filters', 'Industrial WTP Plants', 'Replacement Cartridges', 'Testing Kits'],
     sampleItems: [
       {
@@ -303,7 +398,7 @@ export const BUSINESS_CATEGORIES: BusinessCategoryDefinition[] = [
     defaultModules: { appointmentBooking: true, productReviews: true, disputeSystem: true, digitalDownloads: false },
   },
 
-  // 9. Restaurant, Cafe & Food Delivery
+  // 10. Restaurant, Cafe & Food Delivery
   {
     id: 'restaurant_food',
     name: 'Restaurant, Cafe & Food Delivery',
@@ -314,6 +409,16 @@ export const BUSINESS_CATEGORIES: BusinessCategoryDefinition[] = [
     badge: 'Artisanal Cuisine & Express Food Delivery',
     heroTitle: 'Freshly Prepared Gourmet Dishes Delivered Hot',
     heroSubtitle: 'Authentic recipes, organic ingredients, and lightning-fast packaging right from our master kitchen to your doorstep.',
+    demoSlug: 'chillibite',
+    color: 'amber',
+    keywords: ['food', 'restaurant', 'burger', 'pizza', 'cafe', 'dine-in', 'delivery', 'chef', 'catering'],
+    features: [
+      'Visual Interactive Digital Menu & Spice Level Selector',
+      'Table Reservation & Private Dining Slot Booking',
+      'Live Kitchen Order Tracking & SMS Delivery ETA',
+      'Automated POS Kitchen Display System (KDS) Sync',
+    ],
+    popularBrands: ['Chillibite Master Kitchen', 'Lavazza Coffee', 'Anchor Dairy', 'Calvé Artisanal'],
     defaultCategories: ['Signature Mains', 'Wood-Fired Pizza', 'Artisanal Coffee & Drinks', 'Appetizers', 'Desserts'],
     sampleItems: [
       {
@@ -329,7 +434,7 @@ export const BUSINESS_CATEGORIES: BusinessCategoryDefinition[] = [
     defaultModules: { appointmentBooking: true, productReviews: true, disputeSystem: true, digitalDownloads: false },
   },
 
-  // 10. Furniture & Home Decor
+  // 11. Furniture & Home Decor
   {
     id: 'furniture_decor',
     name: 'Furniture & Home Decor',
@@ -340,6 +445,16 @@ export const BUSINESS_CATEGORIES: BusinessCategoryDefinition[] = [
     badge: 'Premium Handcrafted Furniture & Living Decor',
     heroTitle: 'Architectural Furniture for Inspiring Living Spaces',
     heroSubtitle: 'Seasoned mahogany, Canadian oak, ergonomic executive chairs, and bespoke minimalist home furnishings.',
+    demoSlug: 'luxewood',
+    color: 'amber',
+    keywords: ['furniture', 'wood', 'sofa', 'table', 'chair', 'bed', 'decor', 'oak', 'interior', 'office'],
+    features: [
+      'Solid Kiln-Dried Wood 10-Year Anti-Pest Guarantee',
+      'Fabric & Wood Polish Customization Matrix',
+      'White-Glove In-Home Assembly & Installation',
+      'Corporate Workspace Bulk Procurement Invoicing',
+    ],
+    popularBrands: ['Otobi', 'Hatil', 'Akhtar Furnishers', 'Navana Furniture', 'Regal'],
     defaultCategories: ['Living Room Sofas', 'Dining Tables', 'Executive Work Desks', 'Bedrooms & Mattresses', 'Lighting & Decor'],
     sampleItems: [
       {
@@ -355,7 +470,7 @@ export const BUSINESS_CATEGORIES: BusinessCategoryDefinition[] = [
     defaultModules: { appointmentBooking: false, productReviews: true, disputeSystem: true, digitalDownloads: false },
   },
 
-  // 11. Agro Farm & Livestock
+  // 12. Agro Farm & Livestock
   {
     id: 'agro_farm',
     name: 'Agro Farm & Livestock',
@@ -366,6 +481,16 @@ export const BUSINESS_CATEGORIES: BusinessCategoryDefinition[] = [
     badge: 'Pure Organic Farm & Quality Livestock',
     heroTitle: 'Fresh Dairy, Organic Farm Harvest & Certified Livestock',
     heroSubtitle: '100% antibiotic-free dairy milk, farm-fresh eggs, pure organic honey, and healthy livestock breeding.',
+    demoSlug: 'greenagro',
+    color: 'emerald',
+    keywords: ['agro', 'farm', 'honey', 'dairy', 'milk', 'livestock', 'organic', 'cow', 'cattle', 'fertilizer'],
+    features: [
+      '100% Certified Antibiotic-Free & Organic Badges',
+      'Cold-Chain Temperature Controlled Morning Delivery',
+      'Live Cattle & Qurbani Video Inspection Booking',
+      'Bulk Farm-to-Table Wholesale Supply Contracts',
+    ],
+    popularBrands: ['Green Agro Organic', 'Sundarbans Pure Honey', 'Aarong Dairy', 'Pran Dairy'],
     defaultCategories: ['Fresh Dairy & Milk', 'Farm Organic Produce', 'Livestock & Cattle', 'Bio Fertilizer', 'Poultry & Feed'],
     sampleItems: [
       {
@@ -381,7 +506,7 @@ export const BUSINESS_CATEGORIES: BusinessCategoryDefinition[] = [
     defaultModules: { appointmentBooking: false, productReviews: true, disputeSystem: true, digitalDownloads: false },
   },
 
-  // 12. Plant Nursery & Gardening
+  // 13. Plant Nursery & Gardening
   {
     id: 'plant_nursery',
     name: 'Plant Nursery & Gardening',
@@ -392,6 +517,16 @@ export const BUSINESS_CATEGORIES: BusinessCategoryDefinition[] = [
     badge: 'Exotic Greenery & Plant Nursery',
     heroTitle: 'Breathe Fresh Air with Exotic Indoor Plants & Bonsai',
     heroSubtitle: 'Air-purifying houseplants, succulent collections, imported ceramic planters, and garden maintenance kits.',
+    demoSlug: 'bonsaibd',
+    color: 'green',
+    keywords: ['plant', 'nursery', 'bonsai', 'flower', 'pot', 'garden', 'succulent', 'indoor', 'soil'],
+    features: [
+      'Care Guide & Sunlight Requirement Badges',
+      'Plant Survival & Healthy Root Guarantee on Transit',
+      'Potting Soil & Fertilizer Delivery Bundle',
+      'In-Home Landscape & Balcony Garden Consultation',
+    ],
+    popularBrands: ['Bonsai Garden BD', 'Green Living Plants', 'Imported Ceramic Studio', 'Miracle-Gro'],
     defaultCategories: ['Indoor Plants', 'Bonsai Trees', 'Succulents & Cacti', 'Pots & Planters', 'Organic Soil & Fertilizers'],
     sampleItems: [
       {
@@ -407,7 +542,7 @@ export const BUSINESS_CATEGORIES: BusinessCategoryDefinition[] = [
     defaultModules: { appointmentBooking: false, productReviews: true, disputeSystem: true, digitalDownloads: false },
   },
 
-  // 13. Real Estate & Developer Company
+  // 14. Real Estate & Developer Company
   {
     id: 'real_estate',
     name: 'Real Estate & Developer Company',
@@ -418,6 +553,16 @@ export const BUSINESS_CATEGORIES: BusinessCategoryDefinition[] = [
     badge: 'Luxury Property & Prime Real Estate',
     heroTitle: 'Architectural Masterpieces & Prime Living Properties',
     heroSubtitle: 'Verified legal clearance, prime residential addresses, private villas, and high-yield commercial property developments.',
+    demoSlug: 'aebanproperty',
+    color: 'yellow',
+    keywords: ['real estate', 'property', 'apartment', 'flat', 'land', 'plot', 'villa', 'estate', 'commercial'],
+    features: [
+      'High-Resolution Architectural Gallery & Floor Plans',
+      'Private VIP Viewing Inquiry Booking Engine',
+      'Verified RAJUK & Title Deed Clearance Badges',
+      'Instant Lead Notification to Merchant WhatsApp/Email',
+    ],
+    popularBrands: ['Shanta Holdings', 'Building Technology & Ideas', 'Navana Real Estate', 'Concord Group'],
     defaultCategories: ['Luxury Apartments', 'Private Country Estates', 'Commercial Spaces', 'Residential Plots', 'Penthouses'],
     sampleItems: [
       {
@@ -426,13 +571,13 @@ export const BUSINESS_CATEGORIES: BusinessCategoryDefinition[] = [
         shortDesc: 'Gale Henderson-designed 10,000 sq ft mansion set across 3 private manicured acres with resort-style pool.',
         price: 5500000,
         itemType: 'PHYSICAL_PRODUCT',
-        image: '/storage/products/DWrSTE77cUki5p8dIRY2OfOD6H4EIUCAkZEVZCyR.jpg',
+        image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80',
       },
     ],
     defaultModules: { appointmentBooking: true, productReviews: true, disputeSystem: true, digitalDownloads: false },
   },
 
-  // 14. Doctor & Healthcare Clinic
+  // 15. Doctor & Healthcare Clinic
   {
     id: 'healthcare_service',
     name: 'Doctor & Healthcare Clinic',
@@ -443,6 +588,16 @@ export const BUSINESS_CATEGORIES: BusinessCategoryDefinition[] = [
     badge: 'Specialized Healthcare & Clinical Care',
     heroTitle: 'Expert Doctor Appointments with Guaranteed 1-Hour Slots',
     heroSubtitle: 'Avoid clinic queues. Book confirmed time slots with top-tier specialized physicians, dental surgeons, and diagnostic specialists.',
+    demoSlug: 'medicare',
+    color: 'emerald',
+    keywords: ['health', 'doctor', 'clinic', 'dental', 'medical', 'serial', 'appointment', 'chamber', 'dentist', 'physician'],
+    features: [
+      'Guaranteed 1-Hour Confirmed Slot Booking Engine',
+      'Printable Daily Chamber Appointment & Token Sheet',
+      'Doctor Degrees, Chambers & Visiting Hour Badges',
+      'Automated SMS / WhatsApp Appointment Confirmation',
+    ],
+    popularBrands: ['Square Hospital', 'United Healthcare', 'Labaid Group', 'Apollo Clinics'],
     defaultCategories: ['Dental Care & Surgery', 'General Medicine', 'Pediatric Clinic', 'Cardiology Consultations', 'Diagnostic Ultrasound'],
     sampleItems: [
       {
@@ -458,7 +613,7 @@ export const BUSINESS_CATEGORIES: BusinessCategoryDefinition[] = [
     defaultModules: { appointmentBooking: true, productReviews: true, disputeSystem: true, digitalDownloads: false },
   },
 
-  // 15. Barber Shop & Beauty Salon
+  // 16. Barber Shop & Beauty Salon
   {
     id: 'barber_salon',
     name: 'Barber Shop & Beauty Salon',
@@ -469,6 +624,16 @@ export const BUSINESS_CATEGORIES: BusinessCategoryDefinition[] = [
     badge: 'Luxury Styling & Parlor Care',
     heroTitle: 'Elevate Your Personal Style & Grooming Excellence',
     heroSubtitle: 'Expert hair sculptors, rejuvenating organic facials, bridal packages, and precision beard sculpting.',
+    demoSlug: 'makeover',
+    color: 'purple',
+    keywords: ['salon', 'barber', 'haircut', 'facial', 'makeover', 'bridal', 'spa', 'massage', 'styling'],
+    features: [
+      'Stylist-Specific Hourly Slot Booking Calendar',
+      'VIP Grooming Packages with Token Number Alert',
+      'Sanitized Tool Hygiene & Disposable Kit Verification',
+      'Automated Appointment Reminder via WhatsApp/SMS',
+    ],
+    popularBrands: ['L\'Oréal Professionnel', 'Schwarzkopf', 'Olaplex', 'Wahl Professional'],
     defaultCategories: ['Hair Styling & Cut', 'Beard Sculpting', 'Skin & Facials', 'Bridal & Party Makeover', 'Scalp Therapy'],
     sampleItems: [
       {
@@ -484,7 +649,7 @@ export const BUSINESS_CATEGORIES: BusinessCategoryDefinition[] = [
     defaultModules: { appointmentBooking: true, productReviews: true, disputeSystem: true, digitalDownloads: false },
   },
 
-  // 16. Pet Food & Animal Care
+  // 17. Pet Food & Animal Supplies
   {
     id: 'pet_care',
     name: 'Pet Food & Animal Supplies',
@@ -495,6 +660,16 @@ export const BUSINESS_CATEGORIES: BusinessCategoryDefinition[] = [
     badge: 'Premium Pet Nutrition & Care',
     heroTitle: 'Nutritious Food, Toys & Healthcare for Your Beloved Pets',
     heroSubtitle: 'Imported veterinarian-approved dry food, wet pouches, chew treats, litter boxes, and grooming accessories.',
+    demoSlug: 'petshopbd',
+    color: 'orange',
+    keywords: ['pet', 'dog', 'cat', 'kitten', 'puppy', 'royal canin', 'food', 'litter', 'veterinary'],
+    features: [
+      'Veterinary Batch Verification & Expiry Shield',
+      'Auto-Replenish Monthly Pet Food Subscription',
+      'Weight & Age Specific Nutrition Filter',
+      'Express Delivery for Emergency Pet Nutrition',
+    ],
+    popularBrands: ['Royal Canin', 'Drools', 'Whiskas', 'Purina Pro Plan', 'Pedigree'],
     defaultCategories: ['Cat Food & Treats', 'Dog Nutrition', 'Pet Toys & Harnesses', 'Litter & Hygiene', 'Health & Supplements'],
     sampleItems: [
       {
@@ -510,7 +685,7 @@ export const BUSINESS_CATEGORIES: BusinessCategoryDefinition[] = [
     defaultModules: { appointmentBooking: true, productReviews: true, disputeSystem: true, digitalDownloads: false },
   },
 
-  // 17. Digital Marketing Agency
+  // 18. Digital Marketing Agency
   {
     id: 'marketing_agency',
     name: 'Digital Marketing Agency',
@@ -521,6 +696,16 @@ export const BUSINESS_CATEGORIES: BusinessCategoryDefinition[] = [
     badge: 'Growth-Focused Digital Agency',
     heroTitle: 'Scale Your Business Revenue with Data-Driven Marketing',
     heroSubtitle: 'Performance Google Ads, high-converting social funnels, SEO rankings, and conversion-optimized websites.',
+    demoSlug: 'scaleup',
+    color: 'blue',
+    keywords: ['agency', 'marketing', 'seo', 'ads', 'google', 'facebook', 'growth', 'branding', 'leads'],
+    features: [
+      'Interactive Case Study & Live ROI Dashboard Portfolio',
+      'Discovery Consultation Call Scheduler with Calendar Sync',
+      'Monthly Retainer Service Tier Matrix & Milestone Billing',
+      'NDA & Client Performance Service Level Agreements (SLA)',
+    ],
+    popularBrands: ['Google Premier Partner', 'Meta Business Partner', 'HubSpot Certified', 'Shopify Partner'],
     defaultCategories: ['SEO Growth Engine', 'Performance Meta & Google Ads', 'Content Strategy & Design', 'Web Application Dev'],
     sampleItems: [
       {
@@ -536,15 +721,24 @@ export const BUSINESS_CATEGORIES: BusinessCategoryDefinition[] = [
     defaultModules: { appointmentBooking: true, productReviews: true, disputeSystem: true, digitalDownloads: false },
   },
 
-  // 18. Digital Products & Software Licenses
+  // 19. Digital Products & Software Licenses
   {
     id: 'digital_products',
     name: 'Digital Products & Software Licenses',
     group: 'professional',
     icon: 'Code2',
-    shortDesc: 'Software licenses, website templates, digital ebooks, and media assets.',
+    shortDesc: 'Instant download software licenses, UI/UX design kits, and code templates.',
     archetype: 'DIGITAL_DOWNLOAD',
-    badge: 'Instant Digital Asset & License Downloads',
+    badge: 'Verified Digital Assets & Licenses',
+    demoSlug: 'devnexus',
+    color: 'indigo',
+    keywords: ['software', 'license', 'digital', 'theme', 'template', 'figma', 'code', 'ui kit'],
+    features: [
+      'Instant Download Link & License Key Engine',
+      'Automated VAT / Invoicing for Digital Items',
+      'Lifetime Updates & Documentation Viewer',
+    ],
+    popularBrands: ['JetBrains', 'Microsoft Cloud', 'Figma Community', 'Envato Market'],
     heroTitle: 'Instant Access to Digital Tools, Code & Creative Assets',
     heroSubtitle: 'Production-ready codebases, UI kits, design system templates, and verified software activation keys with instant delivery.',
     defaultCategories: ['Software Licenses', 'UI/UX Kits & Figma', 'Next.js & React Templates', 'Audio & Video Assets'],
@@ -562,7 +756,7 @@ export const BUSINESS_CATEGORIES: BusinessCategoryDefinition[] = [
     defaultModules: { appointmentBooking: false, productReviews: true, disputeSystem: true, digitalDownloads: true },
   },
 
-  // 19. Coaching Center & Education Services
+  // 20. Coaching Center & Education Services
   {
     id: 'coaching_education',
     name: 'Coaching Center & Education Services',
@@ -573,6 +767,16 @@ export const BUSINESS_CATEGORIES: BusinessCategoryDefinition[] = [
     badge: 'Certified Academic & Skill Coaching',
     heroTitle: 'Master Key Skills with Industry-Leading Mentors',
     heroSubtitle: 'Live interactive classes, comprehensive study materials, personalized mentoring, and mock test evaluations.',
+    demoSlug: 'eduexcel',
+    color: 'indigo',
+    keywords: ['education', 'coaching', 'ielts', 'admission', 'student', 'batch', 'tuition', 'mock test', 'class'],
+    features: [
+      'Live Batch Seat Reservation & Enrollment Engine',
+      'Trainer Credentials & Student Scorecard Verification',
+      'Free Diagnostic Assessment & Demo Class Booking',
+      'Digital Study PDF Materials & LMS Access Portal',
+    ],
+    popularBrands: ['British Council Partner', 'Cambridge Assessment', 'Pearson PTE', 'IDP IELTS'],
     defaultCategories: ['IELTS Preparation', 'University Admission', 'Coding Bootcamp', 'Corporate English', 'Mock Exam Series'],
     sampleItems: [
       {
@@ -588,7 +792,7 @@ export const BUSINESS_CATEGORIES: BusinessCategoryDefinition[] = [
     defaultModules: { appointmentBooking: true, productReviews: true, disputeSystem: true, digitalDownloads: true },
   },
 
-  // 20. Professional Consultant & Portfolio
+  // 21. Professional Consultant & Portfolio
   {
     id: 'consultant_portfolio',
     name: 'Professional Consultant & Portfolio',
@@ -599,6 +803,16 @@ export const BUSINESS_CATEGORIES: BusinessCategoryDefinition[] = [
     badge: 'Executive Advisory & Professional Practice',
     heroTitle: 'Strategic Legal, Financial & Corporate Advisory',
     heroSubtitle: 'Decades of boardroom experience delivering high-impact corporate strategy, audit compliance, and investment governance.',
+    demoSlug: 'advisorypro',
+    color: 'slate',
+    keywords: ['consultant', 'advisor', 'legal', 'tax', 'audit', 'lawyer', 'chartered accountant', 'corporate', 'counsel'],
+    features: [
+      'Confidential 1-on-1 Strategic Session Slot Booking',
+      'Boardroom Advisory Credentials & Published Insights',
+      'Automated Retainer Agreement & Retainer Invoicing',
+      'Encrypted Document Vault for Client Financials',
+    ],
+    popularBrands: ['ICAB Chartered Practice', 'Supreme Court Bar', 'Deloitte Alumni Network', 'PwC Partner Circle'],
     defaultCategories: ['Corporate Law Advisory', 'Tax & Audit Planning', 'M&A Valuation', 'Executive Mentoring'],
     sampleItems: [
       {
@@ -630,4 +844,3 @@ export function getCategoryDefinition(businessType: string): BusinessCategoryDef
 
   return BUSINESS_CATEGORIES[0];
 }
-
