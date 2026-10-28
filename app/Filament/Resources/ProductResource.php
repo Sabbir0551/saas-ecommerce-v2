@@ -195,6 +195,29 @@ class ProductResource extends Resource
                 // ডান পাশ (১ কলাম): মূল্য, স্ট্যাটাস ও ইনভেন্টরি
                 Grid::make(1)->columnSpan(['lg' => 1])->schema([
                     
+                    Section::make('ক্যাটাগরি ও ব্র্যান্ড')->schema([
+                        Select::make('category_id')
+                            ->label('ক্যাটাগরি')
+                            ->relationship('category', 'name')
+                            ->searchable()
+                            ->preload()
+                            ->createOptionForm([
+                                TextInput::make('name')->label('ক্যাটাগরির নাম')->required(),
+                                TextInput::make('slug')->label('Slug')->required(),
+                            ]),
+
+                        Select::make('brand_id')
+                            ->label('ব্র্যান্ড / প্রস্তুতকারক')
+                            ->relationship('brand', 'name')
+                            ->searchable()
+                            ->preload()
+                            ->createOptionForm([
+                                TextInput::make('name')->label('ব্র্যান্ডের নাম')->required(),
+                                TextInput::make('slug')->label('Slug')->required(),
+                                FileUpload::make('logo')->label('ব্র্যান্ড লোগো')->image()->directory('brands'),
+                            ]),
+                    ]),
+
                     Section::make('মূল্য ও চার্জ')->schema([
                         TextInput::make('price')
                             ->label($priceLabel)
@@ -257,6 +280,22 @@ class ProductResource extends Resource
                 ->searchable()
                 ->sortable(),
 
+            TextColumn::make('brand.name')
+                ->label('ব্র্যান্ড')
+                ->badge()
+                ->color('info')
+                ->placeholder('ব্র্যান্ড নেই')
+                ->sortable()
+                ->searchable(),
+
+            TextColumn::make('category.name')
+                ->label('ক্যাটাগরি')
+                ->badge()
+                ->color('gray')
+                ->placeholder('সাধারণ')
+                ->sortable()
+                ->searchable(),
+
             TextColumn::make('price')
                 ->label('মূল্য/ফি')
                 ->money('BDT')
@@ -283,6 +322,8 @@ class ProductResource extends Resource
         return $table
             ->columns($columns)
             ->filters([
+                Tables\Filters\SelectFilter::make('brand')->relationship('brand', 'name')->label('ব্র্যান্ড ফিল্টার')->preload(),
+                Tables\Filters\SelectFilter::make('category')->relationship('category', 'name')->label('ক্যাটাগরি ফিল্টার')->preload(),
                 Tables\Filters\TernaryFilter::make('is_active')->label('সক্রিয় স্ট্যাটাস'),
             ])
             ->actions([

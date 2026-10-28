@@ -31,6 +31,14 @@
     $requiresRx = !empty($specs['requires_prescription']);
     $darNumber = $specs['dar_number'] ?? 'DAR-BD-VERIFIED';
 
+    // Shajgoj & Healthcare Benchmark Features
+    $authenticityBadge = !empty($specs['authenticity_badge']) || !isset($specs['authenticity_badge']);
+    $skinConcern = $specs['skin_concern'] ?? $specs['target_concern'] ?? null;
+    $skinType = $specs['skin_type'] ?? null;
+    $keyIngredients = $specs['key_ingredients'] ?? null;
+    $howToUse = $specs['how_to_use'] ?? null;
+    $countryOfOrigin = $specs['country_of_origin'] ?? 'Official DGDA Registered';
+
     $displayPrice = $product->sale_price ?: $product->price;
     $regularPrice = $product->price;
     $discount = ($product->sale_price && $product->sale_price < $product->price) ? ($product->price - $product->sale_price) : 0;
@@ -147,12 +155,40 @@
 
             <!-- Clinical & Pharmaceutical Specs Table -->
             <div class="bg-white rounded-3xl border border-zinc-200 p-6 sm:p-8 shadow-xs space-y-6">
-                <div class="border-b border-zinc-100 pb-4">
+                <div class="border-b border-zinc-100 pb-4 space-y-2">
+                    <div class="flex flex-wrap items-center gap-2">
+                        @if($authenticityBadge)
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                <span>🛡️</span>
+                                <span>100% Authentic Guaranteed (DGDA Verified)</span>
+                            </span>
+                        @endif
+                        @if(!empty($countryOfOrigin))
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-zinc-100 text-zinc-700 border border-zinc-200">
+                                <span>🌍</span>
+                                <span>{{ $countryOfOrigin }}</span>
+                            </span>
+                        @endif
+                    </div>
+
                     <h1 class="text-2xl sm:text-3xl font-black text-zinc-950">{{ $product->name }}</h1>
-                    <p class="text-sm font-semibold text-emerald-800 mt-1 flex items-center gap-2">
-                        <span>🧪 Generic:</span>
-                        <span class="italic underline">{{ $genericName }}</span>
-                    </p>
+
+                    <div class="flex flex-wrap items-center gap-3 pt-1">
+                        <p class="text-xs sm:text-sm font-semibold text-emerald-800 flex items-center gap-1.5">
+                            <span>🧪 Generic Formulation:</span>
+                            <span class="italic underline font-black">{{ $genericName }}</span>
+                        </p>
+                        @if(!empty($skinConcern))
+                            <span class="px-2.5 py-0.5 rounded-md text-[11px] font-extrabold bg-teal-50 text-teal-800 border border-teal-200">
+                                Target Concern: {{ $skinConcern }}
+                            </span>
+                        @endif
+                        @if(!empty($skinType))
+                            <span class="px-2.5 py-0.5 rounded-md text-[11px] font-extrabold bg-blue-50 text-blue-800 border border-blue-200">
+                                Type: {{ $skinType }}
+                            </span>
+                        @endif
+                    </div>
                 </div>
 
                 <!-- Specs Grid -->
@@ -174,6 +210,32 @@
                         <span class="block text-xs font-black text-zinc-900 mt-1">{{ $darNumber }}</span>
                     </div>
                 </div>
+
+                <!-- Shajgoj Inspired: Key Active Ingredients (If Present) -->
+                @if(!empty($keyIngredients))
+                    <div class="p-4 rounded-2xl bg-teal-50/60 border border-teal-200/80 space-y-2">
+                        <span class="text-xs font-black uppercase tracking-wider text-teal-950 flex items-center gap-1.5">
+                            <span>🌿</span>
+                            <span>Key Active Ingredients & Formulation</span>
+                        </span>
+                        <p class="text-xs text-teal-900 font-semibold leading-relaxed">
+                            {{ $keyIngredients }}
+                        </p>
+                    </div>
+                @endif
+
+                <!-- Shajgoj Inspired: How To Use / Routine Instructions (If Present) -->
+                @if(!empty($howToUse))
+                    <div class="p-4 rounded-2xl bg-blue-50/60 border border-blue-200/80 space-y-2">
+                        <span class="text-xs font-black uppercase tracking-wider text-blue-950 flex items-center gap-1.5">
+                            <span>📋</span>
+                            <span>How to Use / ব্যবহার বিধি ও নির্দেশিকা</span>
+                        </span>
+                        <p class="text-xs text-blue-900 leading-relaxed font-medium">
+                            {{ $howToUse }}
+                        </p>
+                    </div>
+                @endif
 
                 @if(!empty($product->description))
                     <div class="pt-2 text-xs sm:text-sm text-zinc-700 leading-relaxed prose prose-zinc max-w-none">

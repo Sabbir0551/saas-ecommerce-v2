@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Dispute;
 use App\Models\Item;
@@ -18,7 +19,7 @@ use Illuminate\Validation\ValidationException;
 
 class StorefrontController extends Controller
 {
-    /** হোমপেজ: ক্যাটাগরি ও সক্রিয় আইটেমসমূহ প্রদর্শন */
+    /** হোমপেজ: ক্যাটাগরি, ব্র্যান্ড ও সক্রিয় আইটেমসমূহ প্রদর্শন */
     public function index(Request $request)
     {
         $categories = Category::where('is_active', true)
@@ -27,9 +28,13 @@ class StorefrontController extends Controller
             ->orderBy('sort_order')
             ->get();
 
+        $brands = Schema::hasTable('brands')
+            ? Brand::where('is_active', true)->orderBy('sort_order')->get()
+            : collect();
+
         if (Schema::hasTable('items')) {
             $query = Item::where('is_active', true)
-                ->with(['variants' => fn ($q) => $q->where('is_active', true), 'categories', 'reviews']);
+                ->with(['variants' => fn ($q) => $q->where('is_active', true), 'categories', 'brand', 'reviews']);
 
             if ($request->filled('category')) {
                 $query->whereHas('categories', function ($q) use ($request) {
@@ -37,18 +42,55 @@ class StorefrontController extends Controller
                 });
             }
 
+            if ($request->filled('brand')) {
+                $brandParam = $request->query('brand');
+                $query->where(function ($q) use ($brandParam) {
+                    $q->whereHas('brand', function ($bq) use ($brandParam) {
+                        $bq->where('slug', $brandParam)
+                           ->orWhere('name', $brandParam);
+                    })->orWhere('item_attributes->brand', 'like', "%{$brandParam}%");
+                });
+            }
+
             if ($request->filled('search')) {
-                $query->where('name', 'like', '%' . $request->query('search') . '%');
+                $search = $request->query('search');
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('description', 'like', "%{$search}%")
+                      ->orWhereHas('brand', fn ($bq) => $bq->where('name', 'like', "%{$search}%"))
+                      ->orWhere('item_attributes->brand', 'like', "%{$search}%");
+                });
             }
 
             $products = $query->latest()->paginate(12)->withQueryString();
+
+            // Featured items (is_featured = true or latest 8)
+            $featuredBase = Item::where('is_active', true)
+                ->with(['variants' => fn ($q) => $q->where('is_active', true), 'categories', 'brand', 'reviews']);
+            $featuredProducts = (clone $featuredBase)->where('is_featured', true)->latest()->take(8)->get();
+            if ($featuredProducts->isEmpty()) {
+                $featuredProducts = (clone $featuredBase)->latest()->take(8)->get();
+            }
+
+            // New arrivals (latest 8 items)
+            $newArrivals = (clone $featuredBase)->latest()->take(8)->get();
         } else {
             $productsQuery = Product::where('is_active', true)
-                ->with(['variants' => fn ($q) => $q->where('is_active', true), 'categories']);
+                ->with(['variants' => fn ($q) => $q->where('is_active', true), 'categories', 'brand']);
 
             if ($request->filled('category')) {
                 $productsQuery->whereHas('categories', function ($q) use ($request) {
                     $q->where('slug', $request->query('category'));
+                });
+            }
+
+            if ($request->filled('brand')) {
+                $brandParam = $request->query('brand');
+                $productsQuery->where(function ($q) use ($brandParam) {
+                    $q->whereHas('brand', function ($bq) use ($brandParam) {
+                        $bq->where('slug', $brandParam)
+                           ->orWhere('name', $brandParam);
+                    });
                 });
             }
 
@@ -57,9 +99,14 @@ class StorefrontController extends Controller
             }
 
             $products = $productsQuery->latest()->paginate(12)->withQueryString();
+
+            $featuredBase = Product::where('is_active', true)
+                ->with(['variants' => fn ($q) => $q->where('is_active', true), 'categories', 'brand']);
+            $featuredProducts = (clone $featuredBase)->latest()->take(8)->get();
+            $newArrivals = (clone $featuredBase)->latest()->take(8)->get();
         }
 
-        return $this->resolveView('index', compact('categories', 'products'));
+        return $this->resolveView('index', compact('categories', 'brands', 'products', 'featuredProducts', 'newArrivals'));
     }
 
     /** প্রোডাক্ট / আইটেম ডিটেইল ও ফাস্ট চেকআউট পেজ */
@@ -112,8 +159,10 @@ class StorefrontController extends Controller
             'house_rental'       => 'real_estate',
             'vehicle_dealership' => 'real_estate',
             'travel_agency'      => 'real_estate',
-            'grocery_food'       => 'pharmacy',
-            'pet_food'           => 'default',
+            'grocery_food'           => 'pharmacy',
+            'cosmetics_beauty'       => 'pharmacy',
+            'electronics_appliances' => 'laptop_computer',
+            'pet_food'               => 'default',
         ];
 
         if (isset($aliasMap[$category]) && view()->exists("storefront.categories.{$aliasMap[$category]}.{$viewName}")) {

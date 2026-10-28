@@ -70,21 +70,79 @@ class StoreSettings extends Page implements HasForms
             'showroom_address_branch' => $branding['showroom_address_branch'] ?? '',
 
             // Hero Section
-            'hero_badge'              => $branding['hero_badge'] ?? ($categoryDefaults['hero_badge'] ?? '✨ Premium Quality'),
-            'hero_title'              => $branding['hero_title'] ?? ($categoryDefaults['hero_title'] ?? 'Discover Quality Products & Services'),
+            'hero_badge'              => $branding['hero_badge'] ?? ($categoryDefaults['hero_badge'] ?? '🔥 HOT TECH ACCESSORIES'),
+            'hero_title'              => $branding['hero_title'] ?? ($categoryDefaults['hero_title'] ?? 'Mobile Accessories & Electronic'),
             'hero_subtitle'           => $branding['hero_subtitle'] ?? ($categoryDefaults['hero_subtitle'] ?? ''),
-            'hero_btn_text'           => $branding['hero_btn_text'] ?? ($categoryDefaults['hero_btn_text'] ?? 'Explore Catalog'),
-            'hero_btn_url'            => $branding['hero_btn_url'] ?? '#products',
+            'hero_image'              => $branding['hero_image'] ?? '',
+            'hero_btn_text'           => $branding['hero_btn_text'] ?? ($categoryDefaults['hero_btn_text'] ?? 'Shop Now'),
+            'hero_btn_url'            => $branding['hero_btn_url'] ?? '#featured-gadgets',
+            'hero_btn2_text'          => $branding['hero_btn2_text'] ?? ($categoryDefaults['hero_btn2_text'] ?? 'Discover More'),
+            'hero_btn2_url'           => $branding['hero_btn2_url'] ?? ($categoryDefaults['hero_btn2_url'] ?? '#categories'),
+            'hero_pills'              => $branding['hero_pills'] ?? ($categoryDefaults['hero_pills'] ?? [
+                ['icon' => '⚡', 'label' => 'Fast Charger'],
+                ['icon' => '📶', 'label' => 'Wireless'],
+                ['icon' => '🎧', 'label' => 'Hi-Fi Audio'],
+                ['icon' => '🔋', 'label' => 'Power Bank'],
+                ['icon' => '⌚', 'label' => 'Smartwatch'],
+                ['icon' => '🛡️', 'label' => 'Case & Glass'],
+            ]),
 
-            // 4 Trust Perks
-            'perk_1_title'            => $branding['perk_1_title'] ?? ($categoryDefaults['perk_1_title'] ?? 'Nationwide Cash on Delivery'),
-            'perk_1_desc'             => $branding['perk_1_desc'] ?? ($categoryDefaults['perk_1_desc'] ?? 'Fast delivery within 24-48 hours.'),
-            'perk_2_title'            => $branding['perk_2_title'] ?? ($categoryDefaults['perk_2_title'] ?? 'Quality Guarantee'),
-            'perk_2_desc'             => $branding['perk_2_desc'] ?? ($categoryDefaults['perk_2_desc'] ?? 'Hassle-free replacement for any defects.'),
-            'perk_3_title'            => $branding['perk_3_title'] ?? ($categoryDefaults['perk_3_title'] ?? 'Dedicated Support'),
-            'perk_3_desc'             => $branding['perk_3_desc'] ?? ($categoryDefaults['perk_3_desc'] ?? 'Free assistance and lifetime support.'),
-            'perk_4_title'            => $branding['perk_4_title'] ?? ($categoryDefaults['perk_4_title'] ?? '100% Genuine & Authentic'),
-            'perk_4_desc'             => $branding['perk_4_desc'] ?? ($categoryDefaults['perk_4_desc'] ?? 'Direct verified sourcing.'),
+            // 4 Trust Perks (Under Hero Section)
+            'perk_1_title'            => $branding['perk_1_title'] ?? ($categoryDefaults['perk_1_title'] ?? '100% Satisfaction'),
+            'perk_1_desc'             => $branding['perk_1_desc'] ?? ($categoryDefaults['perk_1_desc'] ?? 'Authentic & guaranteed genuine quality.'),
+            'perk_2_title'            => $branding['perk_2_title'] ?? ($categoryDefaults['perk_2_title'] ?? 'Fast Nationwide Delivery'),
+            'perk_2_desc'             => $branding['perk_2_desc'] ?? ($categoryDefaults['perk_2_desc'] ?? 'Express 24-48h dispatch across 64 districts.'),
+            'perk_3_title'            => $branding['perk_3_title'] ?? ($categoryDefaults['perk_3_title'] ?? '7 Days Replacement'),
+            'perk_3_desc'             => $branding['perk_3_desc'] ?? ($categoryDefaults['perk_3_desc'] ?? 'Hassle-free replacement for any defects.'),
+            'perk_4_title'            => $branding['perk_4_title'] ?? ($categoryDefaults['perk_4_title'] ?? 'Secure Payment'),
+            'perk_4_desc'             => $branding['perk_4_desc'] ?? ($categoryDefaults['perk_4_desc'] ?? 'Cash on delivery, bKash & verified cards.'),
+
+            // Categories Grid Section ("Smart Gadget Categories")
+            'cat_section_enabled'     => $branding['cat_section_enabled'] ?? true,
+            'cat_section_badge'       => $branding['cat_section_badge'] ?? ($categoryDefaults['cat_section_badge'] ?? 'EXPLORE COLLECTION'),
+            'cat_section_title'       => $branding['cat_section_title'] ?? ($categoryDefaults['cat_section_title'] ?? 'Smart Gadget Categories'),
+            'cat_section_subtitle'    => $branding['cat_section_subtitle'] ?? ($categoryDefaults['cat_section_subtitle'] ?? 'Curated collection of authentic gear for daily productivity, fitness, travel and high-end audio.'),
+
+            // Featured Products Section ("Featured Gadgets")
+            'featured_section_enabled'   => $branding['featured_section_enabled'] ?? true,
+            'featured_section_badge'     => $branding['featured_section_badge'] ?? ($categoryDefaults['featured_section_badge'] ?? 'HOT PRODUCTS OF THE WEEK'),
+            'featured_section_title'     => $branding['featured_section_title'] ?? ($categoryDefaults['featured_section_title'] ?? 'Featured Gadgets'),
+            'featured_section_link_text' => $branding['featured_section_link_text'] ?? ($categoryDefaults['featured_section_link_text'] ?? 'View All Products →'),
+
+            // Mid-Page Promo Spotlight Banner ("The Ultimate Mobile Gaming Setup 2026")
+            'promo_banner_enabled'    => $branding['promo_banner_enabled'] ?? true,
+            'promo_badge'             => $branding['promo_badge'] ?? ($categoryDefaults['promo_badge'] ?? 'NEXT-GEN GAMING 2026'),
+            'promo_title'             => $branding['promo_title'] ?? ($categoryDefaults['promo_title'] ?? 'The Ultimate Mobile Gaming Setup 2026'),
+            'promo_desc'              => $branding['promo_desc'] ?? ($categoryDefaults['promo_desc'] ?? 'Transform your smartphone into a powerhouse console with ultra-low latency wireless controllers, cooling fans, and Hi-Res trigger audio.'),
+            'promo_image'             => $branding['promo_image'] ?? '',
+            'promo_btn_text'          => $branding['promo_btn_text'] ?? ($categoryDefaults['promo_btn_text'] ?? 'Explore Setup Now →'),
+            'promo_btn_url'           => $branding['promo_btn_url'] ?? ($categoryDefaults['promo_btn_url'] ?? '#products'),
+
+            // New Arrivals Section ("New Gadget Drops")
+            'new_drops_enabled'       => $branding['new_drops_enabled'] ?? true,
+            'new_drops_badge'         => $branding['new_drops_badge'] ?? ($categoryDefaults['new_drops_badge'] ?? 'FRESH IN STORE'),
+            'new_drops_title'         => $branding['new_drops_title'] ?? ($categoryDefaults['new_drops_title'] ?? 'New Gadget Drops'),
+            'new_drops_subtitle'      => $branding['new_drops_subtitle'] ?? ($categoryDefaults['new_drops_subtitle'] ?? 'Upgrade your routine with brand-new releases fresh off the production line.'),
+            'new_drops_link_text'     => $branding['new_drops_link_text'] ?? ($categoryDefaults['new_drops_link_text'] ?? 'Explore All Drops →'),
+
+            // VIP / First-Order Discount Coupon Banner ("Save 10% On Your First Order")
+            'coupon_banner_enabled'   => $branding['coupon_banner_enabled'] ?? true,
+            'coupon_badge'            => $branding['coupon_badge'] ?? ($categoryDefaults['coupon_badge'] ?? 'EXCLUSIVE MEMBER PRIVILEGE'),
+            'coupon_title'            => $branding['coupon_title'] ?? ($categoryDefaults['coupon_title'] ?? 'Save 10% On Your First Order'),
+            'coupon_desc'             => $branding['coupon_desc'] ?? ($categoryDefaults['coupon_desc'] ?? 'Join over 50,000 satisfied tech lovers across Bangladesh. Use voucher code FIRST10 at checkout.'),
+            'coupon_code'             => $branding['coupon_code'] ?? ($categoryDefaults['coupon_code'] ?? 'FIRST10'),
+            'coupon_btn_text'         => $branding['coupon_btn_text'] ?? ($categoryDefaults['coupon_btn_text'] ?? 'GET YOUR COUPON'),
+
+            // 4 Service Highlights Strip (Bottom of page)
+            'service_strip_enabled'   => $branding['service_strip_enabled'] ?? true,
+            'service_1_title'         => $branding['service_1_title'] ?? ($categoryDefaults['service_1_title'] ?? 'Fast Dispatch'),
+            'service_1_desc'          => $branding['service_1_desc'] ?? ($categoryDefaults['service_1_desc'] ?? 'Same-day processing across 64 districts'),
+            'service_2_title'         => $branding['service_2_title'] ?? ($categoryDefaults['service_2_title'] ?? 'Genuine Warranty'),
+            'service_2_desc'          => $branding['service_2_desc'] ?? ($categoryDefaults['service_2_desc'] ?? 'Authorized dealer replacement & warranty'),
+            'service_3_title'         => $branding['service_3_title'] ?? ($categoryDefaults['service_3_title'] ?? '24/7 Expert Support'),
+            'service_3_desc'          => $branding['service_3_desc'] ?? ($categoryDefaults['service_3_desc'] ?? 'Reach out anytime via phone or WhatsApp'),
+            'service_4_title'         => $branding['service_4_title'] ?? ($categoryDefaults['service_4_title'] ?? '0% Bank EMI'),
+            'service_4_desc'          => $branding['service_4_desc'] ?? ($categoryDefaults['service_4_desc'] ?? 'Flexible 3 to 12 months installment plans'),
 
             // Why Choose Us
             'why_1_title'             => $branding['why_1_title'] ?? 'Grade-A Certified Quality',
@@ -238,25 +296,53 @@ class StoreSettings extends Page implements HasForms
 
                         Section::make('Hero Showcase Banner')->schema([
                             TextInput::make('hero_badge')
-                                ->label('Top Highlight Badge')
-                                ->placeholder('e.g., ✨ Premium Certified Quality'),
+                                 ->label('Top Highlight Badge')
+                                 ->placeholder('e.g., 🔥 HOT TECH ACCESSORIES'),
 
                             TextInput::make('hero_title')
-                                ->label('Main Hero Heading')
-                                ->placeholder('e.g., High-Performance & Certified Business Laptops'),
+                                 ->label('Main Hero Heading')
+                                 ->placeholder('e.g., Mobile Accessories & Electronic'),
 
                             Textarea::make('hero_subtitle')
-                                ->label('Subheading & Brief Overview')
-                                ->rows(2)
-                                ->columnSpanFull(),
+                                 ->label('Subheading & Brief Overview')
+                                 ->rows(2)
+                                 ->columnSpanFull(),
+
+                            FileUpload::make('hero_image')
+                                 ->label('Hero Showcase Image (ব্যানারের প্রধান ছবি)')
+                                 ->image()
+                                 ->imagePreviewHeight('160')
+                                 ->directory('branding')
+                                 ->helperText('Upload a custom hero banner product collage or graphic. Leave empty for default high-res composite.')
+                                 ->columnSpanFull(),
 
                             TextInput::make('hero_btn_text')
-                                ->label('Primary Action Button Text')
-                                ->placeholder('Explore Laptops'),
+                                 ->label('Primary Action Button Text')
+                                 ->placeholder('Shop Now'),
 
                             TextInput::make('hero_btn_url')
-                                ->label('Button Target URL / Section')
-                                ->placeholder('#products'),
+                                 ->label('Primary Button Target URL')
+                                 ->placeholder('#featured-gadgets'),
+
+                            TextInput::make('hero_btn2_text')
+                                 ->label('Secondary Action Button Text')
+                                 ->placeholder('Discover More'),
+
+                            TextInput::make('hero_btn2_url')
+                                 ->label('Secondary Button Target Link')
+                                 ->placeholder('#categories'),
+
+                            Repeater::make('hero_pills')
+                                 ->label('Quick Feature Badges / Pills (হিরো সেকশনের ফিচার পিলসমূহ)')
+                                 ->schema([
+                                     TextInput::make('icon')->label('Icon / Emoji')->placeholder('e.g., ⚡, 📶, 🎧')->default('⚡'),
+                                     TextInput::make('label')->label('Feature Title')->placeholder('e.g., Fast Charger')->required(),
+                                 ])
+                                 ->columns(2)
+                                 ->reorderable()
+                                 ->collapsible()
+                                 ->columnSpanFull()
+                                 ->itemLabel(fn (array $state): ?string => ($state['icon'] ?? '') . ' ' . ($state['label'] ?? 'Feature')),
                         ])->columns(2),
 
                         Section::make('Physical Showroom Branches')->schema([
@@ -268,6 +354,80 @@ class StoreSettings extends Page implements HasForms
                                 ->label('Branch Showroom Address (Chittagong / Other)')
                                 ->rows(2),
                         ])->columns(2),
+                    ]),
+
+                // Tab: Homepage Banners & Promotional Sections
+                Tabs\Tab::make('Homepage Banners & Drops')
+                    ->icon('heroicon-o-sparkles')
+                    ->schema([
+                        Section::make('Smart Categories Showcase Grid (ক্যাটাগরি গ্রিড সেকশন)')
+                            ->description('হোমপেজে ক্যাটাগরি কার্ড এবং এক্সপ্লোর বাটনসহ আকর্ষণীয় গ্রিড প্রদর্শন')
+                            ->schema([
+                                Toggle::make('cat_section_enabled')->label('Show Categories Grid on Homepage')->default(true)->columnSpanFull(),
+                                TextInput::make('cat_section_badge')->label('Badge Tag')->placeholder('EXPLORE COLLECTION'),
+                                TextInput::make('cat_section_title')->label('Heading Title')->placeholder('Smart Gadget Categories'),
+                                Textarea::make('cat_section_subtitle')->label('Subtitle Description')->rows(2)->columnSpanFull(),
+                            ])->columns(2),
+
+                        Section::make('Featured Products Section ("Featured Gadgets" / বিশেষ গ্যাজেটসমূহ)')
+                            ->schema([
+                                Toggle::make('featured_section_enabled')->label('Show Featured Products Section')->default(true)->columnSpanFull(),
+                                TextInput::make('featured_section_badge')->label('Badge Tag')->placeholder('HOT PRODUCTS OF THE WEEK'),
+                                TextInput::make('featured_section_title')->label('Section Heading')->placeholder('Featured Gadgets'),
+                                TextInput::make('featured_section_link_text')->label('Action Link Text')->placeholder('View All Products →')->columnSpanFull(),
+                            ])->columns(2),
+
+                        Section::make('Mid-Page High-Impact Promo Banner ("The Ultimate Mobile Gaming Setup 2026")')
+                            ->description('ওয়েবসাইটের মাঝখানের বিশেষ হাইলাইট বা অফার ব্যানার')
+                            ->schema([
+                                Toggle::make('promo_banner_enabled')->label('Enable Mid-Page Promo Banner')->default(true)->columnSpanFull(),
+                                TextInput::make('promo_badge')->label('Badge Tag')->placeholder('NEXT-GEN GAMING 2026'),
+                                TextInput::make('promo_title')->label('Headline Title')->placeholder('The Ultimate Mobile Gaming Setup 2026'),
+                                Textarea::make('promo_desc')->label('Banner Description')->rows(2)->columnSpanFull(),
+                                FileUpload::make('promo_image')
+                                    ->label('Promotional Image (বামপাশের প্রোডাক্ট বা সেটআপ ছবি)')
+                                    ->image()
+                                    ->directory('branding')
+                                    ->columnSpanFull(),
+                                TextInput::make('promo_btn_text')->label('Button Label')->placeholder('Explore Setup Now →'),
+                                TextInput::make('promo_btn_url')->label('Target URL')->placeholder('#products'),
+                            ])->columns(2),
+
+                        Section::make('New Arrivals Section ("New Gadget Drops" / নতুন কালেকশন)')
+                            ->schema([
+                                Toggle::make('new_drops_enabled')->label('Show New Drops Section')->default(true)->columnSpanFull(),
+                                TextInput::make('new_drops_badge')->label('Badge Tag')->placeholder('FRESH IN STORE'),
+                                TextInput::make('new_drops_title')->label('Section Heading')->placeholder('New Gadget Drops'),
+                                Textarea::make('new_drops_subtitle')->label('Subtitle Description')->rows(2)->columnSpanFull(),
+                                TextInput::make('new_drops_link_text')->label('Action Link Text')->placeholder('Explore All Drops →')->columnSpanFull(),
+                            ])->columns(2),
+
+                        Section::make('VIP / First-Order Discount Coupon Banner ("Save 10% On Your First Order")')
+                            ->description('প্রথম অর্ডারে ডিসকাউন্ট বা ভিআইপি মেম্বার ভাউচার ব্যানার')
+                            ->schema([
+                                Toggle::make('coupon_banner_enabled')->label('Enable VIP Coupon Banner')->default(true)->columnSpanFull(),
+                                TextInput::make('coupon_badge')->label('Badge Tag')->placeholder('EXCLUSIVE MEMBER PRIVILEGE'),
+                                TextInput::make('coupon_title')->label('Banner Headline')->placeholder('Save 10% On Your First Order'),
+                                Textarea::make('coupon_desc')->label('Description')->rows(2)->columnSpanFull(),
+                                TextInput::make('coupon_code')->label('Voucher Code (কুপন কোড)')->placeholder('FIRST10'),
+                                TextInput::make('coupon_btn_text')->label('Button Text')->placeholder('GET YOUR COUPON'),
+                            ])->columns(2),
+
+                        Section::make('4 Service Highlights Strip (পেজের নিচের ৪টি সেবা নিশ্চয়তা)')
+                            ->schema([
+                                Toggle::make('service_strip_enabled')->label('Show Service Highlights Strip')->default(true)->columnSpanFull(),
+                                TextInput::make('service_1_title')->label('Service 1 Title')->placeholder('Fast Dispatch'),
+                                TextInput::make('service_1_desc')->label('Service 1 Description')->placeholder('Same-day processing across 64 districts'),
+
+                                TextInput::make('service_2_title')->label('Service 2 Title')->placeholder('Genuine Warranty'),
+                                TextInput::make('service_2_desc')->label('Service 2 Description')->placeholder('Authorized dealer replacement & warranty'),
+
+                                TextInput::make('service_3_title')->label('Service 3 Title')->placeholder('24/7 Expert Support'),
+                                TextInput::make('service_3_desc')->label('Service 3 Description')->placeholder('Reach out anytime via phone or WhatsApp'),
+
+                                TextInput::make('service_4_title')->label('Service 4 Title')->placeholder('0% Bank EMI'),
+                                TextInput::make('service_4_desc')->label('Service 4 Description')->placeholder('Flexible 3 to 12 months installment plans'),
+                            ])->columns(2),
                     ]),
 
                 // Tab 3: Trust Badges & Guarantee Perks
@@ -597,9 +757,16 @@ class StoreSettings extends Page implements HasForms
             'store_name', 'store_tagline', 'store_logo', 'primary_color', 'currency_symbol',
             'top_announcement', 'hotline_number', 'whatsapp_number', 'support_hours',
             'showroom_address', 'showroom_address_branch',
-            'hero_badge', 'hero_title', 'hero_subtitle', 'hero_btn_text', 'hero_btn_url',
+            'hero_badge', 'hero_title', 'hero_subtitle', 'hero_image', 'hero_btn_text', 'hero_btn_url',
+            'hero_btn2_text', 'hero_btn2_url', 'hero_pills',
             'perk_1_title', 'perk_1_desc', 'perk_2_title', 'perk_2_desc',
             'perk_3_title', 'perk_3_desc', 'perk_4_title', 'perk_4_desc',
+            'cat_section_enabled', 'cat_section_badge', 'cat_section_title', 'cat_section_subtitle',
+            'featured_section_enabled', 'featured_section_badge', 'featured_section_title', 'featured_section_link_text',
+            'promo_banner_enabled', 'promo_badge', 'promo_title', 'promo_desc', 'promo_image', 'promo_btn_text', 'promo_btn_url',
+            'new_drops_enabled', 'new_drops_badge', 'new_drops_title', 'new_drops_subtitle', 'new_drops_link_text',
+            'coupon_banner_enabled', 'coupon_badge', 'coupon_title', 'coupon_desc', 'coupon_code', 'coupon_btn_text',
+            'service_strip_enabled', 'service_1_title', 'service_1_desc', 'service_2_title', 'service_2_desc', 'service_3_title', 'service_3_desc', 'service_4_title', 'service_4_desc',
             'consultation_title', 'consultation_subtitle', 'consultation_phone',
             'why_1_title', 'why_1_desc', 'why_2_title', 'why_2_desc', 'why_3_title', 'why_3_desc',
             'nav_trust_tag_1', 'nav_trust_tag_2', 'nav_items',

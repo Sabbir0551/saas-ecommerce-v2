@@ -140,6 +140,16 @@ class Item extends Model
         return $this->belongsTo(Category::class);
     }
 
+    public function brand(): BelongsTo
+    {
+        return $this->belongsTo(Brand::class);
+    }
+
+    public function getBrandNameAttribute(): ?string
+    {
+        return $this->brand?->name ?? ($this->item_attributes['brand'] ?? ($this->specs['brand'] ?? null));
+    }
+
     public function categories(): BelongsToMany
     {
         return $this->belongsToMany(Category::class, 'category_item', 'item_id', 'category_id');

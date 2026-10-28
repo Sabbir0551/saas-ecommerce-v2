@@ -14,8 +14,8 @@ return new class extends Migration
                 $table->id();
                 $table->foreignId('item_id')->constrained('items')->cascadeOnDelete();
                 $table->unsignedTinyInteger('day_of_week')->default(0); // 0 = Sunday, 1 = Monday ... 6 = Saturday
-                $table->time('start_time');
-                $table->time('end_time');
+                $table->string('start_time');
+                $table->string('end_time');
                 $table->unsignedInteger('capacity')->default(1);
                 $table->boolean('is_active')->default(true);
                 $table->timestamps();
@@ -31,8 +31,8 @@ return new class extends Migration
                 $table->string('customer_phone');
                 $table->string('customer_email')->nullable();
                 $table->date('booking_date');
-                $table->time('slot_start');
-                $table->time('slot_end')->nullable();
+                $table->string('slot_start');
+                $table->string('slot_end')->nullable();
                 $table->decimal('fee', 10, 2)->default(0);
                 $table->string('status')->default('pending'); // pending, confirmed, completed, cancelled
                 $table->string('payment_status')->default('unpaid'); // unpaid, paid, refunded

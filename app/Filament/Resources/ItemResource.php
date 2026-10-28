@@ -208,7 +208,7 @@ class ItemResource extends Resource
                                 ->columnSpan(1),
                         ]),
 
-                        Grid::make(3)->schema([
+                        Grid::make(4)->schema([
                             TextInput::make('price')
                                 ->label($priceLabel)
                                 ->numeric()
@@ -230,6 +230,18 @@ class ItemResource extends Resource
                                 ->createOptionForm([
                                     TextInput::make('name')->label('Category Name')->required(),
                                     TextInput::make('slug')->label('Slug')->required(),
+                                ])
+                                ->columnSpan(1),
+
+                            Select::make('brand_id')
+                                ->label('Brand / Manufacturer')
+                                ->relationship('brand', 'name')
+                                ->searchable()
+                                ->preload()
+                                ->createOptionForm([
+                                    TextInput::make('name')->label('Brand Name')->required(),
+                                    TextInput::make('slug')->label('Slug')->required(),
+                                    FileUpload::make('logo')->label('Brand Logo')->image()->directory('brands'),
                                 ])
                                 ->columnSpan(1),
                         ]),
@@ -444,6 +456,22 @@ class ItemResource extends Resource
                 ->sortable()
                 ->weight('bold'),
 
+            TextColumn::make('brand.name')
+                ->label('Brand')
+                ->badge()
+                ->color('info')
+                ->placeholder('No Brand')
+                ->sortable()
+                ->searchable(),
+
+            TextColumn::make('category.name')
+                ->label('Category')
+                ->badge()
+                ->color('gray')
+                ->placeholder('Uncategorized')
+                ->sortable()
+                ->searchable(),
+
             TextColumn::make('price')
                 ->label('Price')
                 ->money('BDT')
@@ -481,6 +509,14 @@ class ItemResource extends Resource
         return $table
             ->columns($columns)
             ->filters([
+                Tables\Filters\SelectFilter::make('brand')
+                    ->relationship('brand', 'name')
+                    ->label('Filter by Brand')
+                    ->preload(),
+                Tables\Filters\SelectFilter::make('category')
+                    ->relationship('category', 'name')
+                    ->label('Filter by Category')
+                    ->preload(),
                 Tables\Filters\TernaryFilter::make('is_active')
                     ->label('Active Status'),
                 Tables\Filters\TernaryFilter::make('is_featured')

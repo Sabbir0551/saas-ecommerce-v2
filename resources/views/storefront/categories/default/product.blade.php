@@ -3,7 +3,7 @@
 @section('content')
 @php
     $archetype = tenant('archetype') ?? 'physical_store';
-    $category = tenant('business_category') ?? 'laptop_computer';
+    $category = tenant('business_category') ?? 'default';
 
     // ইমেজ ডিকোড নিরাপদ হ্যান্ডলিং (PHP 8.3 null-safe)
     $rawImages = $product->images;

@@ -27,10 +27,13 @@
     $rawSpecs = $product->item_attributes ?? $product->specs;
     $specs = is_array($rawSpecs) ? $rawSpecs : (is_string($rawSpecs) ? (json_decode($rawSpecs, true) ?? []) : []);
 
-    $fabric = $specs['fabric'] ?? '100% Pure Cotton';
-    $fit = $specs['fit'] ?? 'Regular Fit';
-    $gender = $specs['gender'] ?? 'Unisex';
-    $washCare = $specs['wash_care'] ?? 'Cold water machine wash or hand wash with gentle detergent.';
+    $fabric = $specs['fabric'] ?? '100% Egyptian Giza Cotton / Premium Fabric';
+    $fit = $specs['fit'] ?? 'Tailored Bespoke Fit';
+    $weaveType = $specs['weave_type'] ?? 'Luxury Oxford Twill';
+    $gender = $specs['gender'] ?? 'Men';
+    $washCare = $specs['wash_care'] ?? 'Cold water gentle wash or professional dry clean.';
+    $customTailoring = !empty($specs['custom_tailoring']) || !empty($specs['bespoke_note']);
+    $bespokeNote = $specs['bespoke_note'] ?? 'Custom sleeve length, collar styling, and bespoke chest fitting available.';
 
     $displayPrice = $product->sale_price ?: $product->price;
     $regularPrice = $product->price;
@@ -140,16 +143,16 @@
                         <span class="block text-xs font-black text-zinc-900 mt-1">{{ $fabric }}</span>
                     </div>
                     <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200/60">
+                        <span class="block text-[11px] text-zinc-500 font-bold uppercase">Weave Type</span>
+                        <span class="block text-xs font-black text-zinc-900 mt-1">{{ $weaveType }}</span>
+                    </div>
+                    <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200/60">
                         <span class="block text-[11px] text-zinc-500 font-bold uppercase">Fitting</span>
                         <span class="block text-xs font-black text-zinc-900 mt-1">{{ $fit }}</span>
                     </div>
                     <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200/60">
                         <span class="block text-[11px] text-zinc-500 font-bold uppercase">Gender</span>
                         <span class="block text-xs font-black text-zinc-900 mt-1">{{ $gender }}</span>
-                    </div>
-                    <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200/60">
-                        <span class="block text-[11px] text-zinc-500 font-bold uppercase">Delivery</span>
-                        <span class="block text-xs font-black text-zinc-900 mt-1">24-48 Hours</span>
                     </div>
                 </div>
 
@@ -167,11 +170,34 @@
                 </div>
             </div>
 
-            <!-- Trust & Exchange Promise -->
+            <!-- Zaiyan Bespoke Inspired: Bespoke Made-to-Measure Consultation Box -->
+            @if($customTailoring)
+                <div class="bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 text-white rounded-3xl p-6 border border-amber-500/30 shadow-lg space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xl">✂️</span>
+                            <span class="text-sm font-black uppercase tracking-wider text-amber-400">Bespoke Made-to-Measure Service</span>
+                        </div>
+                        <span class="text-[10px] bg-amber-500/20 text-amber-300 font-extrabold px-2.5 py-0.5 rounded-full border border-amber-500/30">Custom Fit</span>
+                    </div>
+                    <p class="text-xs text-zinc-300 leading-relaxed">
+                        {{ $bespokeNote }} We provide custom collar styling, sleeve length adjustments, and precise chest fitting tailored to your exact measurements.
+                    </p>
+                    <div class="flex flex-wrap items-center justify-between gap-3 pt-1 border-t border-zinc-800">
+                        <span class="text-[11px] text-zinc-400">Need personal measurement consultation?</span>
+                        <a href="https://wa.me/{{ $waDigits }}?text={{ urlencode('Hello Master Tailor, I want custom tailoring measurements for: ' . $product->name) }}" target="_blank"
+                           class="px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-zinc-950 font-black rounded-xl text-xs transition flex items-center gap-1.5 shadow-sm">
+                            <span>💬 Consult Master Tailor on WhatsApp</span>
+                        </a>
+                    </div>
+                </div>
+            @endif
+
+            <!-- Trust & Doorstep Size Exchange Promise -->
             <div class="p-6 rounded-3xl bg-zinc-900 text-white flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div class="space-y-1 text-center sm:text-left">
-                    <h4 class="text-sm font-bold text-rose-300">7 Days Easy Size Exchange Guarantee</h4>
-                    <p class="text-xs text-zinc-400">If the size does not fit comfortably, we exchange it at your doorstep within 7 days.</p>
+                    <h4 class="text-sm font-bold text-rose-300">7 Days Doorstep Size Exchange Guarantee</h4>
+                    <p class="text-xs text-zinc-400">If the size does not fit comfortably, our delivery partner will exchange it at your doorstep within 7 days.</p>
                 </div>
                 <a href="https://wa.me/{{ $waDigits }}?text={{ urlencode('Hello, I have a question about ' . $product->name) }}" target="_blank"
                    class="px-5 py-2.5 rounded-xl bg-white text-zinc-950 text-xs font-bold hover:bg-zinc-100 transition flex-shrink-0 flex items-center gap-2">

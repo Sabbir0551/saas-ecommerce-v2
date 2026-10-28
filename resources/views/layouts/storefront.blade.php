@@ -40,6 +40,16 @@
             'mobile_gadgets', 'laptop_computer' => '💻',
             default => '🛍️',
         };
+
+        $drawerCategories = \App\Models\Category::where('is_active', true)
+            ->whereNull('parent_id')
+            ->with(['children' => fn($q) => $q->where('is_active', true)->orderBy('sort_order')])
+            ->orderBy('sort_order')
+            ->get();
+
+        $drawerBrands = \Illuminate\Support\Facades\Schema::hasTable('brands')
+            ? \App\Models\Brand::where('is_active', true)->orderBy('sort_order')->take(20)->get()
+            : collect();
     @endphp
     <title>{{ $storeName }} - {{ $storeTagline }}</title>
     <!-- Tailwind Play CDN -->
@@ -70,7 +80,7 @@
         }
     </style>
 </head>
-<body class="bg-zinc-50 text-zinc-900 antialiased flex flex-col min-h-screen">
+<body x-data="{ mobileMenuOpen: false }" class="bg-zinc-50 text-zinc-900 antialiased flex flex-col min-h-screen">
 
     <!-- Top Announcement Bar -->
     <div class="bg-zinc-950 text-zinc-300 text-xs py-2 px-4 border-b border-zinc-800 print:hidden">
@@ -96,24 +106,37 @@
     <header class="bg-white border-b border-zinc-200 sticky top-0 z-50 print:hidden shadow-xs">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between gap-4">
             
-            <!-- Store Logo & Identity -->
-            <a href="{{ route('storefront.home') }}" class="flex items-center gap-3 flex-shrink-0 group">
-                @if(!empty($storeLogo))
-                    <img src="{{ asset('storage/' . $storeLogo) }}" alt="{{ $storeName }}" class="h-10 w-auto object-contain">
-                @else
-                    <div class="w-10 h-10 rounded-xl bg-theme-primary flex items-center justify-center text-white font-black text-xl shadow-md transition group-hover:scale-105">
-                        {{ $catIcon }}
+            <div class="flex items-center gap-3 flex-shrink-0">
+                <!-- Hamburger Drawer Toggle Button -->
+                <button type="button" 
+                        x-on:click="mobileMenuOpen = true"
+                        class="flex items-center gap-2 px-3 py-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-900 font-extrabold text-xs transition border border-zinc-200/90 shadow-2xs cursor-pointer group"
+                        title="Open Menu & Categories">
+                    <svg class="w-5 h-5 text-zinc-800 transition group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                    <span class="hidden md:inline font-black uppercase tracking-wider text-[11px]">মেনু</span>
+                </button>
+
+                <!-- Store Logo & Identity -->
+                <a href="{{ route('storefront.home') }}" class="flex items-center gap-2.5 flex-shrink-0 group">
+                    @if(!empty($storeLogo))
+                        <img src="{{ asset('storage/' . $storeLogo) }}" alt="{{ $storeName }}" class="h-10 w-auto object-contain">
+                    @else
+                        <div class="w-10 h-10 rounded-xl bg-theme-primary flex items-center justify-center text-white font-black text-xl shadow-md transition group-hover:scale-105">
+                            {{ $catIcon }}
+                        </div>
+                    @endif
+                    <div>
+                        <span class="text-base sm:text-xl font-black tracking-tight text-zinc-950 uppercase block leading-none">
+                            {{ $storeName }}
+                        </span>
+                        <span class="text-[10px] text-zinc-500 font-semibold tracking-wider block mt-0.5">
+                            {{ $storeTagline }}
+                        </span>
                     </div>
-                @endif
-                <div>
-                    <span class="text-lg sm:text-xl font-black tracking-tight text-zinc-950 uppercase block leading-none">
-                        {{ $storeName }}
-                    </span>
-                    <span class="text-[10px] text-zinc-500 font-semibold tracking-wider block mt-0.5">
-                        {{ $storeTagline }}
-                    </span>
-                </div>
-            </a>
+                </a>
+            </div>
 
             @php
                 $searchPlaceholder = match($category) {
@@ -162,6 +185,14 @@
         <div class="bg-zinc-900 text-white text-xs border-t border-zinc-800">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between overflow-x-auto scrollbar-none py-2 gap-4">
                 <div class="flex items-center gap-1 sm:gap-2 whitespace-nowrap">
+                    <!-- Highlighted Category & Brand Quick Drawer Button -->
+                    <button type="button" 
+                            x-on:click="mobileMenuOpen = true"
+                            class="px-3.5 py-1.5 rounded-lg bg-theme-primary font-black text-white shadow-xs transition flex items-center gap-1.5 cursor-pointer hover:opacity-90 flex-shrink-0">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                        <span>সব ক্যাটাগরি ও ব্র্যান্ড</span>
+                    </button>
+
                     @php
                         $navItems = $branding['nav_items'] ?? ($categoryDefaults['nav_items'] ?? []);
                         $currentUrl = request()->fullUrl();
@@ -182,14 +213,14 @@
                                 $isActive = true;
                             }
                         @endphp
-                        <a href="{{ $url }}" class="px-3 py-1 rounded-lg {{ $isActive ? 'bg-theme-primary font-bold text-white shadow-xs' : 'hover:bg-zinc-800 text-zinc-300' }} transition flex items-center gap-1.5">
+                        <a href="{{ $url }}" class="px-3 py-1 rounded-lg {{ $isActive ? 'bg-zinc-800 font-bold text-white shadow-xs border border-zinc-700' : 'hover:bg-zinc-800 text-zinc-300' }} transition flex items-center gap-1.5">
                             @if(!empty($icon))
                                 <span>{{ $icon }}</span>
                             @endif
                             <span>{{ $label }}</span>
                         </a>
                     @empty
-                        <a href="{{ route('storefront.home') }}" class="px-3 py-1 rounded-lg bg-theme-primary font-bold text-white transition">
+                        <a href="{{ route('storefront.home') }}" class="px-3 py-1 rounded-lg hover:bg-zinc-800 text-zinc-300 transition">
                             {{ $catIcon }} All Items
                         </a>
                     @endforelse
@@ -200,7 +231,7 @@
                         $trust2 = $branding['nav_trust_tag_2'] ?? ($categoryDefaults['nav_trust_tag_2'] ?? null);
                     @endphp
                     @if(!empty($trust1))
-                        <span class="text-emerald-400">{{ $trust1 }}</span>
+                        <span class="text-emerald-400 font-bold">{{ $trust1 }}</span>
                     @endif
                     @if(!empty($trust2))
                         <span>{{ $trust2 }}</span>
@@ -209,6 +240,194 @@
             </div>
         </div>
     </header>
+
+    <!-- Slide-Over Hamburger Drawer (Full Categories, Brands & Quick Concierge) -->
+    <div x-cloak x-show="mobileMenuOpen" class="fixed inset-0 z-50 overflow-hidden" aria-labelledby="drawer-title" role="dialog" aria-modal="true">
+        <!-- Backdrop -->
+        <div x-show="mobileMenuOpen" 
+             x-transition:enter="ease-in-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="ease-in-out duration-300"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             x-on:click="mobileMenuOpen = false"
+             class="fixed inset-0 bg-zinc-950/70 backdrop-blur-xs transition-opacity"></div>
+
+        <div class="fixed inset-y-0 left-0 max-w-full flex pr-10">
+            <!-- Drawer Panel -->
+            <div x-show="mobileMenuOpen" 
+                 x-transition:enter="transform transition ease-in-out duration-300"
+                 x-transition:enter-start="-translate-x-full"
+                 x-transition:enter-end="translate-x-0"
+                 x-transition:leave="transform transition ease-in-out duration-300"
+                 x-transition:leave-start="translate-x-0"
+                 x-transition:leave-end="-translate-x-full"
+                 class="w-screen max-w-sm sm:max-w-md bg-white shadow-2xl flex flex-col h-full border-r border-zinc-200">
+                
+                <!-- Drawer Header -->
+                <div class="p-4 sm:p-5 bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 text-white flex items-center justify-between border-b border-zinc-800">
+                    <div class="flex items-center gap-3">
+                        @if(!empty($storeLogo))
+                            <img src="{{ asset('storage/' . $storeLogo) }}" alt="{{ $storeName }}" class="h-9 w-auto object-contain">
+                        @else
+                            <div class="w-9 h-9 rounded-xl bg-theme-primary flex items-center justify-center text-white font-black text-lg shadow-sm">
+                                {{ $catIcon }}
+                            </div>
+                        @endif
+                        <div>
+                            <span class="font-black text-sm uppercase tracking-wide block text-white">{{ $storeName }}</span>
+                            <span class="text-[10px] text-zinc-400 block">{{ $storeTagline }}</span>
+                        </div>
+                    </div>
+                    <button type="button" 
+                            x-on:click="mobileMenuOpen = false" 
+                            class="p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-800 transition cursor-pointer">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <!-- Drawer Scrollable Body -->
+                <div class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-6">
+                    
+                    <!-- Search Bar Inside Drawer -->
+                    <form action="{{ route('storefront.home') }}" method="GET" class="relative">
+                        <input type="text" name="search" placeholder="Search catalog, brands or products..."
+                               class="w-full bg-zinc-100 border border-zinc-300 rounded-xl py-2.5 pl-4 pr-10 text-xs sm:text-sm focus:outline-none focus:bg-white focus:border-theme-primary transition shadow-inner">
+                        <button type="submit" class="absolute right-2.5 top-2.5 text-zinc-400 hover:text-theme-primary transition">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        </button>
+                    </form>
+
+                    <!-- Section 1: Shop by Categories (সব ক্যাটাগরি) -->
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between border-b border-zinc-100 pb-2">
+                            <span class="text-xs font-black uppercase tracking-wider text-zinc-900 flex items-center gap-1.5">
+                                <span>📂</span>
+                                <span>সব ক্যাটাগরি (All Categories)</span>
+                            </span>
+                            <span class="text-[10px] font-bold text-zinc-400">{{ $drawerCategories->count() }} টি ক্যাটাগরি</span>
+                        </div>
+
+                        <div class="space-y-1">
+                            @forelse($drawerCategories as $dCat)
+                                <div x-data="{ expanded: false }" class="border border-zinc-200/70 rounded-xl overflow-hidden bg-zinc-50/60 transition">
+                                    <div class="flex items-center justify-between p-2.5 hover:bg-zinc-100 transition">
+                                        <a href="{{ route('storefront.home', ['category' => $dCat->slug]) }}" 
+                                           class="text-xs font-bold text-zinc-900 flex items-center gap-2 hover:text-theme-primary transition truncate">
+                                            @if($dCat->image)
+                                                <img src="{{ asset('storage/' . $dCat->image) }}" class="w-6 h-6 rounded-md object-cover flex-shrink-0" alt="{{ $dCat->name }}">
+                                            @else
+                                                <span class="text-sm">📁</span>
+                                            @endif
+                                            <span class="truncate">{{ $dCat->name }}</span>
+                                        </a>
+
+                                        @if($dCat->children->count() > 0)
+                                            <button type="button" x-on:click="expanded = !expanded" class="p-1 text-zinc-400 hover:text-zinc-800 cursor-pointer">
+                                                <svg class="w-4 h-4 transition-transform duration-200" :class="expanded ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                            </button>
+                                        @endif
+                                    </div>
+
+                                    @if($dCat->children->count() > 0)
+                                        <div x-show="expanded" class="p-2.5 pl-8 bg-white border-t border-zinc-100 space-y-1 text-xs text-zinc-600">
+                                            @foreach($dCat->children as $cChild)
+                                                <a href="{{ route('storefront.home', ['category' => $cChild->slug]) }}" 
+                                                   class="block py-1 hover:text-theme-primary font-medium transition">
+                                                    • {{ $cChild->name }}
+                                                </a>
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                </div>
+                            @empty
+                                <a href="{{ route('storefront.home') }}" class="block p-3 text-xs text-zinc-500 bg-zinc-50 rounded-xl">
+                                    All Store Products
+                                </a>
+                            @endforelse
+                        </div>
+                    </div>
+
+                    <!-- Section 2: Shop by Brands (ব্র্যান্ড সমূহ) -->
+                    @if($drawerBrands->count() > 0)
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between border-b border-zinc-100 pb-2">
+                                <span class="text-xs font-black uppercase tracking-wider text-zinc-900 flex items-center gap-1.5">
+                                    <span>🏷️</span>
+                                    <span>টপ ব্র্যান্ড সমূহ (Popular Brands)</span>
+                                </span>
+                                <span class="text-[10px] font-bold text-zinc-400">{{ $drawerBrands->count() }} টি ব্র্যান্ড</span>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-2">
+                                @foreach($drawerBrands as $dBrand)
+                                    <a href="{{ route('storefront.home', ['brand' => $dBrand->slug]) }}" 
+                                       class="p-2 rounded-xl border border-zinc-200 hover:border-theme-primary hover:bg-zinc-50 transition flex items-center gap-2 group">
+                                        @if($dBrand->logo)
+                                            <img src="{{ asset('storage/' . $dBrand->logo) }}" class="w-7 h-7 rounded-lg object-contain border border-zinc-100 p-0.5 flex-shrink-0" alt="{{ $dBrand->name }}">
+                                        @else
+                                            <div class="w-7 h-7 rounded-lg bg-zinc-900 text-white font-bold text-xs flex items-center justify-center flex-shrink-0">
+                                                {{ substr($dBrand->name, 0, 1) }}
+                                            </div>
+                                        @endif
+                                        <div class="truncate">
+                                            <span class="block text-xs font-bold text-zinc-900 truncate group-hover:text-theme-primary">{{ $dBrand->name }}</span>
+                                        </div>
+                                    </a>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+
+                    <!-- Section 3: Perks & Policies -->
+                    <div class="p-3.5 rounded-2xl bg-zinc-50 border border-zinc-200/90 space-y-2 text-xs text-zinc-700">
+                        <div class="flex items-center gap-2 font-black text-zinc-900">
+                            <span>⚡</span>
+                            <span>অর্ডার ও সেবা পলিসি</span>
+                        </div>
+                        <ul class="space-y-1 text-[11px] text-zinc-600 font-medium">
+                            <li class="flex items-center gap-1.5">
+                                <span class="text-emerald-600 font-bold">✓</span>
+                                <span>ক্যাশ অন ডেলিভারি (পণ্য দেখে পেমেন্ট)</span>
+                            </li>
+                            <li class="flex items-center gap-1.5">
+                                <span class="text-blue-600 font-bold">✓</span>
+                                <span>২৪-৪৮ ঘণ্টায় দ্রুত দেশব্যাপী ডেলিভারি</span>
+                            </li>
+                            <li class="flex items-center gap-1.5">
+                                <span class="text-purple-600 font-bold">✓</span>
+                                <span>সহজ রিপ্লেসমেন্ট ও এক্সচেঞ্জ গ্যারান্টি</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Section 4: Hotline & WhatsApp Concierge -->
+                    <div class="space-y-2 pt-2 border-t border-zinc-100">
+                        <span class="text-xs font-black uppercase text-zinc-900 block">সরাসরি কথা বলতে কল বা চ্যাট করুন</span>
+                        <div class="grid grid-cols-2 gap-2">
+                            <a href="tel:{{ $hotline }}" class="p-2.5 bg-zinc-900 text-white rounded-xl text-center text-xs font-bold hover:bg-zinc-800 transition flex items-center justify-center gap-1.5 shadow-xs">
+                                <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                                <span>কল করুন</span>
+                            </a>
+                            <a href="https://wa.me/{{ $waDigits }}?text={{ urlencode('Hello, I want to order from ' . $storeName) }}" target="_blank"
+                               class="p-2.5 bg-emerald-600 text-white rounded-xl text-center text-xs font-bold hover:bg-emerald-700 transition flex items-center justify-center gap-1.5 shadow-xs">
+                                <span>WhatsApp</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Merchant Admin Shortcut -->
+                    <div class="pt-1 pb-4">
+                        <a href="/admin" target="_blank" class="block w-full text-center py-2 px-3 rounded-xl border border-zinc-200 text-zinc-600 hover:bg-zinc-100 text-xs font-bold transition">
+                            🔐 Merchant Admin Login
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
 
     <!-- Main Content -->
     <main class="flex-1">

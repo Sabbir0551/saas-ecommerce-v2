@@ -24,12 +24,16 @@
     $rawSpecs = $product->item_attributes ?? $product->specs;
     $specs = is_array($rawSpecs) ? $rawSpecs : (is_string($rawSpecs) ? (json_decode($rawSpecs, true) ?? []) : []);
 
-    $brand = $specs['brand'] ?? 'Smartphone Brand';
+    $brandModel = $product->brand ?? null;
+    $brand = is_object($brandModel) ? $brandModel->name : ($specs['brand'] ?? ($product->brand_name ?? 'Smartphone Brand'));
+    $brandSlug = is_object($brandModel) ? $brandModel->slug : null;
     $ram = $specs['ram'] ?? '8GB RAM';
     $storage = $specs['storage'] ?? '128GB ROM';
     $battery = $specs['battery'] ?? '5000 mAh';
     $warranty = $specs['warranty'] ?? '1 Year Official Warranty';
     $status = $specs['official_status'] ?? 'Official BTRC Approved';
+    $freeGifts = $specs['free_gifts'] ?? $specs['gifts'] ?? null;
+    $emiMonthly = ($product->price > 0) ? round(($product->sale_price ?: $product->price) / 12) : 0;
 
     $displayPrice = $product->sale_price ?: $product->price;
     $regularPrice = $product->price;
@@ -143,7 +147,7 @@
                     <h1 class="text-2xl sm:text-3xl font-black text-zinc-950">{{ $product->name }}</h1>
                     <p class="text-sm font-semibold text-blue-600 mt-1 flex items-center gap-2">
                         <span>🏷️ Brand:</span>
-                        <span class="font-bold">{{ $brand }}</span>
+                        <a href="{{ route('storefront.home', ['brand' => $brandSlug ?: $brand]) }}" class="font-bold underline hover:text-blue-800 transition">{{ $brand }}</a>
                     </p>
                 </div>
 
@@ -199,23 +203,45 @@
         <div class="lg:col-span-5 sticky top-6">
             <div class="bg-white rounded-3xl border-2 border-blue-600/40 p-6 sm:p-8 shadow-xl space-y-6">
                 
-                <!-- Price Banner -->
-                <div class="bg-blue-50 rounded-2xl p-4 border border-blue-200 flex items-center justify-between">
-                    <div>
-                        <span class="text-xs font-bold text-blue-800 uppercase block">Regular Price</span>
-                        <div class="flex items-baseline gap-2 mt-0.5">
-                            <span class="text-2xl sm:text-3xl font-black text-blue-950" x-text="'{{ $currPrefix }}' + basePrice">
-                                {{ $currPrefix }}{{ number_format($displayPrice) }}
-                            </span>
-                            @if($discount > 0)
-                                <span class="text-xs text-zinc-400 line-through">{{ $currPrefix }}{{ number_format($regularPrice) }}</span>
-                            @endif
+                <!-- Price Banner with Cash Discount & EMI -->
+                <div class="bg-gradient-to-br from-blue-50 to-white rounded-2xl p-4 sm:p-5 border-2 border-blue-200/90 shadow-xs space-y-2">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <span class="text-[11px] font-black text-blue-900 uppercase tracking-wider block">Special Cash Price</span>
+                            <div class="flex items-baseline gap-2 mt-0.5">
+                                <span class="text-2xl sm:text-3xl font-black text-blue-950" x-text="'{{ $currPrefix }}' + basePrice">
+                                    {{ $currPrefix }}{{ number_format($displayPrice) }}
+                                </span>
+                                @if($discount > 0)
+                                    <span class="text-xs text-zinc-400 line-through">{{ $currPrefix }}{{ number_format($regularPrice) }}</span>
+                                @endif
+                            </div>
                         </div>
+                        <span class="px-3 py-1 bg-blue-600 text-white text-xs font-black rounded-lg">
+                            In Stock
+                        </span>
                     </div>
-                    <span class="px-3 py-1 bg-blue-600 text-white text-xs font-black rounded-lg">
-                        In Stock
-                    </span>
+
+                    @if($emiMonthly > 0)
+                        <div class="pt-2 border-t border-blue-100 flex items-center justify-between text-[11px] text-blue-800 font-bold">
+                            <span>💳 0% EMI Facility</span>
+                            <span>Starts from <strong>{{ $currPrefix }}{{ number_format($emiMonthly) }}</strong>/mo</span>
+                        </div>
+                    @endif
                 </div>
+
+                <!-- Laptop Point BD Inspired: Free Gifts Bundle (If Present) -->
+                @if(!empty($freeGifts))
+                    <div class="p-4 rounded-2xl bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-400/80 shadow-xs space-y-1">
+                        <div class="flex items-center gap-2">
+                            <span class="text-base">🎁</span>
+                            <span class="text-xs font-black uppercase text-emerald-900">Free Gifts Bundle Included</span>
+                        </div>
+                        <p class="text-xs font-bold text-zinc-900 leading-snug">
+                            {{ $freeGifts }}
+                        </p>
+                    </div>
+                @endif
 
                 <!-- Select Storage / Color Variants -->
                 @if($variants->count() > 0)

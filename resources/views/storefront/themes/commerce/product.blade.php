@@ -22,7 +22,9 @@
 
     $isTechCategory = in_array($category ?? '', ['laptop_computer', 'electronics', 'mobile_gadgets']) || !empty($specs['processor_model']);
 
-    $brand = $specs['brand'] ?? $product->brand ?? null;
+    $brandModel = $product->brand ?? null;
+    $brand = is_object($brandModel) ? $brandModel->name : ($specs['brand'] ?? ($product->brand_name ?? null));
+    $brandSlug = is_object($brandModel) ? $brandModel->slug : null;
     $model = $specs['model'] ?? ($product->name);
     $condition = $specs['condition'] ?? 'Brand New (100% Genuine)';
 
@@ -34,6 +36,18 @@
     $hGraphics = $specs['highlight_graphics'] ?? $specs['graphics_chipset'] ?? null;
     $hBattery = $specs['highlight_battery'] ?? $specs['battery'] ?? null;
     $hWarranty = $specs['highlight_warranty'] ?? $specs['warranty'] ?? 'Official Brand Warranty';
+
+    // Best-in-class features from Star Tech, Laptop Point BD & Best Electronics
+    $freeGifts = $specs['free_gifts'] ?? $specs['gifts'] ?? null;
+    $repWarranty = $specs['replacement_warranty'] ?? '15 Days Instant Replacement';
+    $serviceWarranty = $specs['service_warranty'] ?? '5 Years Free Service Warranty';
+    $emiFacility = $specs['emi_facility'] ?? '0% EMI up to 36 Months on 30+ Banks';
+    $compressorWarranty = $specs['compressor_warranty'] ?? null;
+    $panelWarranty = $specs['panel_warranty'] ?? null;
+    $installationPolicy = $specs['installation_policy'] ?? null;
+    $energyRating = $specs['energy_rating'] ?? null;
+    $capacity = $specs['capacity'] ?? null;
+    $emiMonthly = ($displayPrice > 0) ? round($displayPrice / 12) : 0;
 
     // Grouped Specifications for Table
     $specGroups = [];
@@ -198,9 +212,11 @@
                     {{ $condition }}
                 </span>
                 @if(!empty($brand))
-                    <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-zinc-100 text-zinc-700 border border-zinc-200">
-                        {{ $brand }}
-                    </span>
+                    <a href="{{ route('storefront.home', ['brand' => $brandSlug ?: $brand]) }}" 
+                       class="px-2.5 py-1 rounded-full text-xs font-bold bg-zinc-100 hover:bg-zinc-200 text-zinc-800 border border-zinc-200 transition flex items-center gap-1">
+                        <span>🏷️</span>
+                        <span>{{ $brand }}</span>
+                    </a>
                 @endif
             </div>
 
@@ -209,33 +225,124 @@
             </h1>
         </div>
 
-        <!-- Pricing Card -->
-        <div class="bg-zinc-50 border border-zinc-200/90 rounded-2xl p-4 sm:p-5 flex flex-wrap items-center justify-between gap-4">
-            <div class="space-y-1">
-                <span class="text-[11px] font-bold text-zinc-400 uppercase tracking-wider block">Special Offer Price</span>
-                <div class="flex items-baseline gap-3">
-                    <span class="text-3xl font-black text-theme-primary tracking-tight">
-                        {{ $currPrefix }}<span x-text="unitPrice.toLocaleString()">{{ number_format($displayPrice, 0) }}</span>
-                    </span>
-
-                    @if($discount > 0)
-                        <span class="text-sm font-semibold text-zinc-400 line-through">
-                            {{ $currPrefix }}{{ number_format($regularPrice, 0) }}
+        <!-- Star Tech & Laptop Point BD Inspired Pricing Card -->
+        <div class="bg-gradient-to-br from-zinc-50 to-white border-2 border-zinc-200/90 rounded-2xl p-4 sm:p-5 shadow-xs space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-4">
+                <div class="space-y-1">
+                    <div class="flex items-center gap-2">
+                        <span class="text-[11px] font-black text-emerald-800 bg-emerald-100/80 px-2 py-0.5 rounded-md uppercase tracking-wider">
+                            Cash Discount Price
                         </span>
-                        <span class="text-xs font-black text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-100">
-                            {{ round(($discount / $regularPrice) * 100) }}% OFF
+                        @if($discount > 0)
+                            <span class="text-[10px] font-black text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-100">
+                                Save {{ $currPrefix }}{{ number_format($discount, 0) }}
+                            </span>
+                        @endif
+                    </div>
+                    <div class="flex items-baseline gap-3 pt-0.5">
+                        <span class="text-3xl sm:text-4xl font-black text-theme-primary tracking-tight">
+                            {{ $currPrefix }}<span x-text="unitPrice.toLocaleString()">{{ number_format($displayPrice, 0) }}</span>
+                        </span>
+
+                        @if($discount > 0)
+                            <div class="text-xs text-zinc-400">
+                                <span>Regular Price: </span>
+                                <span class="font-semibold line-through">{{ $currPrefix }}{{ number_format($regularPrice, 0) }}</span>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:items-end gap-1.5">
+                    <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                        In Stock (Ready to Ship)
+                    </span>
+                    @if($emiMonthly > 0)
+                        <span class="text-[11px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200/80 px-2.5 py-0.5 rounded-lg flex items-center gap-1">
+                            <span>💳</span>
+                            <span>0% EMI from <strong>{{ $currPrefix }}{{ number_format($emiMonthly) }}</strong>/mo</span>
                         </span>
                     @endif
                 </div>
             </div>
+        </div>
 
-            <div class="flex items-center gap-2">
-                <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                    In Stock (Ready to Ship)
-                </span>
+        <!-- Laptop Point BD Inspired: Exclusive Free Gifts Bundle Box -->
+        @if(!empty($freeGifts))
+            <div class="bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 border-2 border-emerald-400/80 rounded-2xl p-4 sm:p-4.5 shadow-sm relative overflow-hidden">
+                <div class="flex items-start gap-3.5">
+                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center text-2xl flex-shrink-0 shadow-md">
+                        🎁
+                    </div>
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-2">
+                            <span class="text-[11px] font-black uppercase tracking-wider text-emerald-900 bg-emerald-200/80 px-2.5 py-0.5 rounded-md">
+                                Exclusive Free Gifts
+                            </span>
+                            <span class="text-[11px] font-extrabold text-emerald-700">ফ্রি গিফট বান্ডেল</span>
+                        </div>
+                        <p class="text-xs sm:text-sm font-black text-zinc-950 leading-snug">
+                            {{ $freeGifts }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        <!-- Star Tech & Laptop Point BD Inspired: 4-Trust Matrix -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
+            <div class="p-3 rounded-xl bg-white border border-zinc-200/90 shadow-2xs flex flex-col items-center text-center">
+                <span class="text-lg mb-1">🔄</span>
+                <span class="font-extrabold text-zinc-900 leading-tight">{{ $repWarranty }}</span>
+                <span class="text-[10px] text-zinc-400 mt-0.5">Hassle-free</span>
+            </div>
+            <div class="p-3 rounded-xl bg-white border border-zinc-200/90 shadow-2xs flex flex-col items-center text-center">
+                <span class="text-lg mb-1">🛠️</span>
+                <span class="font-extrabold text-zinc-900 leading-tight">{{ $serviceWarranty }}</span>
+                <span class="text-[10px] text-zinc-400 mt-0.5">Free Support</span>
+            </div>
+            <div class="p-3 rounded-xl bg-white border border-zinc-200/90 shadow-2xs flex flex-col items-center text-center">
+                <span class="text-lg mb-1">💳</span>
+                <span class="font-extrabold text-zinc-900 leading-tight">{{ $emiFacility }}</span>
+                <span class="text-[10px] text-zinc-400 mt-0.5">30+ Banks</span>
+            </div>
+            <div class="p-3 rounded-xl bg-white border border-zinc-200/90 shadow-2xs flex flex-col items-center text-center">
+                <span class="text-lg mb-1">💎</span>
+                <span class="font-extrabold text-zinc-900 leading-tight">100% Genuine</span>
+                <span class="text-[10px] text-zinc-400 mt-0.5">Authorized BD</span>
             </div>
         </div>
+
+        <!-- Best Electronics Inspired: Appliance Care & Warranty Box (When Applicable) -->
+        @if(!empty($compressorWarranty) || !empty($panelWarranty) || !empty($installationPolicy))
+            <div class="bg-amber-50/60 border border-amber-200/80 rounded-2xl p-4 space-y-2 text-xs text-zinc-900">
+                <div class="flex items-center gap-2 border-b border-amber-200/60 pb-2">
+                    <span class="text-base">⚡</span>
+                    <span class="font-black text-amber-950 uppercase tracking-wide">Official Appliance Warranty & Support</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 font-medium">
+                    @if(!empty($compressorWarranty))
+                        <div class="p-2 bg-white rounded-lg border border-amber-100 flex items-center gap-2">
+                            <span class="text-amber-600 font-bold">❄️</span>
+                            <span><strong>Compressor:</strong> {{ $compressorWarranty }}</span>
+                        </div>
+                    @endif
+                    @if(!empty($panelWarranty))
+                        <div class="p-2 bg-white rounded-lg border border-amber-100 flex items-center gap-2">
+                            <span class="text-amber-600 font-bold">📺</span>
+                            <span><strong>Panel:</strong> {{ $panelWarranty }}</span>
+                        </div>
+                    @endif
+                    @if(!empty($installationPolicy))
+                        <div class="p-2 bg-white rounded-lg border border-amber-100 flex items-center gap-2">
+                            <span class="text-amber-600 font-bold">🚚</span>
+                            <span><strong>Installation:</strong> {{ $installationPolicy }}</span>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        @endif
 
         <!-- Key Features Bullet Box -->
         @if($isTechCategory && !empty($hProcessor))
