@@ -210,6 +210,10 @@ function DashboardContent() {
   const searchParams = useSearchParams();
   const tenantSlug = searchParams.get('tenant') || 'fashion';
 
+  // Core Tenant & Database State
+  const [tenantInfo, setTenantInfo] = useState<any>(null);
+  const [dbInfo, setDbInfo] = useState<any>(null);
+
   // Dynamic Category Archetype Resolution
   const matchedCategory = BUSINESS_CATEGORIES.find(
     (c) =>
@@ -422,9 +426,6 @@ function DashboardContent() {
     totalBookings: 12,
     totalRevenue: 84500,
   });
-
-  const [tenantInfo, setTenantInfo] = useState<any>(null);
-  const [dbInfo, setDbInfo] = useState<any>(null);
 
   // Products / Items state
   const [items, setItems] = useState<any[]>([]);

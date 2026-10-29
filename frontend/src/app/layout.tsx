@@ -37,8 +37,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-sans">
+    <html lang="en" suppressHydrationWarning>
+      <body className="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-sans" suppressHydrationWarning>
         <CartProvider>{children}</CartProvider>
       </body>
     </html>
