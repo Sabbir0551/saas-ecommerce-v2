@@ -11,6 +11,9 @@ import { useCart } from '@/lib/cart-context';
 import { ShoppingBag, ArrowRight, Star, Clock, CheckCircle2, Sparkles, Calendar, Tag, ShieldCheck, Eye, X, Plus, Minus, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
 import { BUSINESS_CATEGORIES } from '@/lib/categories';
 import { ElectronicsStorefront } from '@/components/ElectronicsStorefront';
+import { HealthcareStorefront } from '@/components/HealthcareStorefront';
+import { FashionBoutiqueStorefront } from '@/components/FashionBoutiqueStorefront';
+import { RealEstateStorefront } from '@/components/RealEstateStorefront';
 
 function StorefrontContent({ tenantSlug }: { tenantSlug: string }) {
   const router = useRouter();
@@ -224,6 +227,51 @@ function StorefrontContent({ tenantSlug }: { tenantSlug: string }) {
   if (isElectronics) {
     return (
       <ElectronicsStorefront
+        tenant={tenant}
+        tenantSlug={tenantSlug}
+        items={items}
+        categories={categories}
+        brands={brands}
+      />
+    );
+  }
+
+  if (isMedical) {
+    return (
+      <HealthcareStorefront
+        tenant={tenant}
+        tenantSlug={tenantSlug}
+        items={items}
+        categories={categories}
+        brands={brands}
+      />
+    );
+  }
+
+  if (isRealEstate) {
+    return (
+      <RealEstateStorefront
+        tenant={tenant}
+        tenantSlug={tenantSlug}
+        items={items}
+        categories={categories}
+        brands={brands}
+      />
+    );
+  }
+
+  const isFashion =
+    tenant?.businessType === 'fashion_clothing' ||
+    tenant?.businessType === 'jewelry' ||
+    tenant?.businessType === 'luxury_watches' ||
+    tenantSlug === 'fashion' ||
+    tenantSlug === 'gulshanfashion' ||
+    matchedCategory?.group === 'retail' ||
+    matchedCategory?.id === 'fashion_clothing';
+
+  if (isFashion) {
+    return (
+      <FashionBoutiqueStorefront
         tenant={tenant}
         tenantSlug={tenantSlug}
         items={items}

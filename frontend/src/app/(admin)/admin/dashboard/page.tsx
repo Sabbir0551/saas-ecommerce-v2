@@ -4,6 +4,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { api } from '@/lib/api';
+import { BUSINESS_CATEGORIES } from '@/lib/categories';
 import { InventoryManager } from '@/components/InventoryManager';
 import SaaSInvoiceModal from '@/components/SaaSInvoiceModal';
 import RichTextEditor from '@/components/RichTextEditor';
@@ -12,6 +13,9 @@ import {
   LayoutDashboard,
   ShoppingBag,
   Calendar,
+  Stethoscope,
+  Building2,
+  Scissors,
   DollarSign,
   TrendingUp,
   Printer,
@@ -205,6 +209,54 @@ function getAccessoryIcon(iconName: string = '') {
 function DashboardContent() {
   const searchParams = useSearchParams();
   const tenantSlug = searchParams.get('tenant') || 'fashion';
+
+  // Dynamic Category Archetype Resolution
+  const matchedCategory = BUSINESS_CATEGORIES.find(
+    (c) =>
+      c.id === tenantInfo?.businessType ||
+      c.demoSlug === tenantSlug ||
+      c.id === tenantSlug ||
+      tenantSlug?.toLowerCase().includes(c.id) ||
+      (tenantInfo?.businessType && c.id.includes(tenantInfo.businessType))
+  );
+
+  const isMedical =
+    tenantInfo?.businessType === 'healthcare_service' ||
+    tenantInfo?.businessType === 'pharmacy' ||
+    tenantSlug === 'medicare' ||
+    tenantSlug === 'meradenralcare' ||
+    matchedCategory?.archetype === 'APPOINTMENT_BOOKING' ||
+    matchedCategory?.group === 'services';
+
+  const isRealEstate =
+    tenantInfo?.businessType === 'real_estate' ||
+    tenantSlug === 'aebanproperty' ||
+    matchedCategory?.archetype === 'LEAD_GEN_REAL_ESTATE' ||
+    matchedCategory?.group === 'real_estate';
+
+  const isElectronics =
+    tenantInfo?.businessType === 'electronics' ||
+    tenantSlug === 'bestlaptop' ||
+    tenantSlug === 'gadgethub' ||
+    tenantInfo?.businessType === 'laptop_computer' ||
+    tenantSlug === 'smartvolt' ||
+    tenantSlug?.toLowerCase().includes('electric') ||
+    matchedCategory?.group === 'tech';
+
+  const isFashion =
+    tenantInfo?.businessType === 'fashion_clothing' ||
+    tenantInfo?.businessType === 'jewelry' ||
+    tenantInfo?.businessType === 'luxury_watches' ||
+    tenantSlug === 'fashion' ||
+    tenantSlug === 'gulshanfashion' ||
+    (!isMedical && !isRealEstate && !isElectronics);
+
+  const getArchetypeBadge = () => {
+    if (isMedical) return { label: '🩺 Healthcare Clinic', color: 'bg-teal-950 text-teal-300 border-teal-800/60' };
+    if (isRealEstate) return { label: '🏢 Luxury Real Estate', color: 'bg-amber-950 text-amber-300 border-amber-800/60' };
+    if (isElectronics) return { label: '⚡ Electronics & POS', color: 'bg-indigo-950 text-indigo-300 border-indigo-800/60' };
+    return { label: '👗 Fashion & Boutique', color: 'bg-rose-950 text-rose-300 border-rose-800/60' };
+  };
 
   const todayStr = new Date().toISOString().split('T')[0];
   const [selectedSheetDate, setSelectedSheetDate] = useState(todayStr);
@@ -2318,14 +2370,16 @@ function DashboardContent() {
             >
               <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-500 via-purple-600 to-cyan-400 p-0.5 shadow-lg shadow-indigo-500/25 flex items-center justify-center shrink-0">
                 <div className="w-full h-full bg-[#090D16]/40 backdrop-blur-sm rounded-[10px] flex items-center justify-center text-white font-black text-sm">
-                  ⚡
+                  {isMedical ? '🩺' : isRealEstate ? '🏢' : isElectronics ? '⚡' : '👗'}
                 </div>
               </div>
               {!sidebarCollapsed && (
-                <div className="leading-tight">
-                  <span className="text-base font-extrabold tracking-tight text-white block">Flux</span>
-                  <span className="text-[10px] font-mono tracking-widest text-slate-400 block uppercase">
-                    DASHBOARD
+                <div className="leading-tight overflow-hidden">
+                  <span className="text-sm font-extrabold tracking-tight text-white block truncate max-w-[130px]">
+                    {tenantInfo?.name || (isMedical ? 'MediCare Clinic' : isRealEstate ? 'Aeban Real Estate' : isElectronics ? 'SmartVolt Store' : 'Gulshan Boutique')}
+                  </span>
+                  <span className={`text-[9px] px-1.5 py-0.2 rounded font-bold uppercase tracking-wider inline-block border ${getArchetypeBadge().color}`}>
+                    {getArchetypeBadge().label}
                   </span>
                 </div>
               )}
@@ -2398,18 +2452,65 @@ function DashboardContent() {
                     ? 'bg-[#201A3D] text-indigo-300 border border-indigo-500/30 shadow-sm'
                     : 'text-slate-400 hover:bg-[#111625] hover:text-slate-200'
                 }`}
-                title="Orders"
+                title={isMedical ? 'Patient Serial Bookings' : isRealEstate ? 'Booking Deposits & Tokens' : 'Orders'}
               >
                 <div className="flex items-center gap-3">
-                  <ShoppingCart className={`w-4 h-4 shrink-0 ${activeTab === 'orders' ? 'text-indigo-400' : 'text-slate-400'}`} />
-                  {!sidebarCollapsed && <span>Orders</span>}
+                  {isMedical ? (
+                    <Stethoscope className={`w-4 h-4 shrink-0 ${activeTab === 'orders' ? 'text-teal-400' : 'text-slate-400'}`} />
+                  ) : isRealEstate ? (
+                    <Building2 className={`w-4 h-4 shrink-0 ${activeTab === 'orders' ? 'text-amber-400' : 'text-slate-400'}`} />
+                  ) : (
+                    <ShoppingCart className={`w-4 h-4 shrink-0 ${activeTab === 'orders' ? 'text-indigo-400' : 'text-slate-400'}`} />
+                  )}
+                  {!sidebarCollapsed && (
+                    <span>
+                      {isMedical
+                        ? 'Patient Serials'
+                        : isRealEstate
+                        ? 'Booking Deposits'
+                        : isElectronics
+                        ? 'Orders & COD'
+                        : 'Store Orders'}
+                    </span>
+                  )}
                 </div>
                 {!sidebarCollapsed && (
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-600 text-white shadow">
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold shadow ${
+                    isMedical ? 'bg-teal-600 text-white' : isRealEstate ? 'bg-amber-600 text-slate-950' : 'bg-indigo-600 text-white'
+                  }`}>
                     {orders.length || stats.totalOrders || 12}
                   </span>
                 )}
               </button>
+
+              {/* Category-Specific Appointments or Site Visits Tab */}
+              {(isMedical || isRealEstate) && (
+                <button
+                  onClick={() => setActiveTab('appointments')}
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
+                    activeTab === 'appointments'
+                      ? isMedical
+                        ? 'bg-teal-950 text-teal-300 border border-teal-500/30 shadow-sm'
+                        : 'bg-amber-950 text-amber-300 border border-amber-500/30 shadow-sm'
+                      : 'text-slate-400 hover:bg-[#111625] hover:text-slate-200'
+                  }`}
+                  title={isMedical ? '1-Hour Chamber Patient Appointments' : 'Private Property Tours & Site Visits'}
+                >
+                  <div className="flex items-center gap-3">
+                    <Calendar className={`w-4 h-4 shrink-0 ${activeTab === 'appointments' ? (isMedical ? 'text-teal-400' : 'text-amber-400') : 'text-slate-400'}`} />
+                    {!sidebarCollapsed && (
+                      <span>{isMedical ? '1-Hour Patient Serials' : 'Site Visits & Tours'}</span>
+                    )}
+                  </div>
+                  {!sidebarCollapsed && (
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold border ${
+                      isMedical ? 'bg-teal-950 text-teal-400 border-teal-800/60' : 'bg-amber-950 text-amber-400 border-amber-800/60'
+                    }`}>
+                      {sheetData.length || 5}
+                    </span>
+                  )}
+                </button>
+              )}
 
               <button
                 onClick={() => {
@@ -2425,7 +2526,17 @@ function DashboardContent() {
               >
                 <div className="flex items-center gap-3">
                   <Package className={`w-4 h-4 shrink-0 ${activeTab === 'products' ? 'text-indigo-400' : 'text-slate-400'}`} />
-                  {!sidebarCollapsed && <span>Products</span>}
+                  {!sidebarCollapsed && (
+                    <span>
+                      {isMedical
+                        ? 'Doctors & Chamber Fees'
+                        : isRealEstate
+                        ? 'Properties & Developments'
+                        : isElectronics
+                        ? 'Devices & Hardware'
+                        : 'Outfits & Apparel'}
+                    </span>
+                  )}
                 </div>
                 {!sidebarCollapsed && (
                   <span className="text-[11px] text-slate-500 font-mono">
@@ -2445,7 +2556,17 @@ function DashboardContent() {
               >
                 <div className="flex items-center gap-3">
                   <Boxes className={`w-4 h-4 shrink-0 ${activeTab === 'inventory' ? 'text-indigo-400' : 'text-slate-400'}`} />
-                  {!sidebarCollapsed && <span>Inventory</span>}
+                  {!sidebarCollapsed && (
+                    <span>
+                      {isElectronics
+                        ? 'IMEI & Stock Ledger'
+                        : isMedical
+                        ? 'Medicine & Supplies'
+                        : isRealEstate
+                        ? 'Plot & Unit Inventory'
+                        : 'Inventory & Stock'}
+                    </span>
+                  )}
                 </div>
                 {!sidebarCollapsed && (
                   <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-950 text-emerald-400 border border-emerald-800/60">
@@ -2525,7 +2646,15 @@ function DashboardContent() {
               >
                 <div className="flex items-center gap-3">
                   <Users className={`w-4 h-4 shrink-0 ${activeTab === 'customers' ? 'text-indigo-400' : 'text-slate-400'}`} />
-                  {!sidebarCollapsed && <span>Customers & CRM</span>}
+                  {!sidebarCollapsed && (
+                    <span>
+                      {isMedical
+                        ? 'Patient Records CRM'
+                        : isRealEstate
+                        ? 'Investor Leads CRM'
+                        : 'Customers & CRM'}
+                    </span>
+                  )}
                 </div>
                 {!sidebarCollapsed && (
                   <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-purple-950 text-purple-300 border border-purple-800/60">
@@ -2647,6 +2776,47 @@ function DashboardContent() {
       >
         {/* Top Header */}
         <header className="h-16 bg-[#090D16]/95 backdrop-blur-md border-b border-[#1B2236] sticky top-0 z-40 px-6 flex items-center justify-between print:hidden">
+          {/* Demo Store Archetype Switcher */}
+          <div className="hidden xl:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[#111625] border border-[#1E2638] text-[11px] font-bold">
+            <span className="text-slate-500 mr-1 text-[10px] uppercase font-mono tracking-wider">Store:</span>
+            <Link
+              href="/admin/dashboard?tenant=gulshanfashion"
+              className={`px-2.5 py-1 rounded-lg transition flex items-center gap-1 ${
+                isFashion ? 'bg-rose-600 text-white shadow-sm' : 'text-slate-400 hover:text-white hover:bg-slate-800'
+              }`}
+              title="Fashion & Boutique Archetype"
+            >
+              <span>👗 Fashion</span>
+            </Link>
+            <Link
+              href="/admin/dashboard?tenant=smartvolt"
+              className={`px-2.5 py-1 rounded-lg transition flex items-center gap-1 ${
+                isElectronics ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-400 hover:text-white hover:bg-slate-800'
+              }`}
+              title="Electronics & POS Archetype"
+            >
+              <span>⚡ Tech/POS</span>
+            </Link>
+            <Link
+              href="/admin/dashboard?tenant=medicare"
+              className={`px-2.5 py-1 rounded-lg transition flex items-center gap-1 ${
+                isMedical ? 'bg-teal-600 text-white shadow-sm' : 'text-slate-400 hover:text-white hover:bg-slate-800'
+              }`}
+              title="Healthcare & Clinic Archetype"
+            >
+              <span>🩺 Doctor/Clinic</span>
+            </Link>
+            <Link
+              href="/admin/dashboard?tenant=aebanproperty"
+              className={`px-2.5 py-1 rounded-lg transition flex items-center gap-1 ${
+                isRealEstate ? 'bg-amber-600 text-slate-950 shadow-sm' : 'text-slate-400 hover:text-white hover:bg-slate-800'
+              }`}
+              title="Real Estate Archetype"
+            >
+              <span>🏢 Real Estate</span>
+            </Link>
+          </div>
+
           {/* Search bar */}
           <div className="relative w-72 sm:w-96 max-w-full">
             <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -2792,75 +2962,75 @@ function DashboardContent() {
 
                   {/* 4 Glassmorphism Metric Cards */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
-                    {/* Card 1: MRR */}
+                    {/* Card 1: Revenue / Pipeline */}
                     <div className="p-4 sm:p-5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 text-white shadow-inner flex flex-col justify-between hover:bg-white/15 transition group">
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-semibold text-indigo-100 flex items-center gap-1.5">
                           <Zap className="w-3.5 h-3.5 text-amber-300" />
-                          <span>MRR</span>
+                          <span>{isMedical ? 'Consultation Revenue' : isRealEstate ? 'Inquiry Pipeline Value' : 'Store Gross Revenue'}</span>
                         </span>
-                        <span className="text-[10px] text-indigo-200 uppercase font-mono">Gross Revenue</span>
+                        <span className="text-[10px] text-indigo-200 uppercase font-mono">{isMedical ? 'Chamber Fees' : isRealEstate ? 'Token Deposits' : 'GMV'}</span>
                       </div>
                       <div className="text-2xl sm:text-3xl font-black tracking-tight text-white mt-2">
-                        {stats.totalRevenue ? `BDT ${(stats.totalRevenue).toLocaleString()}` : '$48.2K'}
+                        {stats.totalRevenue ? `BDT ${(stats.totalRevenue).toLocaleString()}` : (isMedical ? 'BDT 124,500' : isRealEstate ? 'BDT 8.5M' : 'BDT 482,000')}
                       </div>
                       <div className="text-[11px] text-emerald-300 font-bold flex items-center gap-1 mt-2">
-                        <span>↗ +12.4%</span>
+                        <span>↗ +14.2%</span>
                         <span className="text-indigo-200/80 font-normal">vs last month</span>
                       </div>
                     </div>
 
-                    {/* Card 2: Active Users */}
+                    {/* Card 2: Patients / Leads / Users */}
                     <div className="p-4 sm:p-5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 text-white shadow-inner flex flex-col justify-between hover:bg-white/15 transition group">
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-semibold text-indigo-100 flex items-center gap-1.5">
                           <Users className="w-3.5 h-3.5 text-sky-300" />
-                          <span>Active Users</span>
+                          <span>{isMedical ? 'Patient Records' : isRealEstate ? 'Investor Leads' : 'Active Shoppers'}</span>
                         </span>
-                        <span className="text-[10px] text-indigo-200 uppercase font-mono">Shoppers & Leads</span>
+                        <span className="text-[10px] text-indigo-200 uppercase font-mono">{isMedical ? 'Verified' : isRealEstate ? 'High Intent' : 'Registered'}</span>
                       </div>
                       <div className="text-2xl sm:text-3xl font-black tracking-tight text-white mt-2">
-                        {orders.length ? (orders.length * 714).toLocaleString() : '12,847'}
+                        {orders.length ? (orders.length * (isMedical ? 42 : isRealEstate ? 12 : 714)).toLocaleString() : (isMedical ? '1,420' : isRealEstate ? '348' : '12,847')}
                       </div>
                       <div className="text-[11px] text-emerald-300 font-bold flex items-center gap-1 mt-2">
-                        <span>↗ +8.2%</span>
+                        <span>↗ +9.5%</span>
                         <span className="text-indigo-200/80 font-normal">vs last month</span>
                       </div>
                     </div>
 
-                    {/* Card 3: Deployments */}
+                    {/* Card 3: Doctors / Properties / Catalog */}
                     <div className="p-4 sm:p-5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 text-white shadow-inner flex flex-col justify-between hover:bg-white/15 transition group">
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-semibold text-indigo-100 flex items-center gap-1.5">
                           <Rocket className="w-3.5 h-3.5 text-purple-200" />
-                          <span>Deployments</span>
+                          <span>{isMedical ? 'Listed Doctors' : isRealEstate ? 'Live Developments' : 'Active Catalog'}</span>
                         </span>
-                        <span className="text-[10px] text-indigo-200 uppercase font-mono">Catalog Items</span>
+                        <span className="text-[10px] text-indigo-200 uppercase font-mono">{isMedical ? 'Chambers' : isRealEstate ? 'Residences' : 'Items'}</span>
                       </div>
                       <div className="text-2xl sm:text-3xl font-black tracking-tight text-white mt-2">
-                        {items.length ? (items.length * 34 + 2) : '342'}
+                        {isMedical ? `${items.length || 8} Doctors` : isRealEstate ? `${items.length || 6} Projects` : (items.length ? (items.length * 34 + 2) : '342')}
                       </div>
                       <div className="text-[11px] text-emerald-300 font-bold flex items-center gap-1 mt-2">
-                        <span>↗ +24.1%</span>
-                        <span className="text-indigo-200/80 font-normal">vs last month</span>
+                        <span>↗ +18.4%</span>
+                        <span className="text-indigo-200/80 font-normal">active status</span>
                       </div>
                     </div>
 
-                    {/* Card 4: Uptime */}
+                    {/* Card 4: Slot Attendance / Tours / Uptime */}
                     <div className="p-4 sm:p-5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 text-white shadow-inner flex flex-col justify-between hover:bg-white/15 transition group">
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-semibold text-indigo-100 flex items-center gap-1.5">
                           <Shield className="w-3.5 h-3.5 text-emerald-300" />
-                          <span>Uptime</span>
+                          <span>{isMedical ? 'Slot Attendance' : isRealEstate ? 'Site Tours Booked' : isElectronics ? 'IMEI Clearance' : 'Fulfillment Rate'}</span>
                         </span>
-                        <span className="text-[10px] text-emerald-300 uppercase font-mono">99.98%</span>
+                        <span className="text-[10px] text-emerald-300 uppercase font-mono">{isMedical ? 'Verified' : isRealEstate ? 'Weekend' : '100% Valid'}</span>
                       </div>
                       <div className="text-2xl sm:text-3xl font-black tracking-tight text-white mt-2">
-                        99.98%
+                        {isMedical ? '99.4%' : isRealEstate ? `${sheetData.length || 14} Tours` : '99.8%'}
                       </div>
                       <div className="text-[11px] text-emerald-300 font-bold flex items-center gap-1 mt-2">
-                        <span>↗ +0.02%</span>
-                        <span className="text-indigo-200/80 font-normal">vs last month</span>
+                        <span>↗ +0.4%</span>
+                        <span className="text-indigo-200/80 font-normal">on-time rating</span>
                       </div>
                     </div>
                   </div>
@@ -10409,11 +10579,21 @@ function DashboardContent() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-3xl bg-white border border-slate-200/80 shadow-sm print:hidden">
               <div className="space-y-1">
                 <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                  <Calendar className="w-5 h-5 text-emerald-600" />
-                  <span>Daily 1-Hour Appointment Manifest</span>
+                  {isRealEstate ? (
+                    <Building2 className="w-5 h-5 text-amber-600" />
+                  ) : (
+                    <Calendar className="w-5 h-5 text-emerald-600" />
+                  )}
+                  <span>
+                    {isRealEstate
+                      ? 'Daily Property Site Tour & Client Visit Manifest'
+                      : 'Daily 1-Hour Appointment Manifest'}
+                  </span>
                 </h3>
                 <p className="text-xs text-slate-500">
-                  Select a date to generate or print the doctor / clinic physical consultation queue.
+                  {isRealEstate
+                    ? 'Generate or print the scheduled private property tour & client visit itinerary.'
+                    : 'Select a date to generate or print the doctor / clinic physical consultation queue.'}
                 </p>
               </div>
 

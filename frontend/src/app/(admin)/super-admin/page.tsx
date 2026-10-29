@@ -78,10 +78,82 @@ const DEFAULT_MIGRATED_DATA = {
   },
 };
 
+export const INDUSTRY_CLUSTERS = [
+  { key: 'all', label: 'All Merchants', icon: '🌐' },
+  { key: 'fashion', label: 'Fashion & Luxury', icon: '👗' },
+  { key: 'tech', label: 'Tech & Electronics', icon: '⚡' },
+  { key: 'healthcare', label: 'Healthcare & Clinic', icon: '🩺' },
+  { key: 'real_estate', label: 'Real Estate & Land', icon: '🏢' },
+  { key: 'retail', label: 'Specialty Retail', icon: '🛍️' },
+];
+
+export function getTenantClusterInfo(businessType: string) {
+  const bt = (businessType || '').toLowerCase();
+  if (bt.includes('health') || bt.includes('doctor') || bt.includes('pharm') || bt.includes('dental') || bt.includes('clinic')) {
+    return {
+      key: 'healthcare',
+      label: 'Healthcare & Clinic',
+      badge: 'DOCTOR & CLINIC',
+      iconText: '🩺',
+      colorClass: 'bg-emerald-950/80 text-emerald-300 border-emerald-800/80',
+      pillClass: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
+      archetypeDesc: 'Doctor Serial Booking, Slot Scheduler & Prescription Upload',
+      storeDemoSlug: 'medicare',
+    };
+  }
+  if (bt.includes('real_estate') || bt.includes('property') || bt.includes('housing') || bt.includes('apartment') || bt.includes('land')) {
+    return {
+      key: 'real_estate',
+      label: 'Real Estate & Property',
+      badge: 'LUXURY PROPERTY',
+      iconText: '🏢',
+      colorClass: 'bg-amber-950/80 text-amber-300 border-amber-800/80',
+      pillClass: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
+      archetypeDesc: 'VIP Villa/Plot Showcase, Bed/Bath Specs & Convoy Tour Booking',
+      storeDemoSlug: 'aebanproperty',
+    };
+  }
+  if (bt.includes('fashion') || bt.includes('cloth') || bt.includes('boutique') || bt.includes('apparel') || bt.includes('beauty') || bt.includes('salon')) {
+    return {
+      key: 'fashion',
+      label: 'Fashion & Boutique',
+      badge: 'EDITORIAL BOUTIQUE',
+      iconText: '👗',
+      colorClass: 'bg-pink-950/80 text-pink-300 border-pink-800/80',
+      pillClass: 'bg-pink-500/10 text-pink-400 border-pink-500/30',
+      archetypeDesc: 'Editorial Lookbook, S/M/L/XL Size Grid & Swatch Quick View',
+      storeDemoSlug: 'gulshanfashion',
+    };
+  }
+  if (bt.includes('laptop') || bt.includes('mobile') || bt.includes('gadget') || bt.includes('tech') || bt.includes('computer')) {
+    return {
+      key: 'tech',
+      label: 'Tech & Electronics',
+      badge: 'TECH & HARDWARE POS',
+      iconText: '⚡',
+      colorClass: 'bg-indigo-950/80 text-indigo-300 border-indigo-800/80',
+      pillClass: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/30',
+      archetypeDesc: 'IMEI / Serial Ledger, Tech Specifications & Warranty Claims',
+      storeDemoSlug: 'smartvolt',
+    };
+  }
+  return {
+    key: 'retail',
+    label: (businessType || 'Retail').replace(/_/g, ' '),
+    badge: 'GENERAL RETAIL',
+    iconText: '🛍️',
+    colorClass: 'bg-sky-950/80 text-sky-300 border-sky-800/80',
+    pillClass: 'bg-sky-500/10 text-sky-400 border-sky-500/30',
+    archetypeDesc: 'Omnichannel Catalog, Live Stock Tracking & Express COD',
+    storeDemoSlug: 'petshopbd',
+  };
+}
+
 function SuperAdminContent() {
   const [data, setData] = useState<any>(DEFAULT_MIGRATED_DATA);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCluster, setSelectedCluster] = useState<string>('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
 
   // New tenant form state
@@ -294,10 +366,16 @@ function SuperAdminContent() {
     }
   };
 
-  const filteredTenants = (data?.tenants || []).filter((t: any) =>
-    t.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    t.subdomain.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredTenants = (data?.tenants || []).filter((t: any) => {
+    const matchesSearch =
+      t.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      t.subdomain.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (t.businessType || '').toLowerCase().includes(searchTerm.toLowerCase());
+    if (!matchesSearch) return false;
+    if (selectedCluster === 'all') return true;
+    const cluster = getTenantClusterInfo(t.businessType).key;
+    return cluster === selectedCluster;
+  });
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
@@ -576,29 +654,92 @@ function SuperAdminContent() {
           </div>
         </div>
 
+        {/* Multi-Storefront Archetype Sandbox Quick-Launcher */}
+        <div className="p-4 rounded-3xl bg-gradient-to-r from-rose-950/30 via-slate-900 to-indigo-950/30 border border-slate-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 shadow-lg">
+          <div>
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-rose-400" />
+              <span className="font-extrabold text-white text-xs tracking-tight">Category Storefront Archetype Sandbox</span>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-300 border border-rose-500/20 font-bold">LIVE CLUSTERS</span>
+            </div>
+            <p className="text-[11px] text-slate-400 mt-0.5">Directly preview live category storefronts and tailored merchant dashboards</p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center bg-slate-950 border border-slate-800 rounded-xl p-1 gap-1">
+              <span className="text-xs px-2 font-bold text-pink-400">👗 Fashion:</span>
+              <Link href="/?tenant=gulshanfashion" target="_blank" className="px-2 py-1 rounded-lg bg-pink-500/10 hover:bg-pink-500/20 text-pink-300 text-[11px] font-bold transition">Store</Link>
+              <Link href="/admin/dashboard?tenant=gulshanfashion" target="_blank" className="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-semibold transition">Admin</Link>
+            </div>
+            <div className="flex items-center bg-slate-950 border border-slate-800 rounded-xl p-1 gap-1">
+              <span className="text-xs px-2 font-bold text-indigo-400">⚡ Tech/POS:</span>
+              <Link href="/?tenant=smartvolt" target="_blank" className="px-2 py-1 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 text-[11px] font-bold transition">Store</Link>
+              <Link href="/admin/dashboard?tenant=smartvolt" target="_blank" className="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-semibold transition">Admin</Link>
+            </div>
+            <div className="flex items-center bg-slate-950 border border-slate-800 rounded-xl p-1 gap-1">
+              <span className="text-xs px-2 font-bold text-emerald-400">🩺 Clinic:</span>
+              <Link href="/?tenant=medicare" target="_blank" className="px-2 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 text-[11px] font-bold transition">Store</Link>
+              <Link href="/admin/dashboard?tenant=medicare" target="_blank" className="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-semibold transition">Admin</Link>
+            </div>
+            <div className="flex items-center bg-slate-950 border border-slate-800 rounded-xl p-1 gap-1">
+              <span className="text-xs px-2 font-bold text-amber-400">🏢 Real Estate:</span>
+              <Link href="/?tenant=aebanproperty" target="_blank" className="px-2 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 text-[11px] font-bold transition">Store</Link>
+              <Link href="/admin/dashboard?tenant=aebanproperty" target="_blank" className="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-semibold transition">Admin</Link>
+            </div>
+          </div>
+        </div>
+
         {/* Tenant Management Table */}
         <div className="p-6 sm:p-8 rounded-3xl bg-slate-900 border border-slate-800 shadow-xl space-y-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
-            <div>
-              <h2 className="text-lg font-bold text-white tracking-tight flex items-center gap-2">
-                <Layers className="w-5 h-5 text-rose-500" />
-                <span>All Registered Merchants & Tenant Stores</span>
-              </h2>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Manage active store instances, domain mappings, and provisioning status
-              </p>
+          <div className="space-y-4 pb-4 border-b border-slate-800">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-lg font-bold text-white tracking-tight flex items-center gap-2">
+                  <Layers className="w-5 h-5 text-rose-500" />
+                  <span>All Registered Merchants & Tenant Stores</span>
+                </h2>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Manage active store instances, category archetypes, domain mappings, and provisioning status
+                </p>
+              </div>
+
+              {/* Search Input */}
+              <div className="relative w-full sm:w-64">
+                <Search className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
+                <input
+                  type="text"
+                  placeholder="Search store, subdomain, category..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-rose-500"
+                />
+              </div>
             </div>
 
-            {/* Search Input */}
-            <div className="relative w-full sm:w-64">
-              <Search className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
-              <input
-                type="text"
-                placeholder="Search store or subdomain..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-rose-500"
-              />
+            {/* Industry Cluster Filter Pills */}
+            <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-800/60">
+              {INDUSTRY_CLUSTERS.map((c) => {
+                const count = c.key === 'all'
+                  ? (data?.tenants || []).length
+                  : (data?.tenants || []).filter((t: any) => getTenantClusterInfo(t.businessType).key === c.key).length;
+                const active = selectedCluster === c.key;
+                return (
+                  <button
+                    key={c.key}
+                    onClick={() => setSelectedCluster(c.key)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition ${
+                      active
+                        ? 'bg-rose-600 text-white shadow-md shadow-rose-600/30'
+                        : 'bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-800'
+                    }`}
+                  >
+                    <span>{c.icon}</span>
+                    <span>{c.label}</span>
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono ${active ? 'bg-white/20 text-white' : 'bg-slate-800 text-slate-400'}`}>
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -618,94 +759,96 @@ function SuperAdminContent() {
                 {filteredTenants.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="py-8 text-center text-slate-500">
-                      No tenant stores matching the query
+                      No tenant stores matching the filter criteria
                     </td>
                   </tr>
                 ) : (
-                  filteredTenants.map((t: any) => (
-                    <tr key={t.id} className="hover:bg-slate-800/40 transition">
-                      <td className="py-4 px-4 font-bold text-white">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-xl bg-rose-600/20 text-rose-400 border border-rose-500/30 flex items-center justify-center font-bold">
-                            {t.name.slice(0, 1)}
+                  filteredTenants.map((t: any) => {
+                    const cluster = getTenantClusterInfo(t.businessType);
+                    return (
+                      <tr key={t.id} className="hover:bg-slate-800/40 transition">
+                        <td className="py-4 px-4 font-bold text-white">
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-8 h-8 rounded-xl bg-rose-600/20 text-rose-400 border border-rose-500/30 flex items-center justify-center font-bold text-sm">
+                              {cluster.iconText}
+                            </div>
+                            <div>
+                              <span className="block">{t.name}</span>
+                              <span className="text-[11px] text-slate-500 font-mono">ID: {t.id.slice(0, 8)}...</span>
+                            </div>
                           </div>
-                          <div>
-                            <span className="block">{t.name}</span>
-                            <span className="text-[11px] text-slate-500 font-mono">ID: {t.id.slice(0, 8)}...</span>
+                        </td>
+
+                        <td className="py-4 px-4 font-mono">
+                          <span className="text-sky-400 block">{t.subdomain}.localhost</span>
+                          {t.customDomain && (
+                            <span className="text-[11px] text-emerald-400 block">{t.customDomain}</span>
+                          )}
+                        </td>
+
+                        <td className="py-4 px-4">
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-1.5">
+                              <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider border ${cluster.pillClass}`}>
+                                {cluster.badge}
+                              </span>
+                            </div>
+                            <span className="text-[11px] text-slate-400 block font-medium capitalize">
+                              {t.businessType?.replace(/_/g, ' ')}
+                            </span>
                           </div>
-                        </div>
-                      </td>
+                        </td>
 
-                      <td className="py-4 px-4 font-mono">
-                        <span className="text-sky-400 block">{t.subdomain}.localhost</span>
-                        {t.customDomain && (
-                          <span className="text-[11px] text-emerald-400 block">{t.customDomain}</span>
-                        )}
-                      </td>
+                        <td className="py-4 px-4 text-slate-300">
+                          <span className="block font-bold">{t._count?.items || 1} items</span>
+                          <span className="text-[11px] text-slate-500">{t._count?.orders || 15} orders</span>
+                        </td>
 
-                      <td className="py-4 px-4">
-                        <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold capitalize ${
-                          t.businessType === 'healthcare_service' || t.businessType === 'doctor'
-                            ? 'bg-emerald-950 text-emerald-400 border border-emerald-800'
-                            : t.businessType === 'real_estate'
-                            ? 'bg-amber-950 text-amber-400 border border-amber-800'
-                            : t.businessType === 'laptop_computer' || t.businessType === 'mobile_gadgets'
-                            ? 'bg-indigo-950 text-indigo-400 border border-indigo-800'
-                            : 'bg-rose-950 text-rose-400 border border-rose-800'
-                        }`}>
-                          {t.businessType?.replace('_', ' ')}
-                        </span>
-                      </td>
-
-                      <td className="py-4 px-4 text-slate-300">
-                        <span className="block font-bold">{t._count?.items || 1} items</span>
-                        <span className="text-[11px] text-slate-500">{t._count?.orders || 15} orders</span>
-                      </td>
-
-                      <td className="py-4 px-4">
-                        <button
-                          onClick={() => handleToggleStatus(t.id, t.isActive)}
-                          className={`px-3 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 transition ${
-                            t.isActive
-                              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-rose-500/10 hover:text-rose-400 hover:border-rose-500/30'
-                              : 'bg-rose-500/10 text-rose-400 border border-rose-500/30 hover:bg-emerald-500/10 hover:text-emerald-400 hover:border-emerald-500/30'
-                          }`}
-                        >
-                          <Power className="w-3 h-3" />
-                          <span>{t.isActive ? 'Active' : 'Suspended'}</span>
-                        </button>
-                      </td>
-
-                      <td className="py-4 px-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
+                        <td className="py-4 px-4">
                           <button
-                            onClick={() => handleOpenMerchantModal(t.subdomain)}
-                            className="px-3 py-1.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 text-xs font-semibold border border-indigo-500/30 flex items-center gap-1.5 transition"
+                            onClick={() => handleToggleStatus(t.id, t.isActive)}
+                            className={`px-3 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 transition ${
+                              t.isActive
+                                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-rose-500/10 hover:text-rose-400 hover:border-rose-500/30'
+                                : 'bg-rose-500/10 text-rose-400 border border-rose-500/30 hover:bg-emerald-500/10 hover:text-emerald-400 hover:border-emerald-500/30'
+                            }`}
                           >
-                            <Sliders className="w-3.5 h-3.5 text-indigo-400" />
-                            <span>Profile & Plan</span>
+                            <Power className="w-3 h-3" />
+                            <span>{t.isActive ? 'Active' : 'Suspended'}</span>
                           </button>
+                        </td>
 
-                          <Link
-                            href={`/?tenant=${t.subdomain}`}
-                            target="_blank"
-                            className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center gap-1 border border-slate-700 transition"
-                          >
-                            <span>Storefront</span>
-                            <ExternalLink className="w-3 h-3" />
-                          </Link>
+                        <td className="py-4 px-4 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() => handleOpenMerchantModal(t.subdomain)}
+                              className="px-3 py-1.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 text-xs font-semibold border border-indigo-500/30 flex items-center gap-1.5 transition"
+                            >
+                              <Sliders className="w-3.5 h-3.5 text-indigo-400" />
+                              <span>Profile & Plan</span>
+                            </button>
 
-                          <Link
-                            href={`/admin/dashboard?tenant=${t.subdomain}`}
-                            target="_blank"
-                            className="px-3 py-1.5 rounded-xl bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 text-xs font-semibold border border-rose-500/30 transition"
-                          >
-                            <span>Dashboard</span>
-                          </Link>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
+                            <Link
+                              href={`/?tenant=${t.subdomain}`}
+                              target="_blank"
+                              className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center gap-1 border border-slate-700 transition"
+                            >
+                              <span>Storefront</span>
+                              <ExternalLink className="w-3 h-3" />
+                            </Link>
+
+                            <Link
+                              href={`/admin/dashboard?tenant=${t.subdomain}`}
+                              target="_blank"
+                              className="px-3 py-1.5 rounded-xl bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 text-xs font-semibold border border-rose-500/30 transition"
+                            >
+                              <span>Dashboard</span>
+                            </Link>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
@@ -773,7 +916,7 @@ function SuperAdminContent() {
               </div>
 
               <div>
-                <label className="text-slate-300 font-bold block mb-1">Business Category *</label>
+                <label className="text-slate-300 font-bold block mb-1">Business Category & Archetype *</label>
                 <select
                   value={newBusinessType}
                   onChange={(e) => setNewBusinessType(e.target.value)}
@@ -781,10 +924,34 @@ function SuperAdminContent() {
                 >
                   {BUSINESS_CATEGORIES.map((cat) => (
                     <option key={cat.id} value={cat.id}>
-                      {cat.name} ({cat.archetype})
+                      {cat.name} — [{cat.archetype}]
                     </option>
                   ))}
                 </select>
+
+                {/* Dynamic Category Archetype Preview */}
+                {(() => {
+                  const cluster = getTenantClusterInfo(newBusinessType);
+                  const matchedCat = BUSINESS_CATEGORIES.find((c) => c.id === newBusinessType);
+                  return (
+                    <div className={`mt-2 p-3 rounded-2xl border text-xs ${cluster.colorClass} space-y-1.5`}>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5 font-bold">
+                          <span className="text-sm">{cluster.iconText}</span>
+                          <span>Storefront Archetype: {cluster.label}</span>
+                        </div>
+                        <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider border ${cluster.pillClass}`}>
+                          {cluster.badge}
+                        </span>
+                      </div>
+                      <p className="text-[11px] opacity-90 leading-relaxed">{cluster.archetypeDesc}</p>
+                      <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-white/10 text-[10px]">
+                        <span className="px-2 py-0.5 rounded bg-black/40 font-mono">Archetype: {matchedCat?.archetype || 'PHYSICAL_STORE'}</span>
+                        <span className="px-2 py-0.5 rounded bg-black/40">Demo Archetype: {cluster.storeDemoSlug}</span>
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
 
               <div>
@@ -838,8 +1005,9 @@ function SuperAdminContent() {
                     <span className="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 font-mono border border-slate-700">
                       {selectedMerchantSubdomain}.localhost
                     </span>
-                    <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 font-bold border border-indigo-500/30">
-                      {merchantData?.businessType?.replace('_', ' ')}
+                    <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 font-bold border border-indigo-500/30 flex items-center gap-1">
+                      <span>{getTenantClusterInfo(merchantData?.businessType || '').iconText}</span>
+                      <span>{merchantData?.businessType?.replace(/_/g, ' ')}</span>
                     </span>
                   </div>
                   <div className="flex flex-wrap items-center gap-4 text-xs text-slate-400 mt-1">
@@ -859,12 +1027,20 @@ function SuperAdminContent() {
 
               <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
                 <Link
+                  href={`/?tenant=${selectedMerchantSubdomain}`}
+                  target="_blank"
+                  className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 flex items-center gap-1.5 transition"
+                >
+                  <Store className="w-3.5 h-3.5 text-rose-400" />
+                  <span>Storefront</span>
+                </Link>
+                <Link
                   href={`/admin/dashboard?tenant=${selectedMerchantSubdomain}`}
                   target="_blank"
                   className="px-3.5 py-2 rounded-xl bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 text-xs font-bold border border-rose-500/30 flex items-center gap-1.5 transition"
                 >
                   <ExternalLink className="w-3.5 h-3.5" />
-                  <span>Log in as Merchant</span>
+                  <span>Dashboard</span>
                 </Link>
                 <button
                   onClick={() => setSelectedMerchantSubdomain(null)}
