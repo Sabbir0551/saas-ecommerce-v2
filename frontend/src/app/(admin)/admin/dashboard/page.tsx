@@ -8,6 +8,11 @@ import { BUSINESS_CATEGORIES } from '@/lib/categories';
 import { InventoryManager } from '@/components/InventoryManager';
 import SaaSInvoiceModal from '@/components/SaaSInvoiceModal';
 import RichTextEditor from '@/components/RichTextEditor';
+import NotificationEngineTab from '@/components/admin/NotificationEngineTab';
+import LivePosTerminalTab from '@/components/admin/LivePosTerminalTab';
+import CourierHubTab from '@/components/admin/CourierHubTab';
+import AiCopilotTab from '@/components/admin/AiCopilotTab';
+import StaffManagementTab from '@/components/admin/StaffManagementTab';
 import {
   Boxes,
   LayoutDashboard,
@@ -264,7 +269,7 @@ function DashboardContent() {
 
   const todayStr = new Date().toISOString().split('T')[0];
   const [selectedSheetDate, setSelectedSheetDate] = useState(todayStr);
-  const [activeTab, setActiveTab] = useState<'overview' | 'analytics' | 'orders' | 'invoices' | 'customers' | 'inventory' | 'media' | 'products' | 'categories' | 'brands' | 'settings' | 'modules' | 'appointments' | 'showrooms' | 'subscription' | 'accessories'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'analytics' | 'orders' | 'invoices' | 'customers' | 'inventory' | 'media' | 'products' | 'categories' | 'brands' | 'settings' | 'modules' | 'appointments' | 'showrooms' | 'subscription' | 'accessories' | 'notifications' | 'pos' | 'couriers' | 'ai_copilot' | 'staff'>('overview');
   const [customerSearchQuery, setCustomerSearchQuery] = useState('');
   const [customerTierFilter, setCustomerTierFilter] = useState<'all' | 'vip' | 'regular' | 'new' | 'risk' | 'blocked'>('all');
   const [selectedCustomerProfile, setSelectedCustomerProfile] = useState<any | null>(null);
@@ -2690,6 +2695,121 @@ function DashboardContent() {
                   )}
                 </button>
               )}
+            </div>
+
+            {/* GROUP: OPERATIONS, AI & AUTOMATION (Updates 7 - 11) */}
+            <div className="space-y-1">
+              {!sidebarCollapsed && (
+                <div className="px-3 py-1 text-[11px] font-bold text-slate-500 tracking-wider uppercase flex items-center justify-between">
+                  <span>OPERATIONS & AI</span>
+                  <ChevronDown className="w-3.5 h-3.5 opacity-60" />
+                </div>
+              )}
+
+              {/* Update 7: Notifications */}
+              <button
+                onClick={() => setActiveTab('notifications')}
+                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
+                  activeTab === 'notifications'
+                    ? 'bg-[#201A3D] text-emerald-300 border border-emerald-500/30 shadow-sm'
+                    : 'text-slate-400 hover:bg-[#111625] hover:text-slate-200'
+                }`}
+                title="Automated Notifications (WhatsApp & SMS)"
+              >
+                <div className="flex items-center gap-3">
+                  <MessageSquare className={`w-4 h-4 shrink-0 ${activeTab === 'notifications' ? 'text-emerald-400' : 'text-slate-400'}`} />
+                  {!sidebarCollapsed && <span>WA & SMS Automation</span>}
+                </div>
+                {!sidebarCollapsed && (
+                  <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-emerald-950 text-emerald-300 border border-emerald-800">
+                    Live
+                  </span>
+                )}
+              </button>
+
+              {/* Update 8: Live POS */}
+              <button
+                onClick={() => setActiveTab('pos')}
+                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
+                  activeTab === 'pos'
+                    ? 'bg-[#201A3D] text-indigo-300 border border-indigo-500/30 shadow-sm'
+                    : 'text-slate-400 hover:bg-[#111625] hover:text-slate-200'
+                }`}
+                title="Live POS Terminal & Barcode Scanner"
+              >
+                <div className="flex items-center gap-3">
+                  <Store className={`w-4 h-4 shrink-0 ${activeTab === 'pos' ? 'text-indigo-400' : 'text-slate-400'}`} />
+                  {!sidebarCollapsed && <span>POS & Barcode Scanner</span>}
+                </div>
+                {!sidebarCollapsed && (
+                  <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-indigo-950 text-indigo-300 border border-indigo-800">
+                    80mm
+                  </span>
+                )}
+              </button>
+
+              {/* Update 9: Courier Hub */}
+              <button
+                onClick={() => setActiveTab('couriers')}
+                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
+                  activeTab === 'couriers'
+                    ? 'bg-[#201A3D] text-cyan-300 border border-cyan-500/30 shadow-sm'
+                    : 'text-slate-400 hover:bg-[#111625] hover:text-slate-200'
+                }`}
+                title="Courier Hub & Fraud Radar (Steadfast, Pathao, RedX)"
+              >
+                <div className="flex items-center gap-3">
+                  <Truck className={`w-4 h-4 shrink-0 ${activeTab === 'couriers' ? 'text-cyan-400' : 'text-slate-400'}`} />
+                  {!sidebarCollapsed && <span>Courier Hub & Fraud</span>}
+                </div>
+                {!sidebarCollapsed && (
+                  <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-cyan-950 text-cyan-300 border border-cyan-800">
+                    1-Click
+                  </span>
+                )}
+              </button>
+
+              {/* Update 10: AI Copilot */}
+              <button
+                onClick={() => setActiveTab('ai_copilot')}
+                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
+                  activeTab === 'ai_copilot'
+                    ? 'bg-[#201A3D] text-purple-300 border border-purple-500/30 shadow-sm'
+                    : 'text-slate-400 hover:bg-[#111625] hover:text-slate-200'
+                }`}
+                title="Gemini AI Merchant Co-Pilot & Catalog Generator"
+              >
+                <div className="flex items-center gap-3">
+                  <Sparkles className={`w-4 h-4 shrink-0 ${activeTab === 'ai_copilot' ? 'text-purple-400 fill-purple-400' : 'text-slate-400'}`} />
+                  {!sidebarCollapsed && <span>AI Copilot & SEO</span>}
+                </div>
+                {!sidebarCollapsed && (
+                  <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-purple-950 text-purple-300 border border-purple-800">
+                    Gemini
+                  </span>
+                )}
+              </button>
+
+              {/* Update 11: Staff Management */}
+              <button
+                onClick={() => setActiveTab('staff')}
+                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
+                  activeTab === 'staff'
+                    ? 'bg-[#201A3D] text-blue-300 border border-blue-500/30 shadow-sm'
+                    : 'text-slate-400 hover:bg-[#111625] hover:text-slate-200'
+                }`}
+                title="Staff & Role-Based Permissions (RBAC)"
+              >
+                <div className="flex items-center gap-3">
+                  <ShieldCheck className={`w-4 h-4 shrink-0 ${activeTab === 'staff' ? 'text-blue-400' : 'text-slate-400'}`} />
+                  {!sidebarCollapsed && <span>Staff & RBAC Roles</span>}
+                </div>
+                {!sidebarCollapsed && (
+                  <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-blue-950 text-blue-300 border border-blue-800">
+                    RBAC
+                  </span>
+                )}
+              </button>
             </div>
 
             {/* GROUP 3: SYSTEM */}
@@ -9315,125 +9435,7 @@ function DashboardContent() {
                                           }}
                                           className="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-bold transition flex items-center gap-1"
                                           title="Upload product directly to this subcategory"
-                                        >
-                                          <Plus className="w-3 h-3" />
-                                          <span>Upload</span>
-                                        </button>
-
-                                        <button
-                                          type="button"
-                                          onClick={() => {
-                                            setSelectedProdCatFilter(sub.id || sub.slug);
-                                            setActiveTab('products');
-                                          }}
-                                          className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold transition flex items-center gap-1"
-                                          title="View products in this subcategory"
-                                        >
-                                          <Filter className="w-3 h-3" />
-                                          <span>Items</span>
-                                        </button>
-
-                                        {/* Edit Subcategory Button */}
-                                        <button
-                                          type="button"
-                                          onClick={() => handleEditCategoryOpen(sub)}
-                                          className="p-1.5 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-amber-50 border border-slate-200/60 transition"
-                                          title="Edit Subcategory"
-                                        >
-                                          <Pencil className="w-3.5 h-3.5" />
-                                        </button>
-
-                                        {/* Delete Subcategory Button */}
-                                        <button
-                                          type="button"
-                                          onClick={() => handleDeleteCategory(sub.id, sub.name)}
-                                          className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-slate-200/60 transition"
-                                          title="Delete Subcategory"
-                                        >
-                                          <Trash2 className="w-3.5 h-3.5" />
-                                        </button>
-                                      </div>
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })
-                )}
-
-                {/* Any Standalone / Orphan Subcategories */}
-                {categories.some(
-                  (c) => c.parentId && !categories.some((r) => r.id === c.parentId || r.slug === c.parentId)
-                ) && (
-                  <div className="p-4 rounded-2xl bg-amber-50/50 border border-amber-200/80 space-y-2 mt-4">
-                    <h5 className="text-xs font-bold text-amber-800">Independent Subcategories (Unassigned Parent)</h5>
-                    <div className="space-y-2">
-                      {categories
-                        .filter((c) => c.parentId && !categories.some((r) => r.id === c.parentId || r.slug === c.parentId))
-                        .map((orphan) => (
-                          <div
-                            key={orphan.id}
-                            className="p-3 rounded-xl bg-white border border-amber-200 flex items-center justify-between"
-                          >
-                            <div>
-                              <span className="text-xs font-bold text-slate-800">{orphan.name}</span>
-                              <span className="text-[10px] font-mono text-slate-400 block">slug: {orphan.slug}</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                              <button
-                                type="button"
-                                onClick={() => handleEditCategoryOpen(orphan)}
-                                className="p-1.5 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-amber-50 transition"
-                              >
-                                <Pencil className="w-3.5 h-3.5" />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleDeleteCategory(orphan.id, orphan.name)}
-                                className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ============================================================== */}
-        {/* TAB 3: BRAND MANAGEMENT */}
-        {/* ============================================================== */}
-        {activeTab === 'brands' && (
-          <div className="space-y-6">
-            {brandNotice && (
-              <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs flex items-center gap-2 shadow-xs">
-                <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span className="font-semibold">{brandNotice}</span>
-              </div>
-            )}
-
-            {/* Add Brand Form */}
-            <div className="p-6 rounded-3xl bg-white border border-slate-200/80 shadow-sm space-y-4">
-              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <Award className="w-5 h-5 text-amber-600" />
-                <span>Add New Brand to Store</span>
-              </h3>
-              <form onSubmit={handleAddBrand} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold text-slate-700">Brand Name *</label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="Brand Name (e.g. Apple, Walton, Samsung, Gree)"
+                  
                       value={newBrandName}
                       onChange={(e) => setNewBrandName(e.target.value)}
                       className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-amber-500 font-medium"
@@ -12661,6 +12663,70 @@ function DashboardContent() {
               </div>
             </div>
           </div>
+        )}
+
+        {/* ============================================================== */}
+        {/* TAB: NOTIFICATIONS (Update 7) */}
+        {/* ============================================================== */}
+        {activeTab === 'notifications' && (
+          <NotificationEngineTab
+            tenantSlug={tenantSlug}
+            tenantInfo={tenantInfo}
+            isMedical={isMedical}
+            isRealEstate={isRealEstate}
+            isElectronics={isElectronics}
+          />
+        )}
+
+        {/* ============================================================== */}
+        {/* TAB: LIVE POS & BARCODE SCANNER (Update 8) */}
+        {/* ============================================================== */}
+        {activeTab === 'pos' && (
+          <LivePosTerminalTab
+            tenantSlug={tenantSlug}
+            tenantInfo={tenantInfo}
+            items={items}
+            isMedical={isMedical}
+            isRealEstate={isRealEstate}
+            isElectronics={isElectronics}
+          />
+        )}
+
+        {/* ============================================================== */}
+        {/* TAB: COURIER HUB & FRAUD RADAR (Update 9) */}
+        {/* ============================================================== */}
+        {activeTab === 'couriers' && (
+          <CourierHubTab
+            tenantSlug={tenantSlug}
+            tenantInfo={tenantInfo}
+            orders={orders}
+          />
+        )}
+
+        {/* ============================================================== */}
+        {/* TAB: AI COPILOT & CATALOG ENGINE (Update 10) */}
+        {/* ============================================================== */}
+        {activeTab === 'ai_copilot' && (
+          <AiCopilotTab
+            tenantSlug={tenantSlug}
+            tenantInfo={tenantInfo}
+            isMedical={isMedical}
+            isRealEstate={isRealEstate}
+            isElectronics={isElectronics}
+          />
+        )}
+
+        {/* ============================================================== */}
+        {/* TAB: STAFF & RBAC PERMISSIONS (Update 11) */}
+        {/* ============================================================== */}
+        {activeTab === 'staff' && (
+          <StaffManagementTab
+            tenantSlug={tenantSlug}
+            tenantInfo={tenantInfo}
+            isMedical={isMedical}
+            isRealEstate={isRealEstate}
+            isElectronics={isElectronics}
+          />
         )}
 
         
