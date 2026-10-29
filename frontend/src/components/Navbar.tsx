@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { ShoppingBag, Calendar, ShieldAlert, Sparkles, Menu, X, ArrowRight, Store, Settings, Zap } from 'lucide-react';
+import { ShoppingBag, Calendar, ShieldAlert, Sparkles, Menu, X, ArrowRight, Store, Settings, Zap, User } from 'lucide-react';
 import { useCart } from '@/lib/cart-context';
 
 interface NavbarProps {
@@ -126,8 +126,9 @@ export function Navbar({ tenantSlug = 'fashion', storeName }: NavbarProps) {
             <Link href={`/policies/terms?tenant=${tenantSlug}`} className="hover:text-rose-600 transition">
               Terms
             </Link>
-            <Link href={`/policies/refund-policy?tenant=${tenantSlug}`} className="hover:text-rose-600 transition">
-              Refunds
+            <Link href={`/portal?tenant=${tenantSlug}`} className="hover:text-rose-600 transition flex items-center gap-1.5 font-bold text-slate-800">
+              <User className="w-3.5 h-3.5 text-rose-500" />
+              <span>Portal & Track</span>
             </Link>
             <Link href={`/disputes?tenant=${tenantSlug}`} className="hover:text-rose-600 transition text-slate-500 hover:text-slate-900 flex items-center gap-1">
               <ShieldAlert className="w-3.5 h-3.5 text-amber-500" />
@@ -227,6 +228,13 @@ export function Navbar({ tenantSlug = 'fashion', storeName }: NavbarProps) {
               Product Catalog
             </Link>
           )}
+          <Link
+            href={`/portal?tenant=${tenantSlug}`}
+            onClick={() => setMobileMenuOpen(false)}
+            className="block text-rose-600 font-bold py-1"
+          >
+            Customer Portal & Track Records
+          </Link>
           <Link
             href={`/policies/terms?tenant=${tenantSlug}`}
             onClick={() => setMobileMenuOpen(false)}

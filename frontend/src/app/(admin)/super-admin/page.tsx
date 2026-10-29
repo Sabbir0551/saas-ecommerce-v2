@@ -781,8 +781,15 @@ function SuperAdminContent() {
 
                         <td className="py-4 px-4 font-mono">
                           <span className="text-sky-400 block">{t.subdomain}.localhost</span>
-                          {t.customDomain && (
-                            <span className="text-[11px] text-emerald-400 block">{t.customDomain}</span>
+                          {t.customDomain ? (
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                              <span className="text-[11px] text-emerald-400 font-semibold">{t.customDomain}</span>
+                              <span className="text-[9px] px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 font-bold">
+                                🔒 SSL
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="text-[10px] text-slate-500 block">subdomain routing</span>
                           )}
                         </td>
 
